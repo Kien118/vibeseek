@@ -1,6 +1,6 @@
 # T-002 · Cleanup root junk files
 
-**Status:** `review`
+**Status:** `done`
 **Blueprint ref:** §11 T-002, §3.1 (đã loại khỏi stack)
 **Branch:** `task/T-002-cleanup-root-junk`
 **Assignee:** _(tba)_

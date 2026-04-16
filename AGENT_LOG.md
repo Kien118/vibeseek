@@ -15,3 +15,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-002] gpt-5.2 executor blocked. Cannot open PR automatically (missing `gh` CLI).
 - **—:—** [T-002] gpt-5.2 executor resumed. Installed `gh` + authenticated.
 - **—:—** [T-002] gpt-5.2 executor completed. PR opened: `https://github.com/Kien118/vibeseek/pull/1`.
+- **—:—** [T-002] Architect reviewed. All AC pass. Flagged CRITICAL: `api.doc` contained a live OpenAI API key (now revoked by user). Approved for merge.
+- **—:—** [T-002] User merged PR #1 (commit `0b18f74`). Task status → done.
