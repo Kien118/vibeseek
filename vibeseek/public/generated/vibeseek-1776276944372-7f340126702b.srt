@@ -1,0 +1,29 @@
+1
+00:00:00,000 --> 00:00:06,000
+AI: Simulate Human Intelligence
+AI là ngành học tập trung vào việc giúp máy móc mô phỏng trí tuệ con người. Think learning, perceiving, problem-solving, decision-making, creativity and autonomy.
+
+2
+00:00:06,000 --> 00:00:12,000
+Machine Learning là gì?
+ML là một nhánh con của AI, chuyên về việc tạo ra các model có thể học patterns từ data. Mục tiêu là đưa ra dự đoán hoặc quyết định mà không cần được lập trình tường minh.
+
+3
+00:00:12,000 --> 00:00:18,000
+AI's Big Mission
+AI được kỳ vọng như một chuyên gia, mang lại giải pháp tối ưu cho những vấn đề phức tạp và không chắc chắn. Nó giúp giải quyết các bài toán dự đoán và tương tác như con người.
+
+4
+00:00:18,000 --> 00:00:24,000
+ML: The Black Box Model
+ML models often act like a 'black box'. We get the results, but it's hard to explain clearly *why* that specific output was generated.
+
+5
+00:00:24,000 --> 00:00:30,000
+AI vs ML: The Relationship
+AI là umbrella term cho trí tuệ máy. ML là core engine bên trong, giúp AI học hỏi từ data để đưa ra các quyết định thông minh.
+
+6
+00:00:30,000 --> 00:00:36,000
+AI in Your Shopping Cart
+AI enhances virtual shopping với các recommendations cá nhân hóa và phát hiện giao dịch gian lận trong ngân hàng. It boosts precision & effectiveness.

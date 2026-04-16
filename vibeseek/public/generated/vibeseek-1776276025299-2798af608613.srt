@@ -1,0 +1,29 @@
+1
+00:00:00,000 --> 00:00:06,000
+ML 101: What's Inside?
+This intro to Machine Learning covers AI vs ML basics, how ML helps, its key components, types, and history. Get ready to dive into the core of intelligent systems!
+
+2
+00:00:06,000 --> 00:00:12,000
+AI: Máy Thông Minh
+Artificial Intelligence (AI) is all about making computers mimic human intelligence. Think learning, problem-solving, decision-making, even creativity. It's like giving machines...
+
+3
+00:00:12,000 --> 00:00:18,000
+ML: AI's Learning Buddy
+Machine Learning (ML) is a cool subfield of AI. Its superpower? Learning patterns from data to make predictions or decisions, no explicit programming needed. Just feed it data, ...
+
+4
+00:00:18,000 --> 00:00:24,000
+AI Can Do WHAT?!
+AI isn't just for sci-fi! It enables machines to learn, perceive, comprehend, solve problems, make decisions, be creative, and even act autonomously. Pretty impressive, right?
+
+5
+00:00:24,000 --> 00:00:30,000
+ML: Your Career Superpower
+Why learn ML? Because it's everywhere! From personalized shopping in Retail, fraud detection in Banking, to autonomous cars in Transportation and even Healthcare. Your skills wi...
+
+6
+00:00:30,000 --> 00:00:36,000
+ML's 'Black Box' Secret
+Unlike traditional algorithms, ML models can be a bit mysterious. They learn from data and give results, but sometimes it's super hard to explain *exactly why* they made that de...

@@ -1,0 +1,283 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import UploadZone from '@/components/UploadZone'
+import ProgressBar from '@/components/ProgressBar'
+import GlowButton from '@/components/GlowButton'
+import VibeCard from '@/components/VibeCard'
+import type { VibeCard as VibeCardType } from '@/utils/supabase'
+
+interface VideoScene {
+  scene_index: number
+  title: string
+  visual_prompt: string
+  narration: string
+  on_screen_text: string[]
+  duration_sec: number
+}
+
+interface VideoStoryboard {
+  video_title: string
+  total_duration_sec: number
+  style: string
+  scenes: VideoScene[]
+}
+
+export default function DashboardPage() {
+  const [file, setFile] = useState<File | null>(null)
+  const [title, setTitle] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const [cards, setCards] = useState<Array<Omit<VibeCardType, 'id' | 'document_id' | 'created_at'>>>([])
+  const [videoStoryboard, setVideoStoryboard] = useState<VideoStoryboard | null>(null)
+  const [renderedVideoUrl, setRenderedVideoUrl] = useState<string | null>(null)
+  const [audioProvider, setAudioProvider] = useState<string | null>(null)
+
+  const fileLabel = useMemo(() => (file ? `${file.name} (${Math.round(file.size / 1024)} KB)` : 'No file selected'), [file])
+  const totalVibePoints = useMemo(() => cards.reduce((sum, card) => sum + card.vibe_points, 0), [cards])
+
+  const handleFileSelect = (selectedFile: File) => {
+    setFile(selectedFile)
+    if (!title) {
+      setTitle(selectedFile.name.replace(/\.pdf$/i, ''))
+    }
+    setError(null)
+  }
+
+  const handleAnalyzePdf = async () => {
+    if (!file) {
+      setError('Please choose a PDF before uploading.')
+      return
+    }
+
+    setIsProcessing(true)
+    setError(null)
+    setProgress(10)
+    setCards([])
+    setVideoStoryboard(null)
+    setRenderedVideoUrl(null)
+    setAudioProvider(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('pdf', file)
+      formData.append('title', title || file.name.replace('.pdf', ''))
+      formData.append('maxCards', '10')
+      setProgress(30)
+
+      const response = await fetch('/api/vibefy', {
+        method: 'POST',
+        body: formData,
+      })
+      setProgress(70)
+
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new Error(payload.error || 'Upload failed')
+      }
+
+      setCards(payload.cards ?? [])
+      setProgress(100)
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'Unknown error')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleGenerateVideo = async () => {
+    if (cards.length === 0) {
+      setError('Please analyze a PDF first to generate video scenes.')
+      return
+    }
+
+    setIsGeneratingVideo(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/vibefy-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title || 'Untitled Document',
+          cards,
+          maxScenes: 6,
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to generate video storyboard')
+      }
+
+      setVideoStoryboard(payload.storyboard ?? null)
+      setRenderedVideoUrl(payload.video?.publicUrl ?? null)
+      setAudioProvider(payload.video?.audioProvider ?? null)
+    } catch (videoError) {
+      setError(videoError instanceof Error ? videoError.message : 'Unknown video generation error')
+    } finally {
+      setIsGeneratingVideo(false)
+    }
+  }
+
+  const handleRenderVideoFile = async () => {
+    if (cards.length === 0) {
+      setError('Please analyze a PDF first to render video.')
+      return
+    }
+    setIsGeneratingVideo(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/vibefy-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title || 'Untitled Document',
+          cards,
+          maxScenes: 6,
+          renderVideo: true,
+        }),
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to render video')
+      }
+      setVideoStoryboard(payload.storyboard ?? null)
+      setRenderedVideoUrl(payload.video?.publicUrl ?? null)
+      setAudioProvider(payload.video?.audioProvider ?? null)
+      if (!payload.video?.publicUrl) {
+        throw new Error('Storyboard generated but video file URL is missing.')
+      }
+    } catch (renderError) {
+      setError(renderError instanceof Error ? renderError.message : 'Unknown render error')
+    } finally {
+      setIsGeneratingVideo(false)
+    }
+  }
+
+  return (
+    <main className="dashboard-page">
+      <section className="dashboard-shell">
+        <header className="dashboard-header">
+          <p className="dashboard-kicker">VibeSeek Studio</p>
+          <h1>Upload PDF - Analyze - Convert to Video</h1>
+          <p>Pipeline: Read PDF, generate Vibe Cards, then turn key insights into a ready-to-produce video storyboard.</p>
+        </header>
+
+        <section className="dashboard-form glass">
+          <label htmlFor="doc-title">Document Title</label>
+          <input
+            id="doc-title"
+            type="text"
+            placeholder="e.g. Organic Chemistry Chapter 3"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+
+          <UploadZone onFileSelect={handleFileSelect} disabled={isProcessing || isGeneratingVideo} />
+          <p className="dashboard-file-label">{fileLabel}</p>
+
+          {(isProcessing || progress > 0) && (
+            <ProgressBar
+              progress={progress}
+              variant="rainbow"
+              label={isProcessing ? 'Analyzing PDF with AI...' : 'Analysis complete'}
+            />
+          )}
+
+          <div className="dashboard-actions">
+            <GlowButton onClick={handleAnalyzePdf} disabled={!file} loading={isProcessing} variant="purple">
+              Analyze PDF
+            </GlowButton>
+            <GlowButton
+              onClick={handleGenerateVideo}
+              disabled={cards.length === 0}
+              loading={isGeneratingVideo}
+              variant="cyan"
+            >
+              Generate Video Storyboard
+            </GlowButton>
+            <GlowButton
+              onClick={handleRenderVideoFile}
+              disabled={cards.length === 0}
+              loading={isGeneratingVideo}
+              variant="purple"
+            >
+              Render MP4 Video
+            </GlowButton>
+          </div>
+
+          {error && <p className="dashboard-error">{error}</p>}
+        </section>
+
+        {cards.length > 0 && (
+          <section className="dashboard-result glass">
+            <div className="dashboard-result-header">
+              <h2>Generated Vibe Cards: {cards.length}</h2>
+              <p>Total vibe points: +{totalVibePoints}</p>
+            </div>
+            <div className="dashboard-card-grid">
+              {cards.map((card, index) => (
+                <VibeCard key={`${card.order_index}-${card.title}`} card={card} index={index} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {videoStoryboard && (
+          <section className="dashboard-result glass">
+            <div className="dashboard-result-header">
+              <h2>{videoStoryboard.video_title}</h2>
+              <p>
+                {videoStoryboard.style} • {videoStoryboard.total_duration_sec}s
+              </p>
+            </div>
+            <div className="dashboard-video-grid">
+              {videoStoryboard.scenes.map((scene) => (
+                <article key={scene.scene_index} className="dashboard-video-scene">
+                  <p className="dashboard-video-scene-kicker">
+                    Scene {scene.scene_index} • {scene.duration_sec}s
+                  </p>
+                  <h3>{scene.title}</h3>
+                  <p>
+                    <strong>Visual:</strong> {scene.visual_prompt}
+                  </p>
+                  <p>
+                    <strong>Narration:</strong> {scene.narration}
+                  </p>
+                  {scene.on_screen_text.length > 0 && (
+                    <div className="dashboard-video-tags">
+                      {scene.on_screen_text.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {renderedVideoUrl && (
+          <section className="dashboard-result glass">
+            <div className="dashboard-result-header">
+              <h2>Rendered Video</h2>
+              <p>
+                Video was rendered from storyboard scenes on your server.
+                {audioProvider ? ` Voice provider: ${audioProvider}.` : ''}
+              </p>
+            </div>
+            <video controls style={{ width: '100%', borderRadius: 12 }} src={renderedVideoUrl} />
+            <p style={{ marginTop: 12 }}>
+              <a href={renderedVideoUrl} target="_blank" rel="noreferrer">
+                Open video in new tab
+              </a>
+            </p>
+          </section>
+        )}
+      </section>
+    </main>
+  )
+}
