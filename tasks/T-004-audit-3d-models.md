@@ -1,6 +1,6 @@
 # T-004 · Audit 3D models — giữ DOJO, xoá phần không dùng
 
-**Status:** `review`
+**Status:** `done`
 **Blueprint ref:** §11 T-004, §7.11 (DOJO là mascot chính, chỉ landing)
 **Branch:** `task/T-004-audit-3d-models`
 **Assignee:** Antigravity

@@ -36,3 +36,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-003] Architect reviewed. All AC pass after fresh `.next` rebuild. Noted scope creep: agent added `.eslintrc.json` to make AC-5 reliable (justified, should have logged in Decisions). DoD violation: agent didn't push + open PR → Architect pushed + opened PR #5 on agent's behalf.
 - **—:—** [T-003] User merged PR #5 (commit `df6d1c6`). Task status → done.
 - **—:—** [T-004] Architect rescue: agent T-004 work was uncommitted in WT on wrong branch (task/T-003), never on task/T-004. Stashed + replayed onto fresh task/T-004 branch from main. No content loss.
+- **—:—** [T-004] Architect reviewed during rescue. AC 1/2/3/5/6/7 verified independently (tsc + build + grep + du). AC-4 trusted (agent posted hero shot). Approved. PR #6 opened by Architect on behalf of agent.
+- **—:—** [T-004] User merged PR #6 (commit `959f26f`). Task status → done. **Phase 0 complete.**
