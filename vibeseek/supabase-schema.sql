@@ -84,8 +84,52 @@ CREATE POLICY "Users own progress" ON user_progress
   FOR ALL USING (auth.uid() = user_id);
 
 -- =============================================
--- STORAGE BUCKET
--- Run separately in Supabase → Storage → New bucket
+-- STORAGE BUCKET (Phase 0)
 -- Bucket name: vibeseek-files
--- Public: true (for demo)
 -- =============================================
+
+-- =============================================================
+-- Phase 1: render_jobs queue for GitHub Actions video renderer
+-- =============================================================
+CREATE TABLE IF NOT EXISTS render_jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
+  storyboard JSONB NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('queued', 'rendering', 'ready', 'failed')),
+  video_url TEXT,
+  duration_sec NUMERIC,
+  error_message TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS render_jobs_document_id_idx ON render_jobs(document_id);
+CREATE INDEX IF NOT EXISTS render_jobs_status_idx ON render_jobs(status);
+
+ALTER TABLE render_jobs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "render_jobs public read" ON render_jobs;
+CREATE POLICY "render_jobs public read" ON render_jobs FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "render_jobs service insert" ON render_jobs;
+CREATE POLICY "render_jobs service insert" ON render_jobs FOR INSERT
+  WITH CHECK (auth.role() = 'service_role');
+
+DROP POLICY IF EXISTS "render_jobs service update" ON render_jobs;
+CREATE POLICY "render_jobs service update" ON render_jobs FOR UPDATE
+  USING (auth.role() = 'service_role');
+
+-- =============================================================
+-- Phase 1: Supabase Storage bucket for MP4 output
+-- =============================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('vibeseek-videos', 'vibeseek-videos', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Public can read videos" ON storage.objects;
+CREATE POLICY "Public can read videos" ON storage.objects FOR SELECT
+  USING (bucket_id = 'vibeseek-videos');
+
+DROP POLICY IF EXISTS "Service can upload videos" ON storage.objects;
+CREATE POLICY "Service can upload videos" ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'vibeseek-videos' AND auth.role() = 'service_role');
