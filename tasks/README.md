@@ -98,4 +98,30 @@ Phase 0 tasks — **ALL DONE** ✅
 - [T-005 Reconcile README + agent.md with blueprint](./T-005-reconcile-readme-agent-md.md) — ✅ done
 - [T-006 Fix Model.tsx type errors](./T-006-fix-model-tsx-type-errors.md) — ✅ done
 
-Phase 1 (Video Renderer) tasks will appear below once Architect writes T-101 → T-108 specs.
+Phase 1 — **Video Renderer pipeline** (active)
+
+Dependency graph:
+```
+T-101 (migration) ─ ✅ done by user
+T-102 (storage client) ──┬──► T-105 (render script) ──┐
+                         │                            │
+T-103 (dispatch) ────────┼──► T-106 (vibefy-video) ◄─┤
+                         │                            │
+T-107 (callback+polling) ┴──► T-108 (VideoPlayer)    │
+                                                      │
+                                    T-104 (workflow) ◄┘
+```
+
+- [T-101 Migration render_jobs + bucket](./T-102-supabase-storage-client.md) — ✅ done (merged into T-102's schema sync)
+- [T-102 Supabase Storage client](./T-102-supabase-storage-client.md) — HIGH, foundation
+- [T-103 GitHub dispatch trigger](./T-103-github-dispatch-trigger.md) — HIGH, foundation
+- [T-104 GH Actions workflow render-video.yml](./T-104-github-workflow-render-video.md) — HIGH
+- [T-105 Render script (ffmpeg + edge-tts)](./T-105-render-script.md) — HIGH, core
+- [T-106 Refactor /api/vibefy-video + Groq fallback](./T-106-refactor-vibefy-video-api.md) — HIGH
+- [T-107 Render callback + polling](./T-107-render-callback-and-polling.md) — MED
+- [T-108 VideoPlayer component](./T-108-video-player-component.md) — MED
+
+**Parallel batches:**
+- Batch A (foundation, fully parallel): **T-102, T-103, T-107**
+- Batch B (once Batch A done): **T-105** (needs T-102), **T-106** (needs T-103), **T-108** (needs T-107)
+- Batch C (last): **T-104** (needs T-105)
