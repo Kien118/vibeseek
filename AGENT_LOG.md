@@ -23,3 +23,9 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-005] User merged PR #2 (commit `17a4bae`). Task status → done.
 - **—:—** [T-001] claude-opus-4-6 executor started. Fix .gitignore + untrack .env.local on branch `task/T-001-fix-gitignore-env-local`.
 - **—:—** [T-001] claude-opus-4-6 executor completed. .gitignore updated, .env.local untracked. All 5 ACs verified. Status → review.
+- **—:—** [T-001] Architect reviewed. AC 1/3/4/5 pass; AC-2 has architect-side design flaw (file disappears on branch switch — behavior is correct). Flagged: Supabase service_role + Gemini keys still active in git history; user rotated before merge. Approved.
+- **—:—** [T-001] User merged PR #3 (commit `5b86d1c`). Task status → done.
+- **—:—** [T-006] claude-opus-4-6 executor started. Fix Model.tsx type errors on branch `task/T-006-fix-model-tsx-type-errors`. (AGENT_LOG entry added retroactively by Architect — agent omitted.)
+- **—:—** [T-006] claude-opus-4-6 executor completed. Applied both fixes per spec. Status → review.
+- **—:—** [T-006] Architect reviewed. AC-1 (tsc) + AC-2 (build) verified independently — both pass. AC-3/4 trusted. Noted DoD violation: agent forgot AGENT_LOG entries. Approved.
+- **—:—** [T-006] User merged PR #4. Task status → done.

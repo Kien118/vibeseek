@@ -1,6 +1,6 @@
 # T-001 · Fix `.gitignore` for `.env.local`
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH
 **Blueprint ref:** §11 T-001, §7.10, §8.3
 **Branch:** `task/T-001-fix-gitignore-env-local`
