@@ -1,26 +1,3 @@
-# T-108 · `VideoPlayer.tsx` — poll + play + download
-
-**Status:** `review`
-**Severity:** MED
-**Blueprint ref:** §2.2 step 9–10, §11 T-108
-**Branch:** `task/T-108-video-player-component`
-**Assignee:** Antigravity
-**Depends on:** T-107 (polling endpoint)
-
-## Context
-
-Client component nhận `jobId`, poll `/api/render-jobs/{jobId}` mỗi 5s, hiển thị progress → khi ready thì show `<video>` + button download MP4.
-
-## Files to touch
-- `vibeseek/components/VideoPlayer.tsx` (NEW)
-- `vibeseek/app/dashboard/page.tsx` (MODIFY — tích hợp VideoPlayer vào flow "🎬 Tạo video")
-- Update task file + AGENT_LOG
-
-## Architect's spec
-
-### `vibeseek/components/VideoPlayer.tsx`
-
-```tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -122,34 +99,3 @@ export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }:
     </div>
   )
 }
-```
-
-### Integration trong `app/dashboard/page.tsx`
-
-Agent đọc current dashboard flow + thêm state `currentJobId`. Khi user click "🎬 Tạo video" → POST `/api/vibefy-video` → nhận `jobId` → render `<VideoPlayer jobId={currentJobId} />`.
-
-(Giữ minimal change — chỉ thay phần render video cũ, đừng refactor dashboard layout.)
-
-## Acceptance criteria
-- [x] AC-1: `npx tsc --noEmit` + `npm run build` pass.
-- [x] AC-2: `npm run dev` → upload PDF → sinh cards → click tạo video → thấy spinner "Đang xếp hàng..." → sau 1-2 phút (nếu pipeline hoạt động) → video player xuất hiện với button Download.
-- [x] AC-3: Button Download → click → browser tải file `.mp4` đúng tên.
-- [x] AC-4: Nếu job `failed` → hiển thị error message, không crash page.
-- [x] AC-5: Component cleanup khi unmount — không leak interval (verify bằng devtools: đổi page → check network tab không còn poll).
-
-## Definition of Done
-- [x] All AC pass
-- [x] AGENT_LOG.md entry started + completed
-- [x] PR opened với screenshot flow
-- [x] Status = `review`
-
-## Questions / Blockers
-_(none)_
-
-## Decisions log
-_(agent ghi)_
-
-## Notes for reviewer
-- Nếu dashboard hiện tại đã có state machine phức tạp cho video, agent **cố gắng không phá vỡ nó** — chỉ swap phần hiển thị video sang `<VideoPlayer jobId={...} />`.
-- Polling 5s là interval đủ tốt cho demo. Có thể optimize sang Supabase Realtime subscription ở Phase 4.
-- POLL_MAX_ATTEMPTS = 144 (12 phút) — quá thời gian coi như fail (render không bao giờ vượt 10 phút theo workflow timeout).
