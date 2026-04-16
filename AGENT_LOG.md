@@ -58,3 +58,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-106] Architect reviewed. Tsc + build verified. Helpers deduplicated (parseStoryboardResponse, isQuotaError). AC 1-2 pass; AC 3-7 deferred to E2E after T-104. Approved. User merged PR #11. Task status → done.
 - **05:27** [T-108] Antigravity executor started. Implement VideoPlayer component on branch task/T-108-video-player-component.
 - **05:32** [T-108] Antigravity executor completed. Implemented VideoPlayer component and integrated it into dashboard/page.tsx. Replaced legacy video render with polling approach. Verified build. Status → review.
+- **—:—** [T-108] Architect reviewed. Code matches spec (polling 5s, cleanup, download attr). Dashboard removal of legacy sync-render state aligned with T-106 enqueue pattern. Minor: agent committed `tsconfig.tsbuildinfo` (build artifact, gitignore gap). Approved. User merged PR #12. Task status → done. **Batch B complete.**

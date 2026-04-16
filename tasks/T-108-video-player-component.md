@@ -1,6 +1,6 @@
 # T-108 · `VideoPlayer.tsx` — poll + play + download
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MED
 **Blueprint ref:** §2.2 step 9–10, §11 T-108
 **Branch:** `task/T-108-video-player-component`
