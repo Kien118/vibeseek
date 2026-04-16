@@ -1,6 +1,6 @@
 # T-107 · Render callback + polling endpoints
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MED
 **Blueprint ref:** §6.3, §6.4, §11 T-107
 **Branch:** `task/T-107-render-callback-and-polling`
