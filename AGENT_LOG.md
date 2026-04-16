@@ -31,3 +31,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-006] User merged PR #4. Task status → done.
 - **02:22** [T-003] Antigravity executor started. Remove standalone Python pipeline on branch task/T-003-remove-python-pipeline.
 - **02:30** [T-003] Antigravity executor completed. Removed Python pipeline, simplified codebase, verified build/lint pass on branch task/T-003-remove-python-pipeline.
+- **—:—** [T-003] Architect reviewed. All AC pass after fresh `.next` rebuild. Noted scope creep: agent added `.eslintrc.json` to make AC-5 reliable (justified, should have logged in Decisions). DoD violation: agent didn't push + open PR → Architect pushed + opened PR #5 on agent's behalf.
+- **—:—** [T-003] User merged PR #5 (commit `df6d1c6`). Task status → done.

@@ -1,6 +1,6 @@
 # T-003 · Remove Python pipeline (`pdf2genz`)
 
-**Status:** `review`
+**Status:** `done`
 **Blueprint ref:** §11 T-003, §3.1 (đã loại khỏi stack)
 **Branch:** `task/T-003-remove-python-pipeline`
 **Assignee:** Antigravity
