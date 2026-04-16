@@ -5,6 +5,7 @@ import {
   VIDEO_STORYBOARD_SYSTEM_PROMPT,
   VIDEO_STORYBOARD_USER_PROMPT,
 } from './prompts'
+import { groqChat } from './providers/groq'
 import type { VibeCard } from '@/utils/supabase'
 
 const getGenAI = () => {
@@ -162,6 +163,54 @@ export interface VideoStoryboard {
   scenes: VideoScene[]
 }
 
+// Helper: check if error is a rate-limit / quota error
+function isQuotaError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  return (
+    message.includes('429') ||
+    message.toLowerCase().includes('quota') ||
+    message.includes('RESOURCE_EXHAUSTED')
+  )
+}
+
+// Helper: parse and validate raw storyboard JSON text
+function parseStoryboardResponse(
+  rawText: string,
+  documentTitle: string
+): VideoStoryboard {
+  const cleaned = rawText
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim()
+  const parsed = JSON.parse(cleaned) as Partial<VideoStoryboard>
+
+  const normalizedScenes = Array.isArray(parsed.scenes)
+    ? parsed.scenes.map((scene, idx) => ({
+        scene_index: Number(scene?.scene_index) || idx + 1,
+        title: String(scene?.title || `Scene ${idx + 1}`),
+        visual_prompt: String(scene?.visual_prompt || ''),
+        narration: String(scene?.narration || ''),
+        on_screen_text: Array.isArray(scene?.on_screen_text) ? scene.on_screen_text.map(String) : [],
+        duration_sec: Math.min(15, Math.max(4, Number(scene?.duration_sec) || 6)),
+      }))
+    : []
+
+  if (normalizedScenes.length === 0) {
+    throw new Error('Video storyboard generation returned no scenes')
+  }
+
+  const totalDuration = normalizedScenes.reduce((sum, scene) => sum + scene.duration_sec, 0)
+
+  return {
+    video_title: String(parsed.video_title || `${documentTitle} - AI Video`),
+    style: String(parsed.style || 'Neon educational motion graphics'),
+    total_duration_sec: Number(parsed.total_duration_sec) || totalDuration,
+    scenes: normalizedScenes,
+  }
+}
+
+// Fallback chain: gemini-2.0-flash → gemini-2.0-flash-lite → gemini-2.5-flash → Groq
 export async function generateVideoStoryboard(
   cards: Array<Pick<VibeCard, 'title' | 'content' | 'card_type'>>,
   documentTitle: string,
@@ -170,83 +219,43 @@ export async function generateVideoStoryboard(
   const genAI = getGenAI()
   const fullPrompt = `${VIDEO_STORYBOARD_SYSTEM_PROMPT}\n\n${VIDEO_STORYBOARD_USER_PROMPT(cards, documentTitle, maxScenes)}`
 
-  try {
-    const response = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: fullPrompt,
-      config: {
-        temperature: 0.6,
-        maxOutputTokens: 4096,
+  const geminiModels = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash']
+
+  for (const modelName of geminiModels) {
+    try {
+      console.log(`[Storyboard] Trying ${modelName}`)
+      const response = await genAI.models.generateContent({
+        model: modelName,
+        contents: fullPrompt,
+        config: {
+          temperature: 0.6,
+          maxOutputTokens: 4096,
+        },
+      })
+
+      const rawText = response.text
+      if (!rawText) throw new Error('Empty response while generating video storyboard')
+
+      const storyboard = parseStoryboardResponse(rawText, documentTitle)
+      console.log(`[Storyboard] ✅ Success with ${modelName}`)
+      return storyboard
+    } catch (err) {
+      if (!isQuotaError(err)) throw err
+      console.warn(`[Storyboard] ❌ ${modelName} quota exceeded, trying next...`)
+    }
+  }
+
+  // Final fallback: Groq
+  console.log('[Storyboard] All Gemini models exhausted, falling back to Groq')
+  const raw = await groqChat(
+    [
+      { role: 'system', content: VIDEO_STORYBOARD_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: VIDEO_STORYBOARD_USER_PROMPT(cards, documentTitle, maxScenes),
       },
-    })
-
-    const rawText = response.text
-    if (!rawText) throw new Error('Empty response while generating video storyboard')
-
-    const cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim()
-    const parsed = JSON.parse(cleaned) as Partial<VideoStoryboard>
-
-    const normalizedScenes = Array.isArray(parsed.scenes)
-      ? parsed.scenes.map((scene, idx) => ({
-          scene_index: Number(scene?.scene_index) || idx + 1,
-          title: String(scene?.title || `Scene ${idx + 1}`),
-          visual_prompt: String(scene?.visual_prompt || ''),
-          narration: String(scene?.narration || ''),
-          on_screen_text: Array.isArray(scene?.on_screen_text) ? scene.on_screen_text.map(String) : [],
-          duration_sec: Math.min(15, Math.max(4, Number(scene?.duration_sec) || 6)),
-        }))
-      : []
-
-    if (normalizedScenes.length === 0) {
-      throw new Error('Video storyboard generation returned no scenes')
-    }
-
-    const totalDuration = normalizedScenes.reduce((sum, scene) => sum + scene.duration_sec, 0)
-
-    return {
-      video_title: String(parsed.video_title || `${documentTitle} - AI Video`),
-      style: String(parsed.style || 'Neon educational motion graphics'),
-      total_duration_sec: Number(parsed.total_duration_sec) || totalDuration,
-      scenes: normalizedScenes,
-    }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    const isQuotaError =
-      message.includes('429') ||
-      message.toLowerCase().includes('quota') ||
-      message.includes('RESOURCE_EXHAUSTED')
-
-    if (!isQuotaError) {
-      throw err
-    }
-    return buildLocalStoryboard(cards, documentTitle, maxScenes)
-  }
-}
-
-function buildLocalStoryboard(
-  cards: Array<Pick<VibeCard, 'title' | 'content' | 'card_type'>>,
-  documentTitle: string,
-  maxScenes: number
-): VideoStoryboard {
-  const selected = cards.slice(0, Math.max(1, maxScenes))
-  const scenes: VideoScene[] = selected.map((card, idx) => {
-    const title = String(card.title || `Scene ${idx + 1}`).slice(0, 80)
-    const content = String(card.content || '').trim()
-    const shortContent = content.length > 180 ? `${content.slice(0, 177)}...` : content
-    return {
-      scene_index: idx + 1,
-      title,
-      visual_prompt: `Dynamic educational motion graphic about "${title}", neon accents, clean typography, fast-paced transitions`,
-      narration: shortContent || `Diem nhanh y chinh: ${title}.`,
-      on_screen_text: [title, card.card_type].filter(Boolean),
-      duration_sec: 6,
-    }
-  })
-  const totalDuration = scenes.reduce((sum, s) => sum + s.duration_sec, 0)
-  return {
-    video_title: `${documentTitle} - Local Fallback Storyboard`,
-    style: 'Local fallback storyboard (quota-safe)',
-    total_duration_sec: totalDuration,
-    scenes,
-  }
+    ],
+    { responseFormat: 'json_object' }
+  )
+  return parseStoryboardResponse(raw, documentTitle)
 }

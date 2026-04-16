@@ -54,3 +54,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-105] claude-opus-4-6 executor completed. Created render.mjs + package.json + README.md. Partial test: verified edge-tts Vietnamese TTS + ffmpeg 1080x1920 subtitle rendering locally. Full E2E deferred to T-104 workflow. Status → review.
 - **—:—** [T-105] Architect reviewed. Thoughtful impl: BOM prefix for SRT, relative-path ffmpeg fix for Windows drive colon, PATH gotcha noted. Full Decisions log. Approved. User merged PR #10. Task status → done.
 - **—:—** [T-106] claude-opus-4-6 executor started. Refactor `/api/vibefy-video` (enqueue pattern + Groq fallback) on branch `task/T-106-refactor-vibefy-video-api`.
+- **—:—** [T-106] claude-opus-4-6 executor completed. Created `groq.ts` provider, refactored processor.ts (Gemini 3-model chain + Groq fallback, removed `buildLocalStoryboard`), rewrote route.ts (enqueue pattern, quota guard, 202 response). tsc + build pass. Status → review.

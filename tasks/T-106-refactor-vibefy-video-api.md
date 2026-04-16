@@ -1,6 +1,6 @@
 # T-106 · Refactor `/api/vibefy-video` (enqueue pattern + Groq fallback)
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** HIGH
 **Blueprint ref:** §2.2 step 6, §6.2, §7.3, §7.9, §11 T-106
 **Branch:** `task/T-106-refactor-vibefy-video-api`
@@ -179,7 +179,13 @@ export async function POST(request: NextRequest) {
 _(none)_
 
 ## Decisions log
-_(agent ghi)_
+- Extracted `parseStoryboardResponse()` and `isQuotaError()` helpers from the monolithic `generateVideoStoryboard` to reduce duplication between Gemini models and Groq fallback path.
+- Removed `buildLocalStoryboard()` entirely per blueprint §7.3 — if all AI providers fail, the function throws and the route returns 500.
+- Groq fallback uses `responseFormat: 'json_object'` for reliable JSON output from llama-3.3-70b.
+- Route now creates its own `supabase` client with `SUPABASE_SERVICE_ROLE_KEY` (not the anon client from utils) for server-side insert/select on `render_jobs`.
+- Quota guard uses `?? 120` (nullish coalesce) for `duration_sec` default, matching spec "if null then default 120s/job".
+- `dispatchErr.message` replaced with instanceof check to satisfy TypeScript strict mode (catch param is `unknown`).
+- AC-6 (Groq fallback under Gemini 429): hard to force in prod — trust review. AC-7 (quota guard): verifiable by inserting fake render_jobs rows.
 
 ## Notes for reviewer
 - `buildLocalStoryboard` trong processor.ts phải BỎ (không fallback). Nếu cả Gemini + Groq fail → throw, user retry.
