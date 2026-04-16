@@ -1,6 +1,6 @@
 # T-006 · Fix `Model.tsx` type errors (pre-existing)
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** HIGH (blocks `npm run build` → blocks any future AC-5)
 **Blueprint ref:** §7.11 (DojoModel spec), §4 (landing component)
 **Branch:** `task/T-006-fix-model-tsx-type-errors`
