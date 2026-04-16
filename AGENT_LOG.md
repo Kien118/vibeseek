@@ -30,6 +30,9 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-006] Architect reviewed. AC-1 (tsc) + AC-2 (build) verified independently — both pass. AC-3/4 trusted. Noted DoD violation: agent forgot AGENT_LOG entries. Approved.
 - **—:—** [T-006] User merged PR #4. Task status → done.
 - **02:22** [T-003] Antigravity executor started. Remove standalone Python pipeline on branch task/T-003-remove-python-pipeline.
+- **02:23** [T-004] Antigravity executor started. Audit 3D models and components on branch `task/T-004-audit-3d-models`.
 - **02:30** [T-003] Antigravity executor completed. Removed Python pipeline, simplified codebase, verified build/lint pass on branch task/T-003-remove-python-pipeline.
+- **02:50** [T-004] Antigravity executor completed. Deleted 3 GLB models (~65MB reduction), removed 11 unused TSX components. Verified build & landing page OK. Status → review (but committed to wrong branch).
 - **—:—** [T-003] Architect reviewed. All AC pass after fresh `.next` rebuild. Noted scope creep: agent added `.eslintrc.json` to make AC-5 reliable (justified, should have logged in Decisions). DoD violation: agent didn't push + open PR → Architect pushed + opened PR #5 on agent's behalf.
 - **—:—** [T-003] User merged PR #5 (commit `df6d1c6`). Task status → done.
+- **—:—** [T-004] Architect rescue: agent T-004 work was uncommitted in WT on wrong branch (task/T-003), never on task/T-004. Stashed + replayed onto fresh task/T-004 branch from main. No content loss.
