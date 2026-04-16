@@ -3,12 +3,14 @@
 import { Scroll, useScroll, Environment } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { MathUtils, PerspectiveCamera } from 'three'
+import { useRouter } from 'next/navigation'
 import Model from '@/components/3d/Model'
 
 export default function Experience() {
   const scroll = useScroll()
   const { camera, size } = useThree()
   const perspectiveCamera = camera as PerspectiveCamera
+  const router = useRouter()
 
   useFrame(() => {
     const isMobile = size.width < 768
@@ -83,7 +85,7 @@ export default function Experience() {
           <section className="landing-panel landing-cta">
             <p className="landing-kicker">Ready</p>
             <h2>Build immersive product stories with 3D.</h2>
-            <button type="button">Start now</button>
+            <button type="button" onClick={() => router.push('/dashboard')}>Start now</button>
           </section>
         </div>
       </Scroll>
