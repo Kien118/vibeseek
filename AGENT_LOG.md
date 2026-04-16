@@ -42,3 +42,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **04:14** [T-102] Antigravity executor completed. Applied schema sync, created storage client, verified with build + manual upload test. Status → review.
 - **04:20** [T-103] Antigravity executor started. Implement GitHub repository_dispatch trigger on branch `task/T-103-github-dispatch-trigger`.
 - **04:31** [T-103] Antigravity executor completed. Implemented GitHub repository_dispatch helper, verified with tsc and manual test (captured 401 as expected with current token). Status → review.
+- **04:31** [T-103] Antigravity executor completed. Implemented GitHub repository_dispatch helper, verified with tsc and manual test (captured 401 as expected with current token). Status -> review.
