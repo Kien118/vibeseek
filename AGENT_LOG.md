@@ -43,3 +43,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **04:20** [T-103] Antigravity executor started. Implement GitHub repository_dispatch trigger on branch `task/T-103-github-dispatch-trigger`.
 - **04:31** [T-103] Antigravity executor completed. Implemented GitHub repository_dispatch helper, verified with tsc and manual test (captured 401 with test token, happy path 204 deferred to T-106 integration). Status → review.
 - **—:—** [T-103] Architect form-fix: dedupe AGENT_LOG duplicate 04:31 line, update task file Status review, fill PR #8 description.
+- **—:—** [T-102] Architect reviewed. AC all pass (tsc + build verified independently). Approved. User merged PR #7. Task status → done.
+- **—:—** [T-103] Architect reviewed. Code matches spec exactly. 401 manual test only (happy path verified at T-106 integration). User merged PR #8 (commit `03b432d`). Task status → done.
