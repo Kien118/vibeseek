@@ -1,6 +1,6 @@
 # T-105 · Render script (ffmpeg + edge-tts + Supabase Storage)
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH (core pipeline)
 **Blueprint ref:** §2.2, §7.4, §11 T-105
 **Branch:** `task/T-105-render-script`
