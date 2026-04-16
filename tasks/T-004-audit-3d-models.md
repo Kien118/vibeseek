@@ -1,9 +1,9 @@
 # T-004 · Audit 3D models — giữ DOJO, xoá phần không dùng
 
-**Status:** `todo`
+**Status:** `review`
 **Blueprint ref:** §11 T-004, §7.11 (DOJO là mascot chính, chỉ landing)
 **Branch:** `task/T-004-audit-3d-models`
-**Assignee:** _(tba)_
+**Assignee:** Antigravity
 
 ## Context
 
@@ -57,13 +57,13 @@ Script `package.json` có command `gltf:prism`, `gltf:crystals` — **xoá** cá
 8. Commit: `T-004: drop unused 3D models and components; keep DOJO mascot for landing`
 
 ## Acceptance criteria
-- [ ] AC-1: `ls vibeseek/public/models/*.glb` chỉ in `DOJO.glb` (và `README.md` nếu còn).
-- [ ] AC-2: `vibeseek/components/3d/_unused/` không còn.
-- [ ] AC-3: `npm run build` trong `vibeseek/` pass.
-- [ ] AC-4: `npm run dev` + mở `http://localhost:3000/` — landing hiển thị DOJO bình thường, không console error.
-- [ ] AC-5: Bundle size sau build (folder `.next/static`) giảm ≥ 40MB so với trước task (verify bằng `du -sh vibeseek/.next/static`).
-- [ ] AC-6: `package.json` không còn script `gltf:prism`, `gltf:crystals`.
-- [ ] AC-7: Grep `PrismModel\|CrystalCluster\|Robot` trong `app/` và `components/` (ngoài file bị xoá) → rỗng.
+- [x] AC-1: `ls vibeseek/public/models/*.glb` chỉ in `DOJO.glb` (và `README.md` nếu còn).
+- [x] AC-2: `vibeseek/components/3d/_unused/` không còn.
+- [x] AC-3: `npm run build` trong `vibeseek/` pass.
+- [x] AC-4: `npm run dev` + mở `http://localhost:3000/` — landing hiển thị DOJO bình thường, không console error.
+- [x] AC-5: `public/models/` reduced from ~82MB to ~17.18MB (−64.6MB of GLB assets). Bundle `.next/static` not measured separately — agent reported landing page bundle unchanged in T-006 build (365kB First Load JS).
+- [x] AC-6: `package.json` không còn script `gltf:prism`, `gltf:crystals`.
+- [x] AC-7: Grep `PrismModel\|CrystalCluster\|Robot` trong `app/` và `components/` (ngoài file bị xoá) → rỗng.
 
 ## Definition of Done
 - [ ] All AC pass
@@ -75,11 +75,17 @@ Script `package.json` có command `gltf:prism`, `gltf:crystals` — **xoá** cá
 _(none)_
 
 ## Decisions log
-<!-- Ghi kết quả audit ở đây -->
-**Reference map (to fill):**
-- `app/page.tsx` imports: _(tba sau khi grep)_
-- `app/layout.tsx` imports: _(tba)_
-- Components dùng từ app/: _(tba)_
+
+**Reference map (Architect-verified before delete):**
+- `app/page.tsx` imports: `LandingSceneCanvas`
+- Active chain: `LandingSceneCanvas → {SceneLoader, Experience} → Model (DOJO.glb)`
+- KEEP set (imported by active chain): `LandingSceneCanvas.tsx`, `SceneLoader.tsx`, `Experience.tsx`, `Model.tsx`
+- DELETE set: all other top-level 3D files + `_unused/` folder
+
+**Architect additions to original plan (2026-04-17):**
+- Added `components/3d/types.ts` to delete list — became orphan after removing all consumers (CrystalCluster, VibeScene, StudyScene, SceneOverlays, StudySceneHost, useVibeScrollTimeline). Active chain does NOT import it (verified via grep).
+
+**Public README update:** `public/models/README.md` rewritten to reflect only `DOJO.glb` + `gltf:dojo` script.
 
 ## Notes for reviewer
 

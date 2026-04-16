@@ -7,8 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "gltf:prism": "npx gltfjsx public/models/a_circled_dodecahedron.glb -o components/3d/PrismModel.tsx -T -t",
-    "gltf:crystals": "npx gltfjsx public/models/magic_crystals.glb -o components/3d/CrystalCluster.tsx -T -t",
     "gltf:dojo": "npx gltfjsx public/models/DOJO.glb -o components/3d/DojoModel.tsx -T -t"
   },
   "dependencies": {
