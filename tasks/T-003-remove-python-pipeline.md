@@ -1,9 +1,9 @@
 # T-003 · Remove Python pipeline (`pdf2genz`)
 
-**Status:** `in-progress`
+**Status:** `review`
 **Blueprint ref:** §11 T-003, §3.1 (đã loại khỏi stack)
 **Branch:** `task/T-003-remove-python-pipeline`
-**Assignee:** _(tba)_
+**Assignee:** Antigravity
 
 ## Context
 
@@ -39,17 +39,17 @@ Nếu `vibeseek/src/` sau khi xoá chỉ còn rỗng → xoá luôn folder `src/
 5. Commit: `T-003: remove standalone Python pipeline (superseded by lib/ai/video-renderer.ts)`
 
 ## Acceptance criteria
-- [ ] AC-1: `find vibeseek -name "*.py" -not -path "*/node_modules/*"` rỗng.
-- [ ] AC-2: `vibeseek/pyproject.toml` và `vibeseek/requirements.txt` không còn.
-- [ ] AC-3: `vibeseek/src/pdf2genz/` không còn.
-- [ ] AC-4: `npm run build` trong `vibeseek/` vẫn pass (không break gì).
-- [ ] AC-5: `npm run lint` pass.
+- [x] AC-1: `find vibeseek -name "*.py" -not -path "*/node_modules/*"` rỗng.
+- [x] AC-2: `vibeseek/pyproject.toml` và `vibeseek/requirements.txt` không còn.
+- [x] AC-3: `vibeseek/src/pdf2genz/` không còn.
+- [x] AC-4: `npm run build` trong `vibeseek/` vẫn pass (không break gì).
+- [x] AC-5: `npm run lint` pass.
 
 ## Definition of Done
-- [ ] All AC pass
-- [ ] AGENT_LOG.md có entry
+- [x] All AC pass
+- [x] AGENT_LOG.md có entry
 - [ ] PR opened với output của AC-4 (build log) trong PR description
-- [ ] Status = `review`
+- [x] Status = `review`
 
 ## Questions / Blockers
 _(none)_
