@@ -1,6 +1,6 @@
 # T-002 · Cleanup root junk files
 
-**Status:** `review`
+**Status:** `blocked`
 **Blueprint ref:** §11 T-002, §3.1 (đã loại khỏi stack)
 **Branch:** `task/T-002-cleanup-root-junk`
 **Assignee:** _(tba)_
@@ -42,7 +42,7 @@ Blueprint §3.1 đã chốt: xoá.
 - [x] Status = `review`
 
 ## Questions / Blockers
-_(none)_
+- [BLOCKED 2026-04-17] Không thể mở PR tự động vì môi trường hiện tại không có `gh` CLI (`gh: not recognized`).
 
 ## Decisions log
 _(none yet)_
