@@ -1,37 +1,64 @@
-# 🚀 VibeSeek: Catch the Knowledge Vibe
+# VibeSeek — Catch the Knowledge Vibe
 
-> **Hackathon Entry for VibeCode 2024** > *Tagline: "Đừng chỉ học, hãy tận hưởng cảm hứng tri thức."*
+> Biến PDF học thuật khô khan thành **Vibe Cards + video ngắn 9:16** cho sinh viên Việt Nam Gen Z.
+> Đồ án học tập · Stack 100% free-tier.
 
-## 🌟 The "Wow" Factor
-VibeSeek biến những tập tài liệu PDF khô khan thành một nguồn cấp dữ liệu (Feed) dạng video ngắn và thẻ tương tác (Interactive Cards) như TikTok, kết hợp với mô hình **Learn-to-Earn** giúp Gen Z có động lực học tập tức thì.
+## Tại sao VibeSeek?
 
-## ⚡ Key Features
-- **AI-Powered "Vibefy":** Tự động băm nhỏ PDF/YouTube thành các Micro-content trong < 10 giây.
-- **TikTok-style Learning Feed:** Vuốt dọc để học, tích hợp hiệu ứng Framer Motion cực mượt.
-- **Smart Quiz Boss:** AI tự tạo câu hỏi dựa trên nội dung vừa xem để kiểm tra kiến thức.
-- **Reward Engine:** Hoàn thành bài học để nhận VibePoints, đổi lấy quà tặng thực tế (Voucher, Badge).
+Sinh viên Gen Z dễ mất tập trung với tài liệu dài. VibeSeek tự động chuyển PDF thành:
 
-## 🛠 Tech Stack
-- **Frontend:** Next.js 14, Tailwind CSS, Framer Motion.
-- **Backend:** Supabase (Real-time DB & Auth).
-- **AI:** Claude 3.5/3.7 (Logic & Architect), GPT-4o (Content Processing).
-- **Design:** Glassmorphism UI Concept.
+- **Vibe Cards** — tóm tắt bite-sized (2-3 câu, emoji, tag) theo 5 loại: concept, quote, tip, fact, summary.
+- **Auto MP4 Video 9:16** — storyboard AI + TTS tiếng Việt + render tự động (selling point #1, tải về thiết bị).
+- **Smart Quiz** — sinh tự động theo từng card, chấm điểm realtime.
+- **Leaderboard Vibe Points** — Learn-to-Earn, guest-friendly (không cần login).
+- **VibeBuddy Chatbot** — hỏi đáp RAG trên chính nội dung tài liệu.
 
-## 📂 Project Structure
-- `/components`: Các UI Component Gen Z (VibeCard, ProgressBar, GlowButton).
-- `/lib/ai`: Logic xử lý Prompt Engineering và kết nối LLMs.
-- `/skills`: Các Custom Claude Skills để tự động hóa quy trình code.
-- `/public/assets`: Hình ảnh minh họa do AI tạo.
+## Tech Stack (Free Tier)
 
-## 🚀 Getting Started
-1. Clone repo: `git clone https://github.com/your-team/vibeseek`
-2. Install dependencies: `npm install`
-3. Cài đặt biến môi trường: Tạo file `.env.local` với Supabase & OpenAI Keys.
-4. Run: `npm run dev`
-5. Mở Claude Code và gõ: `claude "Bắt đầu build tính năng Upload theo agent.md"`
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 14 App Router, TypeScript |
+| Styling | Tailwind CSS 3, Framer Motion, GSAP |
+| 3D | three + @react-three/fiber (landing mascot DOJO) |
+| DB | Supabase Postgres + pgvector |
+| AI primary | Google Gemini 2.0 Flash |
+| AI fallback | Groq (llama-3.3-70b) |
+| Embeddings | Gemini text-embedding-004 |
+| Video renderer | GitHub Actions + ffmpeg + edge-tts |
+| Storage | Cloudflare R2 |
+| Hosting | Vercel |
 
-## 🏆 Our Vision
-VibeSeek không chỉ là một công cụ, nó là một cuộc cách mạng trong cách Gen Z tiếp cận tri thức: **Nhanh - Vui - Có giá trị.**
+## Project Structure
 
----
-*Developed with ❤️ by [CtrlC-CtrlV] - VibeCode 2024*
+- `vibeseek/` — Next.js app (deploy target)
+  - `app/` — routes + API
+  - `components/` — UI + 3D scenes
+  - `lib/ai/` — Gemini/Groq processors, prompts
+  - `utils/supabase.ts` — DB client
+- `tasks/` — executor task specs (see [`tasks/README.md`](./tasks/README.md))
+- `ARCHITECT_BLUEPRINT.md` — architectural source of truth
+- `AGENT_LOG.md` — execution journal
+
+## Getting Started
+
+1. Clone: `git clone https://github.com/Kien118/vibeseek`
+2. Install: `cd vibeseek && npm install`
+3. Env: copy `.env.local.example` → `.env.local`, điền Supabase + Gemini + R2 keys. **Không commit `.env.local`.**
+4. Schema: chạy `vibeseek/supabase-schema.sql` trên Supabase Dashboard SQL editor.
+5. Dev: `npm run dev` → http://localhost:3000
+
+Xem `ARCHITECT_BLUEPRINT.md` để biết chi tiết kiến trúc, data model, API contracts, và roadmap.
+
+## For AI Agents
+
+Đây là dự án multi-agent. Mọi AI Agent (Cursor / Copilot / Claude Code) phải đọc theo thứ tự:
+
+1. `ARCHITECT_BLUEPRINT.md` — kiến trúc cố định.
+2. `tasks/README.md` — workflow convention + prompt template.
+3. `tasks/T-XXX.md` — task cụ thể được giao.
+
+KHÔNG tự quyết định kiến trúc — hỏi Architect khi blocked.
+
+## License
+
+Educational project — all rights reserved by owner.
