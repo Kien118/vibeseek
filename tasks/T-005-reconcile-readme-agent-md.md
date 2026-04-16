@@ -1,6 +1,6 @@
 # T-005 · Reconcile `README.md` + `agent.md` with blueprint
 
-**Status:** `todo`
+**Status:** `in-progress`
 **Blueprint ref:** §3 (locked stack), §3.1 (removed from stack), §0 (workflow supersedes agent.md)
 **Branch:** `task/T-005-reconcile-readme-agent-md`
 **Assignee:** _(tba)_
