@@ -89,10 +89,13 @@ Architect creates. Agent does NOT create new task files. If agent thinks a task 
 
 ## Index
 
-Current Phase 0 tasks:
-- [T-001 Fix .gitignore for .env.local](./T-001-fix-gitignore-env-local.md) — HIGH
+Phase 0 tasks — **ALL DONE** ✅
+
+- [T-001 Fix .gitignore for .env.local](./T-001-fix-gitignore-env-local.md) — ✅ done
 - [T-002 Cleanup root junk files](./T-002-cleanup-root-junk.md) — ✅ done
-- [T-003 Remove Python pipeline](./T-003-remove-python-pipeline.md)
-- [T-004 Audit 3D models](./T-004-audit-3d-models.md)
-- [T-005 Reconcile README + agent.md with blueprint](./T-005-reconcile-readme-agent-md.md)
-- [T-006 Fix Model.tsx type errors](./T-006-fix-model-tsx-type-errors.md) — HIGH (unblocks build)
+- [T-003 Remove Python pipeline](./T-003-remove-python-pipeline.md) — ✅ done
+- [T-004 Audit 3D models](./T-004-audit-3d-models.md) — ✅ done
+- [T-005 Reconcile README + agent.md with blueprint](./T-005-reconcile-readme-agent-md.md) — ✅ done
+- [T-006 Fix Model.tsx type errors](./T-006-fix-model-tsx-type-errors.md) — ✅ done
+
+Phase 1 (Video Renderer) tasks will appear below once Architect writes T-101 → T-108 specs.
