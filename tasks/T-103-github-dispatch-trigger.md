@@ -1,10 +1,10 @@
 # T-103 · GitHub repository_dispatch trigger
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** HIGH (foundation — blocks T-106)
 **Blueprint ref:** §2.2 step 6, §11 T-103
 **Branch:** `task/T-103-github-dispatch-trigger`
-**Assignee:** _(tba)_
+**Assignee:** Antigravity
 
 ## Context
 

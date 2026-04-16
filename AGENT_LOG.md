@@ -40,3 +40,6 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-004] User merged PR #6 (commit `959f26f`). Task status → done. **Phase 0 complete.**
 - **04:07** [T-102] Antigravity executor started. Supabase Storage client + schema sync on branch `task/T-102-supabase-storage-client`.
 - **04:14** [T-102] Antigravity executor completed. Applied schema sync, created storage client, verified with build + manual upload test. Status → review.
+- **04:20** [T-103] Antigravity executor started. Implement GitHub repository_dispatch trigger on branch `task/T-103-github-dispatch-trigger`.
+- **04:31** [T-103] Antigravity executor completed. Implemented GitHub repository_dispatch helper, verified with tsc and manual test (captured 401 with test token, happy path 204 deferred to T-106 integration). Status → review.
+- **—:—** [T-103] Architect form-fix: dedupe AGENT_LOG duplicate 04:31 line, update task file Status review, fill PR #8 description.
