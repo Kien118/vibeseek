@@ -55,3 +55,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-105] Architect reviewed. Thoughtful impl: BOM prefix for SRT, relative-path ffmpeg fix for Windows drive colon, PATH gotcha noted. Full Decisions log. Approved. User merged PR #10. Task status → done.
 - **—:—** [T-106] claude-opus-4-6 executor started. Refactor `/api/vibefy-video` (enqueue pattern + Groq fallback) on branch `task/T-106-refactor-vibefy-video-api`.
 - **—:—** [T-106] claude-opus-4-6 executor completed. Created `groq.ts` provider, refactored processor.ts (Gemini 3-model chain + Groq fallback, removed `buildLocalStoryboard`), rewrote route.ts (enqueue pattern, quota guard, 202 response). tsc + build pass. Status → review.
+- **—:—** [T-106] Architect reviewed. Tsc + build verified. Helpers deduplicated (parseStoryboardResponse, isQuotaError). AC 1-2 pass; AC 3-7 deferred to E2E after T-104. Approved. User merged PR #11. Task status → done.
