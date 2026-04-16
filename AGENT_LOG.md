@@ -50,3 +50,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-107] Merge conflict with main (AGENT_LOG + T-102/T-103 task files) after user merged PR #7 + PR #8. Architect resolved: took main for task files, chronological merge for AGENT_LOG.
 - **—:—** [T-107] Second merge conflict (AGENT_LOG only) after Architect close commits for T-102/T-103. Resolved: keep all entries.
 - **—:—** [T-107] Architect reviewed. Code matches spec. Bonus: agent added `export const dynamic = 'force-dynamic'` (correct for App Router dynamic routes, should have logged). Tsc + build verified post-merge. User merged PR #9. Task status → done. **Batch A complete.**
+- **—:—** [T-105] claude-opus-4-6 executor started. Render script (ffmpeg + edge-tts + Supabase Storage) on branch `task/T-105-render-script`.
+- **—:—** [T-105] claude-opus-4-6 executor completed. Created render.mjs + package.json + README.md. Partial test: verified edge-tts Vietnamese TTS + ffmpeg 1080x1920 subtitle rendering locally. Full E2E deferred to T-104 workflow. Status → review.

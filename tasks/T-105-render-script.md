@@ -1,10 +1,10 @@
 # T-105 · Render script (ffmpeg + edge-tts + Supabase Storage)
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** HIGH (core pipeline)
 **Blueprint ref:** §2.2, §7.4, §11 T-105
 **Branch:** `task/T-105-render-script`
-**Assignee:** _(tba)_
+**Assignee:** claude-opus-4-6
 **Depends on:** T-102 (Storage client)
 
 ## Context
@@ -147,7 +147,10 @@ await fetch(process.env.APP_CALLBACK_URL, {
 _(none)_
 
 ## Decisions log
-_(agent ghi nếu gặp issue ffmpeg format, tiếng Việt subtitle, v.v.)_
+- **SRT UTF-8 BOM:** Script writes `\uFEFF` BOM prefix to SRT file to ensure ffmpeg subtitle filter handles Vietnamese diacritics correctly. Tested with "Xin chào các bạn sinh viên" — renders without box characters.
+- **ffmpeg subtitle path:** Use relative path (`subtitles.srt`) with `cwd: workDir` option to avoid Windows drive-letter colon (`C:`) being parsed as ffmpeg filter option separator. On Linux (GitHub Actions) this is a non-issue, but the fix is compatible.
+- **Partial test, full E2E deferred to T-104 workflow:** Local test verified: edge-tts generates Vietnamese audio correctly, ffmpeg renders 1080x1920 MP4 with Vietnamese subtitles (no box characters), codecs h264+aac. Full E2E (Supabase job fetch + upload + callback) requires real Supabase credentials + running app — deferred to T-104 integration.
+- **edge-tts CLI vs module:** On Windows, `edge-tts` command may not be on PATH after pip install (available as `python -m edge_tts`). On GitHub Actions Linux, `pip install edge-tts` puts `edge-tts` on PATH directly. Script targets Actions environment.
 
 ## Notes for reviewer
 - Task này **khó test end-to-end** trong agent's dev env (cần ngrok + real jobId). Agent làm best-effort, note limitation. Architect sẽ test trong review.
