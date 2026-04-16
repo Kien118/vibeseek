@@ -1,6 +1,6 @@
 # T-104 · GitHub Actions workflow `render-video.yml`
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH
 **Blueprint ref:** §2.1, §7.4, §11 T-104
 **Branch:** `task/T-104-github-workflow-render-video`

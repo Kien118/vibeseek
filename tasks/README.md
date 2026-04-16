@@ -98,7 +98,7 @@ Phase 0 tasks — **ALL DONE** ✅
 - [T-005 Reconcile README + agent.md with blueprint](./T-005-reconcile-readme-agent-md.md) — ✅ done
 - [T-006 Fix Model.tsx type errors](./T-006-fix-model-tsx-type-errors.md) — ✅ done
 
-Phase 1 — **Video Renderer pipeline** (active)
+Phase 1 — **Video Renderer pipeline** — ✅ ALL DONE
 
 Dependency graph:
 ```
