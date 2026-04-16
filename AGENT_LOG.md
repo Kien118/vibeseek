@@ -38,3 +38,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-004] Architect rescue: agent T-004 work was uncommitted in WT on wrong branch (task/T-003), never on task/T-004. Stashed + replayed onto fresh task/T-004 branch from main. No content loss.
 - **—:—** [T-004] Architect reviewed during rescue. AC 1/2/3/5/6/7 verified independently (tsc + build + grep + du). AC-4 trusted (agent posted hero shot). Approved. PR #6 opened by Architect on behalf of agent.
 - **—:—** [T-004] User merged PR #6 (commit `959f26f`). Task status → done. **Phase 0 complete.**
+- **04:07** [T-102] Antigravity executor started. Supabase Storage client + schema sync on branch `task/T-102-supabase-storage-client`.
+- **04:14** [T-102] Antigravity executor completed. Applied schema sync, created storage client, verified with build + manual upload test. Status → review.
