@@ -22,3 +22,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-005] Architect reviewed. AC-1/2/3 pass; AC-4 waived (architect-side over-restrictive grep); AC-5 pre-existing Model.tsx errors → new task T-006. Approved for merge.
 - **—:—** [T-005] User merged PR #2 (commit `17a4bae`). Task status → done.
 - **—:—** [T-001] claude-opus-4-6 executor started. Fix .gitignore + untrack .env.local on branch `task/T-001-fix-gitignore-env-local`.
+- **—:—** [T-001] claude-opus-4-6 executor completed. .gitignore updated, .env.local untracked. All 5 ACs verified. Status → review.
