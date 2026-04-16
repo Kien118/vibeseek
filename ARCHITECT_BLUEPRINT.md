@@ -699,6 +699,7 @@ Copy cấu trúc trên, giá trị để trống. Luôn đồng bộ khi thêm e
 - T-003 Xóa `src/pdf2genz/`, `pyproject.toml`, `requirements.txt`.
 - T-004 Audit `components/3d/_unused/` và `public/models/*.glb` — xóa file không liên quan DOJO.
 - T-005 Reconcile `README.md` + xoá `agent.md` (stale OpenAI/Leonardo stack — mâu thuẫn §3).
+- T-006 Fix `Model.tsx` type errors (pre-existing; blocks `npm run build`).
 
 ### Phase 1 — MVP Video Renderer (3–5 ngày)
 - T-101 Tạo `render_jobs` table.

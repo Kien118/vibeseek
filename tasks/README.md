@@ -95,3 +95,4 @@ Current Phase 0 tasks:
 - [T-003 Remove Python pipeline](./T-003-remove-python-pipeline.md)
 - [T-004 Audit 3D models](./T-004-audit-3d-models.md)
 - [T-005 Reconcile README + agent.md with blueprint](./T-005-reconcile-readme-agent-md.md)
+- [T-006 Fix Model.tsx type errors](./T-006-fix-model-tsx-type-errors.md) — HIGH (unblocks build)
