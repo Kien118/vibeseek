@@ -49,3 +49,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-103] Architect reviewed. Code matches spec exactly. 401 manual test only (happy path verified at T-106 integration). User merged PR #8 (commit `03b432d`). Task status → done.
 - **—:—** [T-107] Merge conflict with main (AGENT_LOG + T-102/T-103 task files) after user merged PR #7 + PR #8. Architect resolved: took main for task files, chronological merge for AGENT_LOG.
 - **—:—** [T-107] Second merge conflict (AGENT_LOG only) after Architect close commits for T-102/T-103. Resolved: keep all entries.
+- **—:—** [T-107] Architect reviewed. Code matches spec. Bonus: agent added `export const dynamic = 'force-dynamic'` (correct for App Router dynamic routes, should have logged). Tsc + build verified post-merge. User merged PR #9. Task status → done. **Batch A complete.**
