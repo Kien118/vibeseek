@@ -29,3 +29,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-006] claude-opus-4-6 executor completed. Applied both fixes per spec. Status → review.
 - **—:—** [T-006] Architect reviewed. AC-1 (tsc) + AC-2 (build) verified independently — both pass. AC-3/4 trusted. Noted DoD violation: agent forgot AGENT_LOG entries. Approved.
 - **—:—** [T-006] User merged PR #4. Task status → done.
+- **02:22** [T-003] Antigravity executor started. Remove standalone Python pipeline on branch task/T-003-remove-python-pipeline.
+- **02:30** [T-003] Antigravity executor completed. Removed Python pipeline, simplified codebase, verified build/lint pass on branch task/T-003-remove-python-pipeline.
