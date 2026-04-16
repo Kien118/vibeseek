@@ -91,6 +91,7 @@ Architect creates. Agent does NOT create new task files. If agent thinks a task 
 
 Current Phase 0 tasks:
 - [T-001 Fix .gitignore for .env.local](./T-001-fix-gitignore-env-local.md) — HIGH
-- [T-002 Cleanup root junk files](./T-002-cleanup-root-junk.md)
+- [T-002 Cleanup root junk files](./T-002-cleanup-root-junk.md) — ✅ done
 - [T-003 Remove Python pipeline](./T-003-remove-python-pipeline.md)
 - [T-004 Audit 3D models](./T-004-audit-3d-models.md)
+- [T-005 Reconcile README + agent.md with blueprint](./T-005-reconcile-readme-agent-md.md)

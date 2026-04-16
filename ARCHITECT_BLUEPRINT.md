@@ -694,10 +694,11 @@ Copy cấu trúc trên, giá trị để trống. Luôn đồng bộ khi thêm e
 ## §10. Roadmap
 
 ### Phase 0 — Hygiene (TRƯỚC TIÊN, 1 ngày)
-- T-001 **Rotate leaked secrets + sửa `.gitignore`** (CRITICAL).
-- T-002 Xóa file rác root (`package-lock.json`, `api.doc`).
+- T-001 Fix `.gitignore` cho `.env.local` (HIGH).
+- T-002 ✅ Xóa file rác root (`package-lock.json`, `api.doc`). Done — PR #1 merged 2026-04-17.
 - T-003 Xóa `src/pdf2genz/`, `pyproject.toml`, `requirements.txt`.
 - T-004 Audit `components/3d/_unused/` và `public/models/*.glb` — xóa file không liên quan DOJO.
+- T-005 Reconcile `README.md` + xoá `agent.md` (stale OpenAI/Leonardo stack — mâu thuẫn §3).
 
 ### Phase 1 — MVP Video Renderer (3–5 ngày)
 - T-101 Tạo `render_jobs` table.
@@ -830,6 +831,12 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
   - Cleanup interval khi unmount.
 - **AC:** User upload PDF → thấy bar "Đang render" → ~2 phút sau video hiện → bấm Tải về được file mp4.
 
+### T-005 Reconcile README.md + remove agent.md
+- **Context:** `README.md` root có stack cũ (GPT-4o, Claude 3.5/3.7, Leonardo.ai), `agent.md` có constitution cũ mâu thuẫn workflow mới. Blueprint = SSOT.
+- **Files:** overwrite `README.md` với canonical content; `git rm agent.md`.
+- **Spec chi tiết:** `tasks/T-005-reconcile-readme-agent-md.md`.
+- **AC:** README không còn mention Leonardo/GPT-4o/Claude-3.5/skills; `agent.md` đi khỏi tracking.
+
 ### T-201 → T-205, T-301 → T-305
 (Chi tiết giống pattern trên — sẽ chi tiết hóa khi Phase 1 xong.)
 
@@ -862,5 +869,6 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 
 ## §13. Changelog
 
+- **2026-04-17 (evening)** — T-002 merged (PR #1). Phát hiện `api.doc` chứa OpenAI API key live (đã được user rotate + revoke). Thêm T-005 vào Phase 0 để dọn README.md + agent.md stale.
 - **2026-04-17** — Close Q-01 đến Q-05. Repo private → recompute quota GH Actions (2000 min/tháng, ~33 video/ngày). Thêm §7.9 quota guard, §7.11 UI rules (Vibe Points badge + DOJO mascot mouse-follow). Hạ T-001 severity từ CRITICAL → HIGH (private repo). Thêm R-08 (GH quota) + R-09 (r2.dev rate-limit).
 - **2026-04-16** — Initial blueprint. Kiến trúc renderer qua GitHub Actions + R2 thay vì Supabase Storage. Loại Python pipeline. Fallback AI Gemini → Groq (bỏ local storyboard). Thêm quiz/leaderboard/chatbot vào roadmap.
