@@ -1,6 +1,6 @@
 # T-002 · Cleanup root junk files
 
-**Status:** `in-progress`
+**Status:** `review`
 **Blueprint ref:** §11 T-002, §3.1 (đã loại khỏi stack)
 **Branch:** `task/T-002-cleanup-root-junk`
 **Assignee:** _(tba)_
@@ -31,15 +31,15 @@ Blueprint §3.1 đã chốt: xoá.
 3. Commit: `T-002: remove unused root-level junk (empty lockfile, stray .doc)`
 
 ## Acceptance criteria
-- [ ] AC-1: `ls D:\WangNhat\Study\VibeCode` không còn `package-lock.json` và `api.doc`.
-- [ ] AC-2: `git ls-files | grep -E "^(package-lock.json|api.doc)$"` rỗng.
-- [ ] AC-3: `vibeseek/` không bị ảnh hưởng — `vibeseek/package-lock.json` VẪN TỒN TẠI (file đó 269KB, là lockfile thật).
+- [x] AC-1: `ls D:\WangNhat\Study\VibeCode` không còn `package-lock.json` và `api.doc`.
+- [x] AC-2: `git ls-files | grep -E "^(package-lock.json|api.doc)$"` rỗng.
+- [x] AC-3: `vibeseek/` không bị ảnh hưởng — `vibeseek/package-lock.json` VẪN TỒN TẠI (file đó 269KB, là lockfile thật).
 
 ## Definition of Done
-- [ ] All AC pass
-- [ ] AGENT_LOG.md có entry
+- [x] All AC pass
+- [x] AGENT_LOG.md có entry
 - [ ] PR opened
-- [ ] Status = `review`
+- [x] Status = `review`
 
 ## Questions / Blockers
 _(none)_
