@@ -1,6 +1,6 @@
 # T-102 · Supabase Storage client + schema sync
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH (foundation — blocks T-105)
 **Blueprint ref:** §3 (locked: Supabase Storage), §5 (render_jobs), §11 T-102
 **Branch:** `task/T-102-supabase-storage-client`

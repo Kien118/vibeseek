@@ -45,4 +45,7 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **04:26** [T-107] Antigravity executor completed. Implemented callback and polling endpoints, fixed Supabase URL in .env.local, verified build, and opened PR #9.
 - **04:31** [T-103] Antigravity executor completed. Implemented GitHub repository_dispatch helper, verified with tsc and manual test (captured 401 with test token, happy path 204 deferred to T-106 integration). Status → review.
 - **—:—** [T-103] Architect form-fix: dedupe AGENT_LOG duplicate 04:31 line, update task file Status review, fill PR #8 description.
+- **—:—** [T-102] Architect reviewed. AC all pass (tsc + build verified independently). Approved. User merged PR #7. Task status → done.
+- **—:—** [T-103] Architect reviewed. Code matches spec exactly. 401 manual test only (happy path verified at T-106 integration). User merged PR #8 (commit `03b432d`). Task status → done.
 - **—:—** [T-107] Merge conflict with main (AGENT_LOG + T-102/T-103 task files) after user merged PR #7 + PR #8. Architect resolved: took main for task files, chronological merge for AGENT_LOG.
+- **—:—** [T-107] Second merge conflict (AGENT_LOG only) after Architect close commits for T-102/T-103. Resolved: keep all entries.
