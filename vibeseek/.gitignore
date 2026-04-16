@@ -1,2 +1,6 @@
 node_modules/
 .next/
+
+# Local env (never commit real secrets)
+.env*.local
+!.env.local.example
