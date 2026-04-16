@@ -1,10 +1,10 @@
 # T-106 · Refactor `/api/vibefy-video` (enqueue pattern + Groq fallback)
 
-**Status:** `todo`
+**Status:** `in-progress`
 **Severity:** HIGH
 **Blueprint ref:** §2.2 step 6, §6.2, §7.3, §7.9, §11 T-106
 **Branch:** `task/T-106-refactor-vibefy-video-api`
-**Assignee:** _(tba)_
+**Assignee:** claude-opus-4-6
 **Depends on:** T-103 (dispatch trigger)
 
 ## Context
