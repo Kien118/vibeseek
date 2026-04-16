@@ -77,7 +77,7 @@ export default function Model() {
   const targetRotY = useRef(0)
 
   // Load the DOJO model -------------------------------------------------------
-  const { scene } = useGLTF('/models/DOJO.glb') as GLTFResult
+  const { scene } = useGLTF('/models/DOJO.glb') as unknown as GLTFResult
 
   // Locate DOJO_Head once the scene is ready -----------------------------------
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function Model() {
      */
     const EASE = 0.07
 
-    const targetScale = MathUtils.lerp(2,4, 0.42, p)
+    const targetScale = MathUtils.lerp(2, 4, p)
     group.scale.setScalar(MathUtils.lerp(group.scale.x, targetScale, EASE))
 
     const targetX = MathUtils.lerp(0, 1.0, p)
