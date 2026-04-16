@@ -1,10 +1,10 @@
 # T-105 · Render script (ffmpeg + edge-tts + Supabase Storage)
 
-**Status:** `todo`
+**Status:** `in-progress`
 **Severity:** HIGH (core pipeline)
 **Blueprint ref:** §2.2, §7.4, §11 T-105
 **Branch:** `task/T-105-render-script`
-**Assignee:** _(tba)_
+**Assignee:** claude-opus-4-6
 **Depends on:** T-102 (Storage client)
 
 ## Context
