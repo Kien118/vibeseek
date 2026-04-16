@@ -1,0 +1,52 @@
+name: Render VibeSeek Video
+
+on:
+  repository_dispatch:
+    types: [render-video]
+  workflow_dispatch:
+    inputs:
+      jobId:
+        description: 'render_jobs.id to process'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout render script + lib
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            vibeseek/scripts/render
+            vibeseek/lib/storage
+            vibeseek/lib/ai/prompts.ts
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install system deps (ffmpeg + edge-tts)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-pip
+          pip3 install edge-tts
+
+      - name: Install render script deps
+        working-directory: vibeseek/scripts/render
+        run: npm ci
+
+      - name: Render video
+        working-directory: vibeseek/scripts/render
+        env:
+          JOB_ID: ${{ github.event.client_payload.jobId || github.event.inputs.jobId }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_STORAGE_BUCKET: ${{ secrets.SUPABASE_STORAGE_BUCKET }}
+          RENDER_CALLBACK_SECRET: ${{ secrets.RENDER_CALLBACK_SECRET }}
+          APP_CALLBACK_URL: ${{ secrets.APP_CALLBACK_URL }}
+        run: node render.mjs "$JOB_ID"
