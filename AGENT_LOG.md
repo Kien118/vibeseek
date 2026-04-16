@@ -13,3 +13,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-002] gpt-5.2 executor started. Cleanup root junk files on branch `task/T-002-cleanup-root-junk`.
 - **—:—** [T-002] gpt-5.2 executor completed. Removed `package-lock.json` + `api.doc`, set task status to `review`, ready for PR.
 - **—:—** [T-002] gpt-5.2 executor blocked. Cannot open PR automatically (missing `gh` CLI).
+- **—:—** [T-002] gpt-5.2 executor resumed. Installed `gh` + authenticated.
+- **—:—** [T-002] gpt-5.2 executor completed. PR opened: `https://github.com/Kien118/vibeseek/pull/1`.
