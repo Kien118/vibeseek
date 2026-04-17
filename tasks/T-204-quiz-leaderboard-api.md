@@ -1,10 +1,10 @@
 # T-204 · API routes — `/api/quiz/generate` (lazy) + `/api/quiz/submit` + `/api/leaderboard`
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH
 **Blueprint ref:** §6.5, §6.6, §7.5, §7.6, §11
-**Branch:** `task/T-204-quiz-leaderboard-api`
-**Assignee:** _(tba)_
+**Branch:** `task/T-204-quiz-leaderboard-api` (merged, deleted)
+**Assignee:** claude-opus-4-6
 **Depends on:** T-201 (DB tables), T-202 (anon-id util — chỉ conceptually; server không import), T-203 (quiz lib)
 
 ## Context
