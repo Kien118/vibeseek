@@ -87,3 +87,5 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** [T-206] claude-opus-4-6 executor completed. Created 5 new files (profile API route, VibePointsBadge, LeaderboardTable, /leaderboard page) + modified layout.tsx. tsc + build pass. AC-1/2/8/9 verified; AC-3..7 deferred (headless agent). Status → review.
 - **—:—** [T-205] claude-opus-4-6 executor started. Quiz UI (QuizCard + /quiz/[documentId] page + dashboard button) on branch `task/T-205-quiz-ui`.
 - **—:—** [T-205] claude-opus-4-6 executor completed. Created QuizCard.tsx + quiz/[documentId]/page.tsx, added "🎯 Làm Quiz" Link to dashboard. tsc + build pass. Status → review.
+- **—:—** [T-205] Architect reviewed PR #22. Scope clean (5 files). tsc + build verified independently on branch. AC-1/2 pass, AC-3..6 deferred to E2E. Code byte-for-byte vs spec. 4-phase state machine + §7.6 compliance (correct_index not rendered during `stage=answering`) explicitly confirmed. Agent also pre-added T-206 AGENT_LOG entries in this PR — fixing T-206's DoD gap automatically. Approved.
+- **—:—** [T-205] User merged PR #22 (commit `49f7f9c`). Task status → done. Branch deleted.

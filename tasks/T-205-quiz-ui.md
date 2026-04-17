@@ -1,10 +1,10 @@
 # T-205 · Quiz UI — `<QuizCard />` + `/quiz/[documentId]`
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MED
 **Blueprint ref:** §6.5, §7.5, §11
-**Branch:** `task/T-205-quiz-ui`
-**Assignee:** _(tba)_
+**Branch:** `task/T-205-quiz-ui` (merged, deleted)
+**Assignee:** claude-opus-4-6
 **Depends on:** T-202 (anon-id), T-204 (API routes)
 
 ## Context
