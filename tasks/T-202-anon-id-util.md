@@ -1,10 +1,10 @@
 # T-202 · `utils/anon-id.ts` — SSR-safe localStorage anon_id manager
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** MED (foundation — blocks T-204 leaderboard flow + T-205/T-206 UI)
 **Blueprint ref:** §2.4, §7.6, §11
 **Branch:** `task/T-202-anon-id-util`
-**Assignee:** _(tba)_
+**Assignee:** claude-opus-4-6
 **Depends on:** _(none — can run parallel with T-201, T-203)_
 
 ## Context
@@ -92,9 +92,9 @@ function SomeComponent() {
 ```
 
 ## Acceptance criteria
-- [ ] AC-1: `vibeseek/utils/anon-id.ts` exists, exports `getOrCreateAnonId`, `peekAnonId`, `clearAnonId`, `ANON_ID_STORAGE_KEY`.
-- [ ] AC-2: `npx tsc --noEmit` pass.
-- [ ] AC-3: `npm run build` pass (critical: no `window is not defined` during build's prerender pass).
+- [x] AC-1: `vibeseek/utils/anon-id.ts` exists, exports `getOrCreateAnonId`, `peekAnonId`, `clearAnonId`, `ANON_ID_STORAGE_KEY`.
+- [x] AC-2: `npx tsc --noEmit` pass.
+- [x] AC-3: `npm run build` pass (critical: no `window is not defined` during build's prerender pass).
 - [ ] AC-4: Manual test trong browser DevTools:
   ```js
   // after `npm run dev`, open any page, in console:
@@ -103,19 +103,19 @@ function SomeComponent() {
   localStorage.getItem('vibeseek:anonId')  // null initially
   ```
   Agent có thể verify bằng cách thêm 1 tạm `useEffect` trong dashboard page, in console.log, rồi xoá. Hoặc trust review.
-- [ ] AC-5: Call server-side (vd trong `app/layout.tsx`) không crash — hàm return `null` graceful.
+- [x] AC-5: Call server-side (vd trong `app/layout.tsx`) không crash — hàm return `null` graceful (verified: isBrowser() returns false on server, all exports return null/void).
 
 ## Definition of Done
-- [ ] All AC pass (AC-4 optional — agent có thể skip nếu khó test, ghi Decisions log)
-- [ ] AGENT_LOG.md entry started + completed
+- [x] All AC pass (AC-4 skipped — see Decisions log)
+- [x] AGENT_LOG.md entry started + completed
 - [ ] PR opened
-- [ ] Status = `review`
+- [x] Status = `review`
 
 ## Questions / Blockers
 _(none)_
 
 ## Decisions log
-_(agent ghi)_
+- AC-4 (manual browser DevTools test) skipped: headless agent cannot open browser. Code is trivial pure-function; `isBrowser()` guard + try/catch verified via tsc + build prerender pass (AC-2, AC-3). Left for reviewer.
 
 ## Notes for reviewer
 - Dùng `crypto.randomUUID()` (Web Crypto, browser + Node 19+). Không import thư viện UUID thêm.
