@@ -27,19 +27,43 @@ function isQuotaError(err: unknown): boolean {
   )
 }
 
-// JSON.parse on a truncated response throws SyntaxError "Unterminated string" or similar.
-// Empty-response and validation-shape errors are also retriable — the next model may return
-// a complete well-formed payload even if this one was malformed.
+// Treat as retriable: quota (429), JSON parse failure (truncation mid-string),
+// transient server errors (500/503 UNAVAILABLE/overloaded), empty responses, and shape validation
+// failures. The next model (or Groq fallback) may succeed where this one failed.
 function isRetriableModelError(err: unknown): boolean {
   if (isQuotaError(err)) return true
   if (err instanceof SyntaxError) return true
   const message = err instanceof Error ? err.message : String(err)
+  const lower = message.toLowerCase()
   return (
+    message.includes('503') ||
+    message.includes('500') ||
+    lower.includes('unavailable') ||
+    lower.includes('overloaded') ||
+    lower.includes('deadline') ||
     message.includes('Empty response') ||
     message.includes('must have exactly 4 options') ||
     message.includes('correct_index out of range') ||
-    message.includes('returned empty array')
+    message.includes('returned empty array') ||
+    message.includes('is not valid JSON')
   )
+}
+
+// Try to extract an array of quizzes from the parsed JSON, accepting common wrapper shapes
+// (different LLMs wrap arrays under different keys when forced into an object response).
+function extractQuizArray(parsed: unknown): unknown[] {
+  if (Array.isArray(parsed)) return parsed
+  if (parsed && typeof parsed === 'object') {
+    const obj = parsed as Record<string, unknown>
+    for (const key of ['quizzes', 'questions', 'items', 'results', 'data', 'quiz']) {
+      if (Array.isArray(obj[key])) return obj[key] as unknown[]
+    }
+    // Fallback: pick the first array-valued property.
+    for (const value of Object.values(obj)) {
+      if (Array.isArray(value)) return value
+    }
+  }
+  return []
 }
 
 function parseQuizResponse(rawText: string, expectedCount: number): QuizDraft[] {
@@ -49,7 +73,7 @@ function parseQuizResponse(rawText: string, expectedCount: number): QuizDraft[] 
     .replace(/\s*```$/i, '')
     .trim()
   const parsed = JSON.parse(cleaned)
-  const arr: unknown[] = Array.isArray(parsed) ? parsed : (parsed as { quizzes?: unknown[] }).quizzes || []
+  const arr = extractQuizArray(parsed)
 
   if (arr.length === 0) throw new Error('Quiz generation returned empty array')
 
@@ -93,7 +117,7 @@ export async function generateQuizzesForCards(
       const response = await genAI.models.generateContent({
         model: modelName,
         contents: fullPrompt,
-        config: { temperature: 0.5, maxOutputTokens: 8192 },
+        config: { temperature: 0.5, maxOutputTokens: 16384 },
       })
       const rawText = response.text
       if (!rawText) throw new Error('Empty response while generating quiz')
@@ -109,12 +133,13 @@ export async function generateQuizzesForCards(
   }
 
   console.log('[Quiz] All Gemini exhausted -> fallback Groq')
-  const raw = await groqChat(
-    [
-      { role: 'system', content: QUIZ_BATCH_SYSTEM_PROMPT },
-      { role: 'user', content: QUIZ_BATCH_USER_PROMPT(cards) },
-    ],
-    { responseFormat: 'json_object' },
-  )
+  // Do NOT use responseFormat: 'json_object' here — Groq's object mode wraps arrays under
+  // an LLM-chosen key, which was returning empty results. llama-3.3-70b follows plain JSON
+  // instructions in the system prompt reliably and returns the array directly.
+  const raw = await groqChat([
+    { role: 'system', content: QUIZ_BATCH_SYSTEM_PROMPT },
+    { role: 'user', content: QUIZ_BATCH_USER_PROMPT(cards) },
+  ])
+  console.log(`[Quiz] Groq raw length=${raw.length} chars, preview: ${raw.slice(0, 120)}`)
   return parseQuizResponse(raw, cards.length)
 }
