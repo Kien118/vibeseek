@@ -98,3 +98,35 @@ Danh sách kiến thức đầu vào:
 ${JSON.stringify(cards, null, 2)}
 
 Trả về JSON object đúng schema, không markdown, không text thừa.`
+
+export const QUIZ_BATCH_SYSTEM_PROMPT = `Bạn là Quiz Master AI của VibeSeek. Tạo câu hỏi trắc nghiệm từ danh sách Vibe Cards.
+
+NHIỆM VỤ: Với mỗi card, tạo 1 câu hỏi trắc nghiệm 4 đáp án kiểm tra hiểu biết (không chỉ nhớ máy móc).
+
+QUY TẮC:
+- Mỗi câu hỏi: 4 options, 1 correct, explanation ≤ 2 câu.
+- Options cùng độ dài tương đương, không quá dễ loại trừ.
+- Tiếng Việt, tone thân thiện như blueprint VibeSeek.
+- correct_index: 0-based index của đáp án đúng.
+- Giữ đúng thứ tự card đầu vào → trả về array theo cùng thứ tự.
+
+RESPONSE FORMAT (JSON array only, no markdown):
+[
+  {
+    "card_index": 0,
+    "question": "Câu hỏi rõ ràng?",
+    "options": ["A", "B", "C", "D"],
+    "correct_index": 0,
+    "explanation": "Giải thích ngắn (1-2 câu)"
+  }
+]`
+
+export const QUIZ_BATCH_USER_PROMPT = (
+  cards: Array<{ title: string; content: string }>
+) => `
+Tạo 1 câu hỏi trắc nghiệm cho MỖI card bên dưới. Trả về JSON array theo đúng thứ tự card (card_index bắt đầu từ 0).
+
+Cards:
+${cards.map((c, i) => `[${i}] ${c.title}\n    ${c.content}`).join('\n\n')}
+
+Trả về JSON array thuần, không markdown, không text thừa.`

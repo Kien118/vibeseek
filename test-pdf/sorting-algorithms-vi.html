@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>5 Thuật Toán Sắp Xếp Cơ Bản</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body {
+      font-family: 'Segoe UI', 'Times New Roman', serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 22pt;
+      color: #4338ca;
+      border-bottom: 3px solid #4338ca;
+      padding-bottom: 8px;
+      page-break-after: avoid;
+    }
+    h2 {
+      font-size: 16pt;
+      color: #6d28d9;
+      margin-top: 24px;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 13pt;
+      color: #374151;
+      margin-top: 16px;
+    }
+    p { margin: 10px 0; text-align: justify; }
+    .intro {
+      font-style: italic;
+      background: #f3f4f6;
+      padding: 12px 16px;
+      border-left: 4px solid #4338ca;
+      margin: 16px 0;
+    }
+    .complexity {
+      background: #fef3c7;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 11pt;
+    }
+    .tip {
+      background: #d1fae5;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 11pt;
+    }
+    .example {
+      background: #f9fafb;
+      border: 1px dashed #9ca3af;
+      padding: 12px;
+      font-family: 'Consolas', monospace;
+      font-size: 10.5pt;
+      margin: 10px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 11pt;
+    }
+    th, td {
+      border: 1px solid #d1d5db;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th { background: #e0e7ff; }
+    .algo-section { page-break-inside: avoid; margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+<h1>5 Thuật Toán Sắp Xếp Cơ Bản Cho Sinh Viên CS</h1>
+
+<p class="intro">
+Sắp xếp (sorting) là thao tác nền tảng trong khoa học máy tính: từ việc hiển thị email theo thời gian, tìm sản phẩm rẻ nhất trên Shopee, đến tổ chức dữ liệu cho các thuật toán tìm kiếm nhanh. Hiểu 5 thuật toán sau sẽ giúp bạn nắm vững 80% bài phỏng vấn entry-level.
+</p>
+
+<h2>1. Bubble Sort — Sắp xếp nổi bọt</h2>
+
+<div class="algo-section">
+<h3>Khái niệm</h3>
+<p>
+Bubble Sort là thuật toán sắp xếp đơn giản nhất. Nó lặp qua mảng, so sánh hai phần tử liền kề và hoán đổi nếu sai thứ tự. Sau mỗi vòng lặp, phần tử lớn nhất "nổi" lên cuối mảng — giống như bọt nước nổi lên mặt.
+</p>
+
+<h3>Cách hoạt động</h3>
+<p>
+Với mảng <code>[5, 2, 8, 1]</code>, vòng 1: so 5 và 2 → đổi → <code>[2, 5, 8, 1]</code>. So 5 và 8 → giữ. So 8 và 1 → đổi → <code>[2, 5, 1, 8]</code>. Vòng 2 tương tự. Sau n-1 vòng, mảng được sắp xếp hoàn toàn.
+</p>
+
+<div class="complexity">
+<b>Độ phức tạp:</b> Thời gian <code>O(n²)</code> trong trường hợp xấu và trung bình, <code>O(n)</code> nếu mảng đã gần sắp xếp (có early-exit optimization). Không gian <code>O(1)</code>.
+</div>
+
+<div class="tip">
+<b>Mẹo học:</b> Bubble Sort chỉ nên dùng cho mảng nhỏ hơn 100 phần tử hoặc để dạy khái niệm. Trong thực tế, đừng dùng — chậm hơn Insertion Sort mà phức tạp tương đương.
+</div>
+</div>
+
+<h2>2. Insertion Sort — Sắp xếp chèn</h2>
+
+<div class="algo-section">
+<h3>Khái niệm</h3>
+<p>
+Insertion Sort xây dựng mảng đã sắp xếp từng phần tử một. Tưởng tượng bạn đang sắp bài tú lơ khơ trên tay: mỗi lá mới rút ra được chèn vào đúng vị trí so với những lá đang cầm.
+</p>
+
+<h3>Cách hoạt động</h3>
+<p>
+Với <code>[5, 2, 8, 1]</code>: phần tử 2 được chèn trước 5 → <code>[2, 5, 8, 1]</code>. Phần tử 8 ở đúng chỗ → giữ. Phần tử 1 được dịch lên đầu → <code>[1, 2, 5, 8]</code>.
+</p>
+
+<div class="complexity">
+<b>Độ phức tạp:</b> Trường hợp xấu <code>O(n²)</code>, trung bình <code>O(n²)</code>, tốt nhất <code>O(n)</code> khi mảng đã sắp xếp.
+</div>
+
+<div class="tip">
+<b>Khi nào dùng:</b> Mảng nhỏ (< 50 phần tử) hoặc mảng đã gần sắp xếp. Đây là thuật toán mà Python dùng kết hợp với Timsort cho các block nhỏ.
+</div>
+</div>
+
+<h2>3. Selection Sort — Sắp xếp chọn</h2>
+
+<div class="algo-section">
+<h3>Khái niệm</h3>
+<p>
+Selection Sort lặp qua mảng, tìm phần tử nhỏ nhất chưa sắp xếp, rồi đưa nó về đầu. Sau mỗi vòng, vị trí đã sắp xếp tăng thêm một.
+</p>
+
+<h3>Cách hoạt động</h3>
+<p>
+Với <code>[5, 2, 8, 1]</code>: vòng 1 tìm min = 1 → đổi với 5 → <code>[1, 2, 8, 5]</code>. Vòng 2 tìm min trong phần còn lại (2, 8, 5) → 2 đã đúng → giữ. Vòng 3 tìm min giữa 8 và 5 → đổi → <code>[1, 2, 5, 8]</code>.
+</p>
+
+<div class="complexity">
+<b>Độ phức tạp:</b> Luôn <code>O(n²)</code> bất kể đầu vào. Ưu điểm: số lần swap tối thiểu — tốt khi write cost đắt.
+</div>
+
+<div class="tip">
+<b>Fact thú vị:</b> Selection Sort có số swap ít nhất trong các thuật toán O(n²), chỉ bằng O(n). Dùng khi memory write rất đắt (ví dụ EEPROM).
+</div>
+</div>
+
+<h2>4. Merge Sort — Sắp xếp trộn</h2>
+
+<div class="algo-section">
+<h3>Khái niệm</h3>
+<p>
+Merge Sort là thuật toán "chia để trị" (divide and conquer): chia mảng thành hai nửa, sắp xếp riêng từng nửa, rồi trộn lại. Đây là thuật toán sắp xếp hiệu quả đầu tiên sinh viên được học trong các khóa CS hiện đại.
+</p>
+
+<h3>Cách hoạt động</h3>
+<div class="example">
+[5, 2, 8, 1]
+    ↓ chia đôi
+[5, 2]    [8, 1]
+    ↓ đệ quy
+[2, 5]    [1, 8]
+    ↓ trộn
+[1, 2, 5, 8]
+</div>
+
+<div class="complexity">
+<b>Độ phức tạp:</b> Luôn <code>O(n log n)</code> — stable, ổn định. Không gian phụ <code>O(n)</code> do cần mảng phụ trộn.
+</div>
+
+<div class="tip">
+<b>Quote kinh điển:</b> "Merge Sort là con dao Thụy Sĩ của sắp xếp" — ổn định, dự đoán được, parallelizable. Dùng khi xử lý dữ liệu lớn hoặc cần stability (giữ thứ tự gốc của phần tử bằng nhau).
+</div>
+</div>
+
+<h2>5. Quick Sort — Sắp xếp nhanh</h2>
+
+<div class="algo-section">
+<h3>Khái niệm</h3>
+<p>
+Quick Sort cũng là divide-and-conquer nhưng khác Merge: chọn một phần tử làm "pivot", chia mảng thành hai phần — nhỏ hơn pivot và lớn hơn pivot — rồi sắp xếp đệ quy từng phần.
+</p>
+
+<h3>Cách hoạt động</h3>
+<p>
+Với <code>[5, 2, 8, 1, 9, 3]</code>, chọn pivot = 5. Sau partition: <code>[2, 1, 3] [5] [8, 9]</code>. Đệ quy trên <code>[2, 1, 3]</code> và <code>[8, 9]</code>.
+</p>
+
+<div class="complexity">
+<b>Độ phức tạp:</b> Trung bình <code>O(n log n)</code>, xấu nhất <code>O(n²)</code> (khi pivot luôn là phần tử lớn nhất/nhỏ nhất). Không gian <code>O(log n)</code> do stack đệ quy.
+</div>
+
+<div class="tip">
+<b>Mẹo:</b> Đừng chọn pivot ở đầu mảng — nguy cơ O(n²) khi input đã sắp xếp. Dùng "median-of-three" hoặc pivot ngẫu nhiên để tránh.
+</div>
+</div>
+
+<h2>Bảng so sánh</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Thuật toán</th>
+      <th>Trung bình</th>
+      <th>Xấu nhất</th>
+      <th>Bộ nhớ</th>
+      <th>Ổn định</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Bubble Sort</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Có</td></tr>
+    <tr><td>Insertion Sort</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Có</td></tr>
+    <tr><td>Selection Sort</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Không</td></tr>
+    <tr><td>Merge Sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Có</td></tr>
+    <tr><td>Quick Sort</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>Không</td></tr>
+  </tbody>
+</table>
+
+<h2>Tóm tắt quyết định chọn thuật toán</h2>
+
+<p>
+<b>Dữ liệu nhỏ (< 50):</b> Insertion Sort — đơn giản, nhanh khi dữ liệu gần sắp xếp.<br>
+<b>Dữ liệu trung bình cần ổn định:</b> Merge Sort — đảm bảo O(n log n), giữ thứ tự.<br>
+<b>Dữ liệu lớn, không cần ổn định:</b> Quick Sort — nhanh nhất trong thực tế nhờ cache-friendly.<br>
+<b>Memory giới hạn:</b> Heap Sort (không nằm trong danh sách này, nhưng đáng học tiếp) hoặc Selection Sort.
+</p>
+
+<p class="intro">
+Trong thư viện chuẩn của ngôn ngữ lập trình, Quick Sort và Merge Sort thường được kết hợp. Ví dụ Java dùng Dual-Pivot Quicksort cho primitive, TimSort (biến thể Merge + Insertion) cho object. Python dùng TimSort. C++ std::sort dùng Introsort (Quick + Heap + Insertion). Hiểu nền tảng giúp bạn debug performance tốt hơn.
+</p>
+
+<hr>
+<p style="font-size: 10pt; color: #6b7280; text-align: center;">
+Tài liệu test cho VibeSeek · Sinh cards + video thử nghiệm
+</p>
+
+</body>
+</html>
