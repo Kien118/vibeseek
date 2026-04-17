@@ -151,3 +151,32 @@ T-203 (quiz gen lib) ─────┘                       └──► T-206
 - **Stale-base conflict:** nếu bạn branch trước khi Batch trước merge, rebase onto latest `main` trước khi push. AGENT_LOG conflict là bình thường — giữ cả 2 bên close entries + agent entries.
 - **Scope discipline:** `git status` trước mỗi `git add`. KHÔNG `git add .` / `git add -A`. PR #14/#15/#16 bị close vì scope explosion (1 agent làm 3 task, commit PDF + build artifacts).
 - **Smoke scripts:** nếu spec yêu cầu xoá sau test → xoá thật. `vibeseek/scripts/smoke-*.ts` + `tsconfig.tsbuildinfo` đã gitignored nhưng vẫn nên check `git status`.
+
+Phase 3 — **Chatbot RAG** — 📝 Specs drafted (2026-04-17), awaiting user batch review
+
+Dependency graph:
+```
+T-301 (pgvector + card_embeddings DDL) ──► T-302 (embeddings.ts + /api/embeddings/ensure) ──┐
+                                                                                             │
+                                            T-303 (chat.ts RAG + RPC) ◄───────────────────── ┤
+                                                        │                                    │
+                                                        └──► T-304 (/api/chat SSE) ──► T-305 (ChatPanel + page)
+```
+
+- [T-301 Migration pgvector + card_embeddings + sync quiz UNIQUE](./T-301-pgvector-card-embeddings-migration.md) — 📝 todo
+- [T-302 `lib/ai/embeddings.ts` + `POST /api/embeddings/ensure`](./T-302-embeddings-lib-and-ensure-endpoint.md) — 📝 todo
+- [T-303 `lib/ai/chat.ts` RAG retrieval + streaming wrapper + RPC](./T-303-chat-lib-rag-streaming.md) — 📝 todo
+- [T-304 `POST /api/chat` SSE route](./T-304-chat-sse-api-route.md) — 📝 todo
+- [T-305 `ChatPanel` + `/chat/[documentId]` page + dashboard link](./T-305-chat-panel-and-page.md) — 📝 todo
+
+**Proposed parallel batches:**
+- Batch A (single, blocking everything): **T-301** (DDL, user chạy SQL Dashboard)
+- Batch B (parallel once T-301 merged): **T-302, T-303** — T-303 import `embedTexts` từ T-302 nhưng chỉ ở lib level → có thể develop parallel nếu agent T-303 dùng type-only import hoặc dựng mock function tạm trong branch. Khuyến nghị an toàn: T-302 xong trước, T-303 base trên merged main.
+- Batch C (once B done): **T-304** (cần T-302 + T-303)
+- Batch D (cuối): **T-305** (cần T-304)
+
+**Rule mới cho Phase 3 (rút từ 8 hotfix Phase 2):**
+- Mỗi spec có section `Failure modes` + `Local test plan` + `Non-goals` + `Files NOT to touch` — đã áp dụng.
+- **Architect PHẢI chạy Local test plan thật** (dev server + curl) khi review PR — không chỉ `tsc + build`.
+- **Three-strikes circuit breaker:** nếu 1 task cần hotfix lần 3 trong E2E → dừng, gom consolidated fix task, dispatch agent. KHÔNG architect vá in-place vô hạn như Phase 2.
+- `DEBUG_FORCE_GEMINI_FAIL=true` env flag có sẵn ở T-302/T-303 để test Groq fallback mà không chờ quota cạn.

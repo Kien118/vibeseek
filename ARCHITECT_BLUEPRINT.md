@@ -149,12 +149,26 @@ Biến **tài liệu PDF học thuật dài + khô khan** thành **micro-content
 - Sau mỗi quiz đúng, `/api/quiz/submit` cộng điểm vào `leaderboard_profiles`.
 - `GET /api/leaderboard` → top 20.
 
-### 2.5. Chatbot flow (RAG)
-1. Khi cards được tạo, sinh embedding cho mỗi card content bằng **Gemini `text-embedding-004`** (free, 1500 req/day).
-2. Lưu vector vào `card_embeddings` (Supabase pgvector).
-3. User chat: `/api/chat { documentId, message, history }`.
-4. API: embed query → `SELECT ... ORDER BY embedding <-> query LIMIT 5` → prompt Gemini với context.
-5. Stream response về client (Server-Sent Events).
+### 2.5. Chatbot flow (RAG) — updated 2026-04-17 (Phase 3 planning, Q-06/Q-07/Q-08/Q-09)
+
+**Embeddings — lazy, idempotent (NOT fire-and-forget from `/api/vibefy`):**
+1. Sau khi `/api/vibefy` insert cards xong, **KHÔNG** spawn embedding job (Vercel serverless sẽ kill promise — học từ Phase 2 T-203 quiz).
+2. Client `/chat/[documentId]` lần đầu mở → `POST /api/embeddings/ensure { documentId }`.
+3. Endpoint idempotent: nếu `card_embeddings` đã có đủ rows khớp `vibe_cards` của doc → return `{ ready: true, count }` ngay. Nếu thiếu → call Gemini `text-embedding-004` batch (tối đa 100 items/request per docs) → insert → return.
+4. Gemini free 1500 req/day, `text-embedding-004` dim=768. **Không có Groq fallback cho embeddings** (Groq chưa cung cấp embedding API free) → nếu Gemini fail → return 503, UI hiện "Quota cạn, thử lại 1 phút sau".
+
+**Chat request flow:**
+5. User gõ câu hỏi → client `POST /api/chat { documentId, message, history, anonId }`.
+6. Server:
+   - Embed query bằng `text-embedding-004`.
+   - `SELECT card_id, title, content, embedding <=> $query AS distance FROM card_embeddings JOIN vibe_cards USING(card_id) WHERE document_id = $doc ORDER BY distance ASC LIMIT 5`.
+   - Build context = **top-5 cards formatted + snippet của `vibe_documents.raw_text`** (≤2000 ký tự, ưu tiên khu vực có keyword từ query; fallback = 2000 đầu nếu không match).
+   - Cắt `history` chỉ giữ **6 messages cuối** (3 lượt hội thoại) để giới hạn token.
+   - Gọi Gemini `2.0-flash` streaming với system prompt RAG (ràng buộc: chỉ trả lời theo context, không bịa ngoài doc). Fallback chain: `2.0-flash → 2.0-flash-lite → 2.5-flash → Groq llama-3.3-70b streaming`.
+7. Server stream chunk về client qua Server-Sent Events (`text/event-stream`).
+8. Client append chunk vào message hiện tại, render progressively.
+
+**History persistence:** MVP KHÔNG lưu DB (client-only localStorage keyed theo `documentId`). Bảng `chat_messages` để lại schema §5.2 nhưng Phase 3 không dùng — Phase 4 sẽ enable nếu cần analytics/cross-device.
 
 ---
 
@@ -360,16 +374,17 @@ CREATE INDEX card_embeddings_document_idx ON card_embeddings(document_id);
 CREATE INDEX card_embeddings_vector_idx ON card_embeddings
   USING hnsw (embedding vector_cosine_ops);
 
--- Chat history (optional, giữ context trong-session)
-CREATE TABLE chat_messages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
-  anon_id TEXT,                             -- nullable cho demo
-  role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
-  content TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX chat_messages_doc_idx ON chat_messages(document_id, created_at);
+-- Chat history — DEFERRED TO PHASE 4 (Q-09 resolved 2026-04-17: MVP client-only localStorage).
+-- KHÔNG tạo trong Phase 3. Schema giữ lại để Phase 4 enable nếu cần analytics/cross-device.
+-- CREATE TABLE chat_messages (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
+--   anon_id TEXT,                             -- nullable cho demo
+--   role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+--   content TEXT NOT NULL,
+--   created_at TIMESTAMPTZ DEFAULT NOW()
+-- );
+-- CREATE INDEX chat_messages_doc_idx ON chat_messages(document_id, created_at);
 ```
 
 ### 5.3. RLS Policies (MVP — public demo)
@@ -502,21 +517,41 @@ CREATE INDEX chat_messages_doc_idx ON chat_messages(document_id, created_at);
 
 ---
 
+### 6.6b. `POST /api/embeddings/ensure` (Phase 3, lazy idempotent — thêm 2026-04-17)
+**Runtime:** `nodejs`, `maxDuration = 60`
+**Input:**
+```json
+{ "documentId": "uuid" }
+```
+**Output:**
+```json
+{ "ready": true, "count": 10 }
+```
+**Errors:** 404 nếu doc không có card. 503 nếu Gemini embedding quota cạn (không có Groq fallback cho embeddings). Gọi idempotent — nếu đã đủ embeddings thì return ngay không call AI.
+
 ### 6.7. `POST /api/chat` (Server-Sent Events)
+**Runtime:** `nodejs` (không Edge — Gemini SDK cần Node). `maxDuration = 60` (Vercel Hobby trần).
 **Input:**
 ```json
 {
   "documentId": "uuid",
   "message": "Giải thích lại thuật toán Dijkstra?",
-  "history": [ { "role": "user"|"assistant", "content": "..." } ]
+  "history": [ { "role": "user"|"assistant", "content": "..." } ],
+  "anonId": "uuid"
 }
 ```
-**Output:** `text/event-stream`
+**Output:** `text/event-stream` (Content-Type fixed, `Cache-Control: no-cache`, `Connection: keep-alive`)
 ```
 data: {"delta":"Thuật toán Dijkstra là "}
+
 data: {"delta":"một thuật toán..."}
+
 data: {"done":true,"tokensUsed":245}
+
 ```
+(Double newline `\n\n` sau mỗi event bắt buộc theo SSE spec.)
+**Errors trước khi stream mở:** 400 input sai shape, 404 document không tồn tại, 404 chưa có embeddings (UI phải gọi `/api/embeddings/ensure` trước), 429 rate limit (>10 msg/phút/anonId), 503 Gemini + Groq đều fail.
+**Error giữa stream:** server gửi `data: {"error":"...","done":true}` rồi close. Client render message lỗi inline, không throw.
 
 ---
 
@@ -915,6 +950,10 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 - ✅ **Q-03** 50 pages đủ cho MVP. PDF dài hơn → 422 với message "đang phát triển" (§7.8).
 - ✅ **Q-04** Vibe Points badge top-right nav trên mọi page (trừ landing). §7.11.
 - ✅ **Q-05** DOJO.glb chưa có animation. Tách head/body, head follow mouse ±30°. Chỉ dùng ở landing. §7.11.
+- ✅ **Q-06** (Phase 3) Embeddings generate **lazy qua `/api/embeddings/ensure`** — KHÔNG fire-and-forget trong `/api/vibefy` (Vercel serverless terminate promise, học từ T-203). Endpoint idempotent: đếm rows khớp, thiếu mới gọi AI. §2.5.
+- ✅ **Q-07** (Phase 3) RAG context = **top-5 cards từ pgvector cosine + snippet ≤2000 ký tự từ `vibe_documents.raw_text`** (ưu tiên khu vực chứa keyword query, fallback 2000 đầu). Cards quá ngắn (~200 char) không đủ context cho câu hỏi phức tạp. §2.5.
+- ✅ **Q-08** (Phase 3) SSE route `/api/chat` dùng **`runtime = 'nodejs'` + `maxDuration = 60`**. Edge runtime loại — Gemini SDK cần Node API. 60s khớp Vercel Hobby trần (R-07). §6.7.
+- ✅ **Q-09** (Phase 3) Chat history MVP **client-only localStorage** theo key `documentId`. Bảng `chat_messages` §5.2 comment-out, để Phase 4 enable khi cần analytics/cross-device. Giảm DB write load + đơn giản spec.
 
 ### Open Questions
 *(none — tất cả đã close. Thêm mới khi phát sinh.)*
