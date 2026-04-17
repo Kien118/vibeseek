@@ -124,6 +124,7 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 py-10">
       <QuizCard
+        key={questions[currentIdx].id}
         question={questions[currentIdx]}
         questionNumber={currentIdx + 1}
         totalQuestions={questions.length}
