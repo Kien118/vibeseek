@@ -125,3 +125,24 @@ T-107 (callback+polling) ┴──► T-108 (VideoPlayer)    │
 - Batch A (foundation, fully parallel): **T-102, T-103, T-107**
 - Batch B (once Batch A done): **T-105** (needs T-102), **T-106** (needs T-103), **T-108** (needs T-107)
 - Batch C (last): **T-104** (needs T-105)
+
+Phase 2 — **Quiz + Leaderboard** — 📝 specs ready, agents TBA
+
+Dependency graph:
+```
+T-201 (DB migration) ─────┐
+T-202 (anon-id util) ─────┼──► T-204 (API routes) ──► T-205 (Quiz UI)
+T-203 (quiz gen lib) ─────┘                       └──► T-206 (Leaderboard UI + Badge)
+```
+
+- [T-201 DB migration (leaderboard_profiles + quiz_attempts)](./T-201-db-migration-leaderboard-quiz.md) — HIGH, foundation
+- [T-202 anon-id util (SSR-safe localStorage)](./T-202-anon-id-util.md) — MED, foundation
+- [T-203 Quiz generation lib (batch Gemini→Groq)](./T-203-quiz-generation-lib.md) — HIGH, foundation
+- [T-204 Quiz + Leaderboard API routes (lazy generate + submit + top-N)](./T-204-quiz-leaderboard-api.md) — HIGH
+- [T-205 Quiz UI (QuizCard + /quiz/[documentId])](./T-205-quiz-ui.md) — MED
+- [T-206 Leaderboard UI + VibePointsBadge in layout](./T-206-leaderboard-ui-badge.md) — MED
+
+**Parallel batches:**
+- Batch A (foundation, fully parallel): **T-201, T-202, T-203**
+- Batch B (once Batch A done): **T-204** (needs all of A)
+- Batch C (parallel, once Batch B done): **T-205, T-206**

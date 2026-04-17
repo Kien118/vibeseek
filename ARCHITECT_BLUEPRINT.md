@@ -711,9 +711,22 @@ Copy cấu trúc trên, giá trị để trống. Luôn đồng bộ khi thêm e
 ### Phase 2 — Quiz & Leaderboard (2–3 ngày)
 - T-201 `leaderboard_profiles`, `quiz_attempts` tables.
 - T-202 `utils/anon-id.ts` manager.
-- T-203 `lib/ai/quiz.ts` + trigger trong `/api/vibefy`.
-- T-204 `/api/quiz/submit` + `/api/leaderboard`.
-- T-205 UI: `QuizCard`, `/quiz/[documentId]`, `LeaderboardTable`, `/leaderboard`.
+- T-203 `lib/ai/quiz.ts` — batch quiz generation (Gemini → Groq).
+- T-204 `/api/quiz/generate` (lazy) + `/api/quiz/submit` + `/api/leaderboard` + `/api/leaderboard/profile`.
+- T-205 Quiz UI: `QuizCard`, `/quiz/[documentId]`.
+- T-206 Leaderboard UI: `LeaderboardTable`, `/leaderboard`, `<VibePointsBadge />` trong `layout.tsx`.
+
+**Dependency graph Phase 2:**
+```
+Batch A (parallel):  T-201 (DB) · T-202 (anon-id) · T-203 (quiz lib)
+Batch B (1 task):    T-204 (API routes — needs A)
+Batch C (parallel):  T-205 (quiz UI) · T-206 (leaderboard UI + badge — needs B)
+```
+
+**Kiến trúc Phase 2 — quyết định 2026-04-17:**
+- **Lazy quiz generation** thay cho fire-and-forget trong `/api/vibefy`. Lý do: Vercel serverless kill function sau response → promise không chạy. Client gọi `/api/quiz/generate` lần đầu vào trang quiz → server check DB, nếu chưa có quiz thì gen sync + cache, lần 2+ chỉ read. Trade-off: user chờ ~10-15s lần đầu vào quiz (chỉ trả giá nếu thực sự làm quiz).
+- **Tách T-205 → T-205 + T-206** (vs plan ban đầu): quiz UI và leaderboard UI là 2 feature độc lập; tách ra → 2 agent parallel, PR smaller, reviewer đỡ mệt.
+- **VibePointsBadge global trong `layout.tsx`**: dùng `usePathname()` tự ẩn trên `/` thay vì conditional render ở từng page — less code duplication.
 
 ### Phase 3 — Chatbot RAG (2–3 ngày)
 - T-301 Enable `pgvector` extension + `card_embeddings`, `chat_messages` tables.
@@ -852,8 +865,45 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 - **Spec chi tiết:** `tasks/T-005-reconcile-readme-agent-md.md`.
 - **AC:** README không còn mention Leonardo/GPT-4o/Claude-3.5/skills; `agent.md` đi khỏi tracking.
 
-### T-201 → T-205, T-301 → T-305
-(Chi tiết giống pattern trên — sẽ chi tiết hóa khi Phase 1 xong.)
+### T-201 DB migration — `leaderboard_profiles` + `quiz_attempts`
+- **Files:** `vibeseek/supabase-schema.sql` (APPEND).
+- **Spec chi tiết:** `tasks/T-201-db-migration-leaderboard-quiz.md`.
+- **AC:** 2 bảng mới, RLS service_role-only for writes, indexes, idempotent DDL.
+
+### T-202 `utils/anon-id.ts` — SSR-safe localStorage manager
+- **Files:** `vibeseek/utils/anon-id.ts` (NEW).
+- **Spec chi tiết:** `tasks/T-202-anon-id-util.md`.
+- **AC:** Exports `getOrCreateAnonId`, `peekAnonId`, `clearAnonId`. Build không crash SSR.
+
+### T-203 `lib/ai/quiz.ts` — batch quiz generation
+- **Files:** `vibeseek/lib/ai/quiz.ts` (NEW), `vibeseek/lib/ai/prompts.ts` (APPEND batch prompts).
+- **Spec chi tiết:** `tasks/T-203-quiz-generation-lib.md`.
+- **AC:** `generateQuizzesForCards(cards)` → batch 1-prompt, Gemini 3-model chain → Groq fallback, validation shape.
+
+### T-204 Quiz + Leaderboard API routes
+- **Files:**
+  - `vibeseek/app/api/quiz/generate/route.ts` (NEW — **lazy**, idempotent)
+  - `vibeseek/app/api/quiz/submit/route.ts` (NEW)
+  - `vibeseek/app/api/leaderboard/route.ts` (NEW)
+- **Spec chi tiết:** `tasks/T-204-quiz-leaderboard-api.md`.
+- **AC:** Idempotent lazy gen, UNIQUE chặn duplicate attempt, top-N leaderboard.
+
+### T-205 Quiz UI — `<QuizCard />` + `/quiz/[documentId]`
+- **Files:** `vibeseek/components/QuizCard.tsx`, `vibeseek/app/quiz/[documentId]/page.tsx`, nhẹ sửa `dashboard/page.tsx` (thêm button "🎯 Làm Quiz").
+- **Spec chi tiết:** `tasks/T-205-quiz-ui.md`.
+- **AC:** Upload PDF → cards → quiz → trả lời → reveal → score summary end-to-end.
+
+### T-206 Leaderboard UI + `<VibePointsBadge />` in layout
+- **Files:**
+  - `vibeseek/components/LeaderboardTable.tsx`, `vibeseek/components/VibePointsBadge.tsx` (NEW)
+  - `vibeseek/app/leaderboard/page.tsx` (NEW)
+  - `vibeseek/app/api/leaderboard/profile/route.ts` (NEW — small helper GET/PATCH)
+  - `vibeseek/app/layout.tsx` (MODIFY — mount `<VibePointsBadge />`)
+- **Spec chi tiết:** `tasks/T-206-leaderboard-ui-badge.md`.
+- **AC:** Badge top-right trên mọi page trừ `/`, `/leaderboard` top-20 + edit display_name.
+
+### T-301 → T-305 (Phase 3 Chatbot RAG)
+(Chi tiết hóa khi Phase 2 xong.)
 
 ---
 
@@ -884,6 +934,7 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 
 ## §13. Changelog
 
+- **2026-04-17 (Phase 2 planning)** — Phase 2 task specs authored (T-201 → T-206). **Split T-205 → T-205 + T-206** (quiz UI + leaderboard UI là 2 feature độc lập; parallel agents, smaller PRs). **Lazy quiz generation** replaces fire-and-forget trigger in `/api/vibefy` (Vercel serverless terminates on response → async promise dies). Updated §10 roadmap, §11 task specs for T-201..T-206, added dependency graph + kiến trúc Phase 2 decisions.
 - **2026-04-17 (late night)** — **🎉 PHASE 1 VERIFIED END-TO-END.** User upload PDF thật (sorting-algorithms.pdf, 4 pages) → full pipeline chạy: Gemini 2.0-flash quota'd → fell through to 2.5-flash → 10 cards → storyboard → GitHub Actions render → MP4 upload Supabase Storage → UI download. Phát hiện 4 video quality issues — added P-401 đến P-405 vào Phase 4. Hotfix VideoPlayer POLL_MAX_ATTEMPTS 144 → 240 (cold runner + Gemini 429 retries push first render > 12min). Hotfix landing "Start now" button navigate `/dashboard`.
 - **2026-04-17 (end of day)** — Phase 0 complete (T-001 → T-006 all merged). Swap **Cloudflare R2 → Supabase Storage** (user không có thẻ tín dụng, R2 bắt nhập payment method). Update §2.1 diagram, §2.2 data flow, §3 stack table, §3.1 removed list, §7.4 rendering steps, §7.10 secrets list, §8.1/8.2 env, §9 quota table (R-04 updated), §11 T-101/T-102 task specs, §12 R-04/R-09. T-101 marked done (user chạy migration + tạo bucket).
 - **2026-04-17 (evening)** — T-002 merged (PR #1). Phát hiện `api.doc` chứa OpenAI API key live (đã được user rotate + revoke). Thêm T-005 vào Phase 0 để dọn README.md + agent.md stale.
