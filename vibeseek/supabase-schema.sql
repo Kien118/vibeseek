@@ -190,3 +190,46 @@ DROP POLICY IF EXISTS "quiz_attempts service write" ON quiz_attempts;
 CREATE POLICY "quiz_attempts service write" ON quiz_attempts
   FOR ALL USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+
+-- =============================================================
+-- Phase 3 (T-301) — pgvector + card_embeddings + raw_text column
+-- Run on Supabase Dashboard SQL Editor before merging this PR
+-- =============================================================
+
+-- 1. Vector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- 2. card_embeddings table
+CREATE TABLE IF NOT EXISTS card_embeddings (
+  card_id UUID PRIMARY KEY REFERENCES vibe_cards(id) ON DELETE CASCADE,
+  document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
+  embedding vector(768) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS card_embeddings_document_idx
+  ON card_embeddings(document_id);
+
+-- HNSW index cho cosine similarity — fast ANN search ngay cả khi bảng nhỏ.
+-- vector_cosine_ops khớp distance operator `<=>` dùng trong query RAG.
+CREATE INDEX IF NOT EXISTS card_embeddings_vector_idx
+  ON card_embeddings USING hnsw (embedding vector_cosine_ops);
+
+-- RLS: public read, service_role only write (giống table khác MVP)
+ALTER TABLE card_embeddings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "card_embeddings_public_read" ON card_embeddings
+  FOR SELECT USING (true);
+
+CREATE POLICY "card_embeddings_service_write" ON card_embeddings
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- 3. Add raw_text column to vibe_documents (nullable — doc cũ không có)
+ALTER TABLE vibe_documents
+  ADD COLUMN IF NOT EXISTS raw_text TEXT;
+
+-- 4. Sync cleanup: UNIQUE(card_id) on quiz_questions đã được apply manual Phase 2 E2E,
+-- nhưng chưa có trong file SSOT. Nếu đã tồn tại thì command sau sẽ lỗi — bỏ qua.
+ALTER TABLE quiz_questions
+  ADD CONSTRAINT quiz_questions_card_id_unique UNIQUE (card_id);

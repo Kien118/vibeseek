@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
           original_filename: file.name,
           status: 'ready',
           total_cards: cards.length,
+          raw_text: extractedText,
         })
         .select()
         .single()

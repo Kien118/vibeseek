@@ -101,6 +101,11 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 - **—:—** 🎉 **PHASE 2 E2E FULLY VERIFIED.** User nuke-clean retest confirmed: 10 cards (not 20), badge top-right updates live during quiz, each question resets state correctly, done screen shows accurate score, leaderboard row matches badge. All 8 hotfixes applied during E2E successfully close the gap. Phase 2 feature-complete + verified end-to-end.
 - **—:—** [meta] User feedback at end of session: specs + reviews were not thorough enough → eight E2E hotfixes. Explicitly asked for a better workflow to propose in next session. Architect refreshed `SESSION_HANDOFF.md` with a seven-step Phase 3 pipeline (failure-modes section in spec, user-runnable test plan in spec, architect local-runs feature during review, three-strikes circuit breaker, E2E verification as formal batch step) and added two new memory files: `feedback_vibeseek_phase2_lessons.md` (eight specific pitfalls to preempt) + `project_vibeseek_state_2026_04_17.md` (DB + API + UI snapshot). Next session's first action: propose the workflow to user before drafting any Phase 3 spec.
 
+## 2026-04-18
+
+- **—:—** [T-301] claude-opus-4-6 executor started. Enable pgvector + card_embeddings + raw_text column + quiz UNIQUE sync on branch `task/T-301-pgvector-card-embeddings-migration`.
+- **—:—** [T-301] claude-opus-4-6 executor completed. Appended DDL (vector ext + card_embeddings + HNSW + RLS + raw_text + UNIQUE sync) to schema.sql. Added `raw_text: extractedText` to /api/vibefy INSERT. tsc clean. Status → review.
+
 ## 2026-04-18 — Phase 3 specs drafted + blueprint updated
 
 - **—:—** [meta] New session resumed following `SESSION_HANDOFF.md` bootstrap. Loaded 6 memory files, read blueprint §1/§2/§3/§13, reviewed AGENT_LOG last 20 lines. Proposed 7-step Phase 3 pipeline + 4 triggers (adding `E2E fail` trigger with three-strikes rule). User approved + asked for additional improvements. Architect surfaced 4 process improvements (smoke-phase3.ts script, DEBUG_FORCE_GEMINI_FAIL env flag, `Non-goals` + `Files NOT to touch` section per spec, Phase-2-lessons block in agent prompt) + 4 architectural questions (Q-06 embeddings timing, Q-07 RAG context scope, Q-08 SSE runtime/duration, Q-09 chat history persistence). User approved all 4 proposed resolutions.
