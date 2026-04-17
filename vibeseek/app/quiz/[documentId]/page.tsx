@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
@@ -20,8 +20,15 @@ export default function QuizPage() {
   const [correctCount, setCorrectCount] = useState(0)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  // Ref guard against React Strict Mode double-fire in dev. Without it, two parallel
+  // POSTs to /api/quiz/generate both pass the "existing quiz?" check and insert
+  // duplicate rows (bug observed: 10 cards -> 20 quiz_questions).
+  const fetchedRef = useRef(false)
+
   // Fetch or generate quiz on mount
   useEffect(() => {
+    if (fetchedRef.current) return
+    fetchedRef.current = true
     let cancelled = false
     async function load() {
       try {
@@ -66,6 +73,11 @@ export default function QuizPage() {
     if (body.correct && !body.alreadyAttempted) {
       setPointsEarned((p) => p + body.pointsEarned)
       setCorrectCount((c) => c + 1)
+    }
+    // Tell the global <VibePointsBadge /> to refresh — pathname hasn't changed,
+    // so the badge's own useEffect won't re-fire on its own.
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vibe-points-updated'))
     }
     return {
       correct: body.correct,

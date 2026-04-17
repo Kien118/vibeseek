@@ -17,14 +17,24 @@ export default function VibePointsBadge() {
 
   useEffect(() => {
     if (pathname === '/') return  // landing — don't even fetch
-    const anonId = getOrCreateAnonId()
-    if (!anonId) return
-    fetch(`/api/leaderboard/profile?anonId=${encodeURIComponent(anonId)}`)
-      .then((r) => r.json())
-      .then((body) => {
+
+    async function refresh() {
+      const anonId = getOrCreateAnonId()
+      if (!anonId) return
+      try {
+        const res = await fetch(`/api/leaderboard/profile?anonId=${encodeURIComponent(anonId)}`)
+        const body = await res.json()
         if (body?.profile) setPoints(body.profile.total_points ?? 0)
-      })
-      .catch(() => {/* silent */})
+      } catch {
+        /* silent */
+      }
+    }
+
+    refresh()
+    // Listen for points-updated broadcasts (e.g., quiz submit) so the badge stays
+    // live without requiring a route change.
+    window.addEventListener('vibe-points-updated', refresh)
+    return () => window.removeEventListener('vibe-points-updated', refresh)
   }, [pathname])
 
   if (pathname === '/') return null
