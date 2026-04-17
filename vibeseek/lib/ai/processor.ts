@@ -45,6 +45,20 @@ export async function vibefyText(
 
   let lastError: Error | null = null
 
+  function parseVibefyCards(rawText: string): unknown[] {
+    const cleaned = rawText
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim()
+    const parsed = JSON.parse(cleaned)
+    const cards = Array.isArray(parsed) ? parsed : (parsed as { cards?: unknown[] }).cards || []
+    if (!Array.isArray(cards) || cards.length === 0) {
+      throw new Error('AI returned empty cards array')
+    }
+    return cards
+  }
+
   for (const modelName of models) {
     // Retry each model up to 2 times (with delay for rate limits)
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -63,18 +77,7 @@ export async function vibefyText(
         const rawText = response.text
         if (!rawText) throw new Error('Empty response from Gemini')
 
-        // Strip markdown code fences if present
-        const cleaned = rawText
-          .replace(/^```json\s*/i, '')
-          .replace(/^```\s*/i, '')
-          .replace(/\s*```$/i, '')
-          .trim()
-
-        const parsed = JSON.parse(cleaned)
-        const cards = Array.isArray(parsed) ? parsed : parsed.cards || []
-
-        if (cards.length === 0) throw new Error('AI returned empty cards array')
-
+        const cards = parseVibefyCards(rawText)
         console.log(`[Vibefy] ✅ Success: ${modelName} → ${cards.length} cards`)
         return validateAndTransformCards(cards)
 
@@ -96,9 +99,25 @@ export async function vibefyText(
     }
   }
 
+  // All Gemini models exhausted — fall back to Groq (same pattern as storyboard + quiz).
+  try {
+    console.log('[Vibefy] All Gemini exhausted -> fallback Groq')
+    const raw = await groqChat([
+      { role: 'system', content: VIBEFY_SYSTEM_PROMPT },
+      { role: 'user', content: VIBEFY_USER_PROMPT(text, maxCards) },
+    ])
+    console.log(`[Vibefy] Groq raw length=${raw.length} chars, preview: ${raw.slice(0, 120)}`)
+    const cards = parseVibefyCards(raw)
+    console.log(`[Vibefy] ✅ Groq -> ${cards.length} cards`)
+    return validateAndTransformCards(cards)
+  } catch (groqErr) {
+    lastError = groqErr instanceof Error ? groqErr : new Error(String(groqErr))
+    console.error('[Vibefy] ❌ Groq fallback also failed:', lastError.message?.substring(0, 200))
+  }
+
   throw new Error(
-    `All AI models failed. Last error: ${lastError?.message?.substring(0, 200) || 'unknown'}. ` +
-    `Please check your GEMINI_API_KEY quota at https://aistudio.google.com/apikey`
+    `All AI providers failed. Last error: ${lastError?.message?.substring(0, 200) || 'unknown'}. ` +
+    `Please try again in a minute.`
   )
 }
 
