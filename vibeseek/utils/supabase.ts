@@ -5,10 +5,21 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Next.js augments global fetch with its own data cache. Supabase-js calls
+// use that fetch by default, so server-side reads can serve stale rows even
+// when the route is marked `dynamic = 'force-dynamic'`. Override with a fetch
+// that opts out of the Next.js cache for every Supabase request.
+const noStoreFetch: typeof fetch = (input, init) =>
+  fetch(input, { ...init, cache: 'no-store' })
+
 // Server-side client with elevated privileges
 export const supabaseAdmin = createClient(
   supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: { persistSession: false },
+    global: { fetch: noStoreFetch },
+  }
 )
 
 // ===================================
