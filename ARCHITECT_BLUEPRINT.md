@@ -723,10 +723,19 @@ Copy cấu trúc trên, giá trị để trống. Luôn đồng bộ khi thêm e
 - T-305 UI: `ChatPanel.tsx`, `/chat/[documentId]`.
 
 ### Phase 4 — Polish (ongoing)
+
+**Core polish:**
 - T-401 Error boundaries + empty states.
 - T-402 Loading skeletons cho 3D scene.
 - T-403 PWA manifest (tùy chọn).
 - T-404 Dọn log `debug-*.log`.
+
+**Video quality polish (phát hiện sau Phase 1 E2E test 2026-04-17):**
+- **P-401 Subtitle overflow** — hiện tại long narration bị tràn khỏi 1080x1920. Fix ffmpeg `force_style='MaxLineCount=2,FontSize=40'` + SRT generator split lines > 40 chars.
+- **P-402 English terms mispronounced** — edge-tts tiếng Việt đọc từ Anh phonetic sai. Prompt Gemini viết phiên âm Việt cho thuật ngữ (VD "Bubble Sort" → "bấp-bồ soóc") trong storyboard.narration. Hoặc kép giọng: detect English substring → dùng en-US-... voice → concat audio.
+- **P-403 Duration mismatch** — narration thực tế dài gấp đôi `scene.duration_sec`. Nguyên nhân: edge-tts đọc chậm (~1.5 từ/s tiếng Việt). Fix: prompt Gemini giới hạn narration ≤ `duration_sec × 1.5` từ. Hoặc render script probe TTS duration → tăng scene duration khớp.
+- **P-404 Background đơn sắc** — hiện ffmpeg `color=` filter. Upgrade: `testsrc2` gradient động, hoặc overlay pattern, hoặc stock video loop 9:16 (Pexels free).
+- **P-405 Scene transitions** — hiện cut thẳng, không mượt. Thêm ffmpeg `xfade` crossfade 0.3s giữa scenes.
 
 ---
 
@@ -875,6 +884,7 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 
 ## §13. Changelog
 
+- **2026-04-17 (late night)** — **🎉 PHASE 1 VERIFIED END-TO-END.** User upload PDF thật (sorting-algorithms.pdf, 4 pages) → full pipeline chạy: Gemini 2.0-flash quota'd → fell through to 2.5-flash → 10 cards → storyboard → GitHub Actions render → MP4 upload Supabase Storage → UI download. Phát hiện 4 video quality issues — added P-401 đến P-405 vào Phase 4. Hotfix VideoPlayer POLL_MAX_ATTEMPTS 144 → 240 (cold runner + Gemini 429 retries push first render > 12min). Hotfix landing "Start now" button navigate `/dashboard`.
 - **2026-04-17 (end of day)** — Phase 0 complete (T-001 → T-006 all merged). Swap **Cloudflare R2 → Supabase Storage** (user không có thẻ tín dụng, R2 bắt nhập payment method). Update §2.1 diagram, §2.2 data flow, §3 stack table, §3.1 removed list, §7.4 rendering steps, §7.10 secrets list, §8.1/8.2 env, §9 quota table (R-04 updated), §11 T-101/T-102 task specs, §12 R-04/R-09. T-101 marked done (user chạy migration + tạo bucket).
 - **2026-04-17 (evening)** — T-002 merged (PR #1). Phát hiện `api.doc` chứa OpenAI API key live (đã được user rotate + revoke). Thêm T-005 vào Phase 0 để dọn README.md + agent.md stale.
 - **2026-04-17** — Close Q-01 đến Q-05. Repo private → recompute quota GH Actions (2000 min/tháng, ~33 video/ngày). Thêm §7.9 quota guard, §7.11 UI rules (Vibe Points badge + DOJO mascot mouse-follow). Hạ T-001 severity từ CRITICAL → HIGH (private repo). Thêm R-08 (GH quota) + R-09 (r2.dev rate-limit).
