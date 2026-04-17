@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { JetBrains_Mono, Plus_Jakarta_Sans, Syne } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
+import VibePointsBadge from '@/components/VibePointsBadge'
 import './globals.css'
 
 const headingFont = Syne({
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="vi" className="dark">
       <body className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable}`}>
         {children}
+        <VibePointsBadge />
         <Toaster
           position="bottom-center"
           toastOptions={{

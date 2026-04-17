@@ -1,0 +1,78 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { getOrCreateAnonId } from '@/utils/anon-id'
+import LeaderboardTable, { LeaderboardRow } from '@/components/LeaderboardTable'
+import { Loader2 } from 'lucide-react'
+
+export default function LeaderboardPage() {
+  const [rows, setRows] = useState<LeaderboardRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [anonId, setAnonId] = useState<string | null>(null)
+  const [myName, setMyName] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function loadAll() {
+    const id = getOrCreateAnonId()
+    setAnonId(id)
+    const [topRes, meRes] = await Promise.all([
+      fetch('/api/leaderboard?limit=20').then((r) => r.json()),
+      id ? fetch(`/api/leaderboard/profile?anonId=${id}`).then((r) => r.json()) : Promise.resolve(null),
+    ])
+    setRows(topRes.top || [])
+    if (meRes?.profile?.display_name) setMyName(meRes.profile.display_name)
+    setLoading(false)
+  }
+
+  useEffect(() => { loadAll() }, [])
+
+  async function saveName() {
+    if (!anonId || !myName.trim()) return
+    setSaving(true)
+    try {
+      await fetch('/api/leaderboard/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonId, displayName: myName }),
+      })
+      await loadAll()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen max-w-3xl mx-auto px-4 py-16 text-white space-y-8">
+      <header className="space-y-2">
+        <p className="text-white/50 font-mono uppercase text-xs">VibeSeek Leaderboard</p>
+        <h1 className="font-display text-4xl">Top vibe</h1>
+      </header>
+
+      {anonId && (
+        <section className="flex items-center gap-3">
+          <input
+            type="text"
+            value={myName}
+            onChange={(e) => setMyName(e.target.value)}
+            maxLength={40}
+            placeholder={`T\u00ean c\u1ee7a b\u1ea1n`}
+            className="flex-1 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/90 focus:border-indigo-400 outline-none"
+          />
+          <button
+            onClick={saveName}
+            disabled={saving || myName.trim().length < 1}
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold disabled:opacity-40"
+          >
+            {saving ? '\u0110ang l\u01b0u...' : 'L\u01b0u t\u00ean'}
+          </button>
+        </section>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-indigo-400" /></div>
+      ) : (
+        <LeaderboardTable rows={rows} highlightAnonId={anonId} />
+      )}
+    </main>
+  )
+}
