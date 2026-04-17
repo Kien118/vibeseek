@@ -1,10 +1,10 @@
 # T-201 · DB migration — `leaderboard_profiles` + `quiz_attempts`
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH (foundation — blocks T-204)
 **Blueprint ref:** §5.2, §5.3, §5.4, §7.6, §11
-**Branch:** `task/T-201-db-migration-leaderboard-quiz`
-**Assignee:** _(tba)_
+**Branch:** `task/T-201-db-migration-leaderboard-quiz` (merged, deleted)
+**Assignee:** claude-opus-4-6
 **Depends on:** _(none — can run parallel with T-202, T-203)_
 
 ## Context
