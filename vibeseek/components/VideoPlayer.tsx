@@ -17,7 +17,7 @@ type Job = {
 }
 
 const POLL_INTERVAL = 5000
-const POLL_MAX_ATTEMPTS = 144  // 12 min
+const POLL_MAX_ATTEMPTS = 240  // 20 min — first render on cold runner + Gemini 429 retry can exceed 12min
 
 export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }: Props) {
   const [job, setJob] = useState<Job | null>(null)
