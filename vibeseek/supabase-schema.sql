@@ -133,3 +133,60 @@ CREATE POLICY "Public can read videos" ON storage.objects FOR SELECT
 DROP POLICY IF EXISTS "Service can upload videos" ON storage.objects;
 CREATE POLICY "Service can upload videos" ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'vibeseek-videos' AND auth.role() = 'service_role');
+
+-- =============================================================
+-- Phase 2: Leaderboard (guest profiles) + quiz attempts
+-- =============================================================
+
+-- 1. leaderboard_profiles — 1 row per anonymous user
+CREATE TABLE IF NOT EXISTS leaderboard_profiles (
+  anon_id            TEXT PRIMARY KEY,
+  display_name       TEXT NOT NULL DEFAULT 'Vibe Rookie',
+  total_points       INTEGER NOT NULL DEFAULT 0,
+  documents_count    INTEGER NOT NULL DEFAULT 0,
+  quiz_correct_count INTEGER NOT NULL DEFAULT 0,
+  created_at         TIMESTAMPTZ DEFAULT NOW(),
+  updated_at         TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS leaderboard_profiles_points_idx
+  ON leaderboard_profiles(total_points DESC);
+
+ALTER TABLE leaderboard_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "leaderboard_profiles public read" ON leaderboard_profiles;
+CREATE POLICY "leaderboard_profiles public read" ON leaderboard_profiles
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "leaderboard_profiles service write" ON leaderboard_profiles;
+CREATE POLICY "leaderboard_profiles service write" ON leaderboard_profiles
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- 2. quiz_attempts — 1 row per (anon_id, question_id) thanks to UNIQUE
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  anon_id        TEXT NOT NULL REFERENCES leaderboard_profiles(anon_id) ON DELETE CASCADE,
+  question_id    UUID NOT NULL REFERENCES quiz_questions(id) ON DELETE CASCADE,
+  selected_index INTEGER NOT NULL,
+  is_correct     BOOLEAN NOT NULL,
+  points_earned  INTEGER NOT NULL DEFAULT 0,
+  attempted_at   TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(anon_id, question_id)
+);
+
+CREATE INDEX IF NOT EXISTS quiz_attempts_anon_idx
+  ON quiz_attempts(anon_id);
+CREATE INDEX IF NOT EXISTS quiz_attempts_question_idx
+  ON quiz_attempts(question_id);
+
+ALTER TABLE quiz_attempts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "quiz_attempts public read" ON quiz_attempts;
+CREATE POLICY "quiz_attempts public read" ON quiz_attempts
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "quiz_attempts service write" ON quiz_attempts;
+CREATE POLICY "quiz_attempts service write" ON quiz_attempts
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
