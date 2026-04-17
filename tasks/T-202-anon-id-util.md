@@ -1,9 +1,9 @@
 # T-202 · `utils/anon-id.ts` — SSR-safe localStorage anon_id manager
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MED (foundation — blocks T-204 leaderboard flow + T-205/T-206 UI)
 **Blueprint ref:** §2.4, §7.6, §11
-**Branch:** `task/T-202-anon-id-util`
+**Branch:** `task/T-202-anon-id-util` (merged, deleted)
 **Assignee:** claude-opus-4-6
 **Depends on:** _(none — can run parallel with T-201, T-203)_
 
