@@ -108,7 +108,7 @@ function SomeComponent() {
 ## Definition of Done
 - [x] All AC pass (AC-4 skipped — see Decisions log)
 - [x] AGENT_LOG.md entry started + completed
-- [ ] PR opened
+- [x] PR opened (#18)
 - [x] Status = `review`
 
 ## Questions / Blockers
