@@ -1,0 +1,135 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
+import QuizCard, { QuizCardQuestion } from '@/components/QuizCard'
+import { getOrCreateAnonId } from '@/utils/anon-id'
+
+type Phase = 'loading' | 'quizzing' | 'done' | 'error'
+
+export default function QuizPage() {
+  const params = useParams<{ documentId: string }>()
+  const router = useRouter()
+
+  const [phase, setPhase] = useState<Phase>('loading')
+  const [questions, setQuestions] = useState<QuizCardQuestion[]>([])
+  const [currentIdx, setCurrentIdx] = useState(0)
+  const [pointsEarned, setPointsEarned] = useState(0)
+  const [correctCount, setCorrectCount] = useState(0)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Fetch or generate quiz on mount
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const res = await fetch('/api/quiz/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentId: params.documentId }),
+        })
+        const body = await res.json()
+        if (!res.ok) throw new Error(body.error || 'Lỗi load quiz')
+        if (cancelled) return
+        if (!body.questions || body.questions.length === 0) {
+          throw new Error('Tài liệu này chưa có câu hỏi nào.')
+        }
+        setQuestions(body.questions)
+        setPhase('quizzing')
+      } catch (e) {
+        if (cancelled) return
+        setErrorMsg(e instanceof Error ? e.message : String(e))
+        setPhase('error')
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [params.documentId])
+
+  async function handleSubmit(selectedIndex: number) {
+    const anonId = getOrCreateAnonId()
+    if (!anonId) throw new Error('Không tạo được danh tính guest. Bật localStorage.')
+    const current = questions[currentIdx]
+    const res = await fetch('/api/quiz/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        anonId,
+        questionId: current.id,
+        selectedIndex,
+      }),
+    })
+    const body = await res.json()
+    if (!res.ok) throw new Error(body.error || 'Submit failed')
+    if (body.correct && !body.alreadyAttempted) {
+      setPointsEarned((p) => p + body.pointsEarned)
+      setCorrectCount((c) => c + 1)
+    }
+    return {
+      correct: body.correct,
+      correctIndex: body.correctIndex,
+      explanation: body.explanation,
+      pointsEarned: body.pointsEarned,
+      alreadyAttempted: body.alreadyAttempted,
+    }
+  }
+
+  function handleNext() {
+    if (currentIdx + 1 >= questions.length) {
+      setPhase('done')
+      return
+    }
+    setCurrentIdx((i) => i + 1)
+  }
+
+  if (phase === 'loading') {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center text-white/70 gap-3">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-400" />
+        <p>Đang chuẩn bị quiz...</p>
+        <p className="text-xs text-white/40">Lần đầu có thể mất 10-15s (AI đang sinh câu hỏi).</p>
+      </main>
+    )
+  }
+
+  if (phase === 'error') {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center text-white/80 gap-3 px-6">
+        <p className="text-red-400">Lỗi: {errorMsg}</p>
+        <button onClick={() => router.back()} className="underline">Quay lại</button>
+      </main>
+    )
+  }
+
+  if (phase === 'done') {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center text-white gap-6 px-6">
+        <h1 className="font-display text-4xl">Xong rồi! 🎉</h1>
+        <p className="text-white/70">Đúng {correctCount}/{questions.length} câu · +{pointsEarned} vibe points</p>
+        <div className="flex gap-3">
+          <Link href="/leaderboard" className="px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold">
+            Xem leaderboard
+          </Link>
+          <Link href="/dashboard" className="px-5 py-2 rounded-full bg-white/10 font-semibold">
+            Về dashboard
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
+  // phase === 'quizzing'
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-10">
+      <QuizCard
+        question={questions[currentIdx]}
+        questionNumber={currentIdx + 1}
+        totalQuestions={questions.length}
+        onSubmit={handleSubmit}
+        onNext={handleNext}
+      />
+    </main>
+  )
+}

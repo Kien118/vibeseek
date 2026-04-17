@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import UploadZone from '@/components/UploadZone'
 import ProgressBar from '@/components/ProgressBar'
 import GlowButton from '@/components/GlowButton'
@@ -172,6 +173,14 @@ export default function DashboardPage() {
             <div className="dashboard-result-header">
               <h2>Generated Vibe Cards: {cards.length}</h2>
               <p>Total vibe points: +{totalVibePoints}</p>
+              {documentId && documentId !== 'local' && (
+                <Link
+                  href={`/quiz/${documentId}`}
+                  className="inline-block mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+                >
+                  🎯 Làm Quiz
+                </Link>
+              )}
             </div>
             <div className="dashboard-card-grid">
               {cards.map((card, index) => (

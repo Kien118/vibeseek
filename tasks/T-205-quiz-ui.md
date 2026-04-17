@@ -1,6 +1,6 @@
 # T-205 · Quiz UI — `<QuizCard />` + `/quiz/[documentId]`
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** MED
 **Blueprint ref:** §6.5, §7.5, §11
 **Branch:** `task/T-205-quiz-ui`
@@ -319,8 +319,8 @@ Dashboard hiện có VibeCard grid. Thêm **1 button đơn giản** trong `dashb
 **KHÔNG** sửa `VibeCard.tsx` — prop `onQuiz` giữ nguyên, có thể wire sau Phase 4. Giữ thay đổi dashboard minimal.
 
 ## Acceptance criteria
-- [ ] AC-1: 2 files mới (`QuizCard.tsx`, `app/quiz/[documentId]/page.tsx`) + 1 sửa nhỏ `app/dashboard/page.tsx`.
-- [ ] AC-2: `npx tsc --noEmit` + `npm run build` pass.
+- [x] AC-1: 2 files mới (`QuizCard.tsx`, `app/quiz/[documentId]/page.tsx`) + 1 sửa nhỏ `app/dashboard/page.tsx`.
+- [x] AC-2: `npx tsc --noEmit` + `npm run build` pass.
 - [ ] AC-3: E2E manual:
   - Upload PDF → cards → bấm "🎯 Làm Quiz" → navigate `/quiz/<id>`.
   - Thấy loader 10-15s lần đầu → quiz xuất hiện.
@@ -341,7 +341,8 @@ Dashboard hiện có VibeCard grid. Thêm **1 button đơn giản** trong `dashb
 _(none)_
 
 ## Decisions log
-_(agent ghi)_
+- AC-3 E2E: headless agent, no dev server available. User must verify manually post-merge. Quiz button uses gradient style consistent with existing dashboard buttons (from-indigo-500 to-fuchsia-500).
+- `correct_index` + `explanation` are present in client state from `/api/quiz/generate` response but are NOT rendered in the DOM during `stage === 'answering'` — only revealed after submit (§7.6 compliant).
 
 ## Notes for reviewer
 - Quiz page **client component** — cần anon_id từ localStorage. Không server-render.
