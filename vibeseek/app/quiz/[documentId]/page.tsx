@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
@@ -20,16 +20,13 @@ export default function QuizPage() {
   const [correctCount, setCorrectCount] = useState(0)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // Ref guard against React Strict Mode double-fire in dev. Without it, two parallel
-  // POSTs to /api/quiz/generate both pass the "existing quiz?" check and insert
-  // duplicate rows (bug observed: 10 cards -> 20 quiz_questions).
-  const fetchedRef = useRef(false)
-
-  // Fetch or generate quiz on mount
+  // Fetch or generate quiz on mount.
+  // React Strict Mode in dev remounts components; each remount gets its own
+  // `ignore` flag. Duplicate inserts are prevented at the DB layer by the
+  // UNIQUE(card_id) constraint on quiz_questions plus the "return existing"
+  // path in /api/quiz/generate — so letting both requests run is safe.
   useEffect(() => {
-    if (fetchedRef.current) return
-    fetchedRef.current = true
-    let cancelled = false
+    let ignore = false
     async function load() {
       try {
         const res = await fetch('/api/quiz/generate', {
@@ -38,21 +35,21 @@ export default function QuizPage() {
           body: JSON.stringify({ documentId: params.documentId }),
         })
         const body = await res.json()
+        if (ignore) return
         if (!res.ok) throw new Error(body.error || 'Lỗi load quiz')
-        if (cancelled) return
         if (!body.questions || body.questions.length === 0) {
           throw new Error('Tài liệu này chưa có câu hỏi nào.')
         }
         setQuestions(body.questions)
         setPhase('quizzing')
       } catch (e) {
-        if (cancelled) return
+        if (ignore) return
         setErrorMsg(e instanceof Error ? e.message : String(e))
         setPhase('error')
       }
     }
     load()
-    return () => { cancelled = true }
+    return () => { ignore = true }
   }, [params.documentId])
 
   async function handleSubmit(selectedIndex: number) {
