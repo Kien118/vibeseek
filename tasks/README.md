@@ -126,7 +126,7 @@ T-107 (callback+polling) ┴──► T-108 (VideoPlayer)    │
 - Batch B (once Batch A done): **T-105** (needs T-102), **T-106** (needs T-103), **T-108** (needs T-107)
 - Batch C (last): **T-104** (needs T-105)
 
-Phase 2 — **Quiz + Leaderboard** — 🚧 in progress (Batch A + B done, Batch C next)
+Phase 2 — **Quiz + Leaderboard** — ✅ ALL DONE (6/6 tasks, Batch A + B + C complete)
 
 Dependency graph:
 ```
@@ -139,13 +139,13 @@ T-203 (quiz gen lib) ─────┘                       └──► T-206
 - [T-202 anon-id util (SSR-safe localStorage)](./T-202-anon-id-util.md) — ✅ done (PR #18, merge `98436dd`)
 - [T-203 Quiz generation lib (batch Gemini→Groq)](./T-203-quiz-generation-lib.md) — ✅ done (PR #19, merge `d733fbe`)
 - [T-204 Quiz + Leaderboard API routes (lazy generate + submit + top-N)](./T-204-quiz-leaderboard-api.md) — ✅ done (PR #20, merge `1d019b5`)
-- [T-205 Quiz UI (QuizCard + /quiz/[documentId])](./T-205-quiz-ui.md) — MED
-- [T-206 Leaderboard UI + VibePointsBadge in layout](./T-206-leaderboard-ui-badge.md) — MED
+- [T-205 Quiz UI (QuizCard + /quiz/[documentId])](./T-205-quiz-ui.md) — ✅ done (PR #22, merge `49f7f9c`)
+- [T-206 Leaderboard UI + VibePointsBadge in layout](./T-206-leaderboard-ui-badge.md) — ✅ done (PR #21, merge `7e3afd8`)
 
 **Parallel batches:**
 - Batch A (foundation, fully parallel): **T-201, T-202, T-203** — ✅ complete
 - Batch B (once Batch A done): **T-204** (needs all of A) — ✅ complete
-- Batch C (parallel, once Batch B done): **T-205, T-206** — 🚧 next
+- Batch C (parallel, once Batch B done): **T-205, T-206** — ✅ complete
 
 **Lessons learned from Batch A (relevant for Batch B/C executors):**
 - **Stale-base conflict:** nếu bạn branch trước khi Batch trước merge, rebase onto latest `main` trước khi push. AGENT_LOG conflict là bình thường — giữ cả 2 bên close entries + agent entries.

@@ -1,10 +1,10 @@
 # T-206 · Leaderboard UI + `<VibePointsBadge />` in layout
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MED
 **Blueprint ref:** §6.6, §7.6, §7.11 (UI rules), §11
-**Branch:** `task/T-206-leaderboard-ui-badge`
-**Assignee:** _(tba)_
+**Branch:** `task/T-206-leaderboard-ui-badge` (merged, deleted)
+**Assignee:** claude-opus-4-6
 **Depends on:** T-202 (anon-id), T-204 (leaderboard API)
 
 ## Context
