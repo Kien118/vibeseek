@@ -1,182 +1,136 @@
 # Session Handoff — For New Claude Session
 
-> This file is paste-ready context for a new Claude chat session to pick up as Architect for VibeSeek.
+> Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
+> **Last refresh:** end of Phase 2 E2E, 2026-04-17. Commit tip: `f49013e`.
 
 ---
 
-## Step 1 — Paste THIS prompt first in new session
+## Step 0 — Bootstrap prompt (paste this FIRST)
 
 ```
-Bạn là Software Architect cho dự án VibeSeek (đồ án học tập — biến PDF thành Vibe Cards + video 9:16 cho sinh viên Gen Z Việt Nam). Tôi đã làm việc với Architect ở phiên trước, bây giờ tiếp tục.
+Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
+Vibe Cards + video 9:16 + quiz + leaderboard cho sinh viên Gen Z Việt Nam.
+Tôi đã hoàn tất Phase 0, Phase 1, Phase 2 với bạn ở phiên trước. Phiên này
+ta tiếp tục sang Phase 3 (Chatbot RAG).
 
-Working directory: D:\WangNhat\Study\VibeCode
-Remote: https://github.com/Kien118/vibeseek (private)
-Git user: twangnhat-05 (collaborator trên Kien118/vibeseek)
-User email: dev2@wolffungame.com
+Working dir: D:\WangNhat\Study\VibeCode
+Repo: https://github.com/Kien118/vibeseek (private)
+Git user: twangnhat-05 · email: dev2@wolffungame.com
 
 TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ, đọc theo thứ tự:
-1. ARCHITECT_BLUEPRINT.md (root) — kiến trúc tổng thể, 13 sections. §3 tech stack locked, §10 roadmap, §11 task specs, §13 changelog.
-2. tasks/README.md — workflow agent execution (blueprint + task file + PR + AGENT_LOG).
-3. AGENT_LOG.md — nhật ký đầy đủ Phase 0 + Phase 1. Đọc toàn bộ để nắm: ai đã làm gì, pattern agent nào, lessons learned.
-4. SESSION_HANDOFF.md (file này) — snapshot trạng thái + quyết định ngắn hạn.
 
-ROLE CỦA BẠN:
-- Architect = strategy, spec writer, PR reviewer, SSOT maintainer.
-- Agents khác (Cursor, Copilot, Antigravity, Claude Code sessions) = executor.
-- Khi user báo "review PR cho T-XXX" → fetch PR diff, verify AC độc lập, đưa verdict.
-- Khi user báo "merged T-XXX" → close task (status=done), append AGENT_LOG, delete branch local + remote.
-- Khi user bị stuck → debug step-by-step, đưa options cụ thể.
+1. SESSION_HANDOFF.md (file này) — TL;DR + "new ways of working" đề xuất cho
+   phase 3 (rút ra từ 8 hotfix Phase 2).
+2. ARCHITECT_BLUEPRINT.md §1/§2/§3 — vision, architecture, tech stack locked.
+   §10 roadmap tổng, §13 changelog mới nhất.
+3. AGENT_LOG.md 20 dòng cuối — bắt kịp lịch sử gần nhất (Phase 2 E2E + 8 hotfixes).
+4. memory/feedback_vibeseek_phase2_lessons.md — checklist failure modes để
+   preempt trong spec + review Phase 3. **BẮT BUỘC ÁP DỤNG.**
+5. memory/project_vibeseek_state_2026_04_17.md — snapshot DB + API + UI hiện tại.
 
-QUY TẮC SSOT:
-- Blueprint là nguồn duy nhất cho kiến trúc. Thay đổi kiến trúc → sửa blueprint TRƯỚC.
-- Task file = hợp đồng agent. Không viết code cho agent, chỉ spec.
-- AGENT_LOG append-only, không chỉnh sửa lịch sử.
-- Secret KHÔNG đi qua chat.
-
-WORKFLOW ĐÃ CHỨNG MINH HOẠT ĐỘNG:
-- Git as queue: mỗi task = 1 branch `task/T-XXX-<slug>` → PR → review → merge → delete branch.
-- Architect commit thẳng vào main cho meta files (blueprint, task specs, close commits).
-- User merge PR, báo "merged T-XXX", Architect close + cleanup.
-- Khi agent vi phạm DoD (quên push/PR/log) → Architect có thể "form-fix" commit vào branch của họ hoặc push+PR thay.
-
-Tôi muốn tiếp tục Phase 2 (Quiz + Leaderboard). Đọc các file trên xong, xác nhận bạn đã nắm context, rồi đưa ra plan cho task đầu tiên của Phase 2.
+Sau đó: xác nhận với tôi `sẵn sàng cho Phase 3` + đề xuất QUY TRÌNH PHASE 3
+MỚI dựa trên bài học Phase 2. Không viết spec vội — chờ tôi duyệt quy trình.
 ```
 
 ---
 
-## Step 2 — Project Snapshot (2026-04-17)
+## Step 1 — What shipped through Phase 2
 
-### Phase progress
+| Phase | Tasks | Status |
+|---|---|---|
+| 0 Hygiene | T-001…T-006 | ✅ done |
+| 1 Video renderer | T-101…T-108 | ✅ done + E2E verified |
+| 2 Quiz + Leaderboard | T-201…T-206 | ✅ done + E2E verified after 8 hotfixes |
+| 3 Chatbot RAG | T-301…T-305 | 📝 specs NOT written yet |
+| 4 Polish | T-401…T-404 + P-401…P-405 | 📝 video quality issues queued |
 
-| Phase | Status |
+Commit tips worth knowing:
+- `f49013e` — Phase 2 E2E verified marker
+- `10bb068` — "Phase 2 COMPLETE" (post-merge, before E2E fixes)
+- `92d91d` → `35e6eb4` — 8 hotfix commits during E2E (see §13 changelog)
+
+---
+
+## Step 2 — What went wrong in Phase 2 (don't repeat)
+
+**Eight hotfixes in one E2E session** came from specs and reviews that missed foreseeable failure modes. User feedback verbatim: *"phiên này bạn làm chưa tốt lắm, có nhiều chỗ phải sửa đi sửa lại"*.
+
+Read `memory/feedback_vibeseek_phase2_lessons.md` end-to-end. The short list:
+
+1. `maxOutputTokens: 4096` is too small for Vietnamese batch JSON → always 16384
+2. Retry loops must treat `SyntaxError`, 503, 500, shape-validation errors as retriable — not just 429
+3. Every Gemini call site needs a Groq fallback. Audit all three in Phase 3
+4. Next.js 14 monkey-patches `fetch` with data cache. supabase-js reads go stale unless you inject `cache: 'no-store'` into `createClient`'s `global.fetch`
+5. React Strict Mode dev remounts components. Use canonical `let ignore = false` per effect, not `useRef` guards. Prevent duplicate INSERTs at the DB layer with UNIQUE constraints, not in the frontend
+6. List components reusing instances across items need `key={item.id}` on the list entry
+7. Any in-page data mutation that affects a global badge/indicator needs a CustomEvent broadcast — don't rely on route change to refresh
+
+---
+
+## Step 3 — Proposed workflow change for Phase 3 (architect to propose to user in first message)
+
+User asked at end of Phase 2: *"ở phiên sau bạn sẽ cho tôi một quy trình tốt nhất khi bạn đóng vai trò là kiến trúc sư"*. Here is the improved pipeline to pitch:
+
+### The seven-step Phase 3 pipeline
+
+1. **Spec draft with failure-mode budget.** Each task spec (`tasks/T-XXX-*.md`) must include a dedicated **"Failure modes"** section listing every realistic way the feature can fail: quota, timeout, race condition, Strict Mode, stale cache, empty input, invalid JSON, auth edge case. The spec must describe the defensive code the agent must write for each.
+2. **User-runnable test plan embedded in spec.** Each spec ends with 3–5 explicit commands (curl, SQL, browser steps) the user can run in ~10 minutes to sanity-check the feature before review. No hand-wave "AC-X deferred to E2E".
+3. **Architect pre-flight before dispatch.** Architect drafts all specs for a batch, user reviews + approves the batch spec plan **before** any agent is dispatched. Catches spec gaps early (cheap) instead of after PR (expensive).
+4. **Agent prompt with scope fence.** Prompt includes explicit "Files to touch" list (already done in Phase 2 after round-1 scope explosion) + "Files NOT to touch" for parallel batches.
+5. **Architect local-runs the feature during review.** Not just `tsc + build + read diff`. Actually start the dev server, hit the endpoint with curl, verify the row in DB, click the UI button once. This is what Phase 2 reviews skipped and is why 8 hotfixes happened post-merge instead of pre-merge.
+6. **Three-strikes circuit breaker.** If the same feature needs a third hotfix in one E2E session, **stop**. Collect all known bugs into a single consolidated fix task, write a proper spec for it, dispatch to agent. No architect firefighting in-place with protocol exceptions. (Phase 2 burned 8 exceptions → became noise in history.)
+7. **E2E verification as a formal step per batch.** Before marking a phase "complete", run an explicit E2E checklist. If any check fails, that's a task, not a hotfix.
+
+### New protocol triggers for user
+
+| Trigger | Architect action |
 |---|---|
-| Phase 0 Hygiene | ✅ 6/6 tasks done (T-001..T-006) |
-| Phase 1 Video Renderer | ✅ 8/8 tasks done (T-101..T-108), **E2E VERIFIED** |
-| Phase 2 Quiz + Leaderboard | 📝 Tasks not yet specified (T-201..T-205) |
-| Phase 3 Chatbot RAG | 📝 Tasks not yet specified (T-301..T-305) |
-| Phase 4 Polish | 📝 T-401..T-404 + P-401..P-405 (video quality) |
+| `review PR cho T-XXX` | Fetch PR, read diff, **start dev server + exercise the feature**, verify AC + failure-modes-section → verdict |
+| `merged T-XXX` | Close task, delete branch local + remote, append AGENT_LOG, push |
+| `stuck ở bước N` | Debug step-by-step, explicit options |
+| `E2E fail: <feature>` (NEW) | If <3 bugs so far this E2E: architect hotfix directly with user's explicit approval. If ≥3: stop, create consolidated fix task, dispatch |
 
-### Phase 1 E2E verification (2026-04-17 late night)
+### Cost model the user should know
 
-User uploaded sorting-algorithms.pdf → full pipeline ran:
-- Gemini 2.0-flash → 2.0-flash-lite → 2.5-flash (fallback chain worked, quota pressure)
-- 10 cards generated + saved to Supabase
-- Storyboard (6 scenes, 45s spec) generated by gemini-2.5-flash
-- GitHub Actions `render-video.yml` triggered via repository_dispatch
-- Workflow: ubuntu + Node 20 + ffmpeg + edge-tts (vi-VN-HoaiMyNeural)
-- MP4 1080x1920 uploaded to Supabase Storage bucket `vibeseek-videos`
-- Callback via ngrok → DB status=ready
-- VideoPlayer rendered `<video>` + download button
-
-Sample working video (public URL from real test):
-`https://chfqfggcukmaqfcsashi.supabase.co/storage/v1/object/public/vibeseek-videos/0e635e9f-88aa-468b-bf0c-ef8985bb9422.mp4`
-
-### Video quality review (user feedback)
-
-1. Subtitle tràn khỏi màn hình (no wrap) — fixed trong P-401
-2. English terms phát âm sai (edge-tts VI đọc Bubble Sort = "bâp-bồ") — P-402
-3. Actual duration 1:30 (spec 45s) — narration đọc chậm hơn — P-403
-4. Background màu đơn sắc — P-404
-5. Scene transitions cắt thẳng — P-405
-
-Các issues này **không block tính năng mới**. Phase 2/3 build song song được.
-
-### Tech stack (locked per §3)
-
-- Next.js 14 App Router + TypeScript
-- Tailwind 3 + Framer Motion + GSAP + three + @react-three/fiber
-- Supabase (Postgres + pgvector + Storage — 1GB free, bucket `vibeseek-videos`)
-- Gemini 2.0 Flash + Groq (llama-3.3-70b) fallback
-- Gemini text-embedding-004 cho RAG
-- GitHub Actions (private 2000 min/month) renderer
-- Vercel free hosting (chưa deploy — đang dùng ngrok + `npm run dev`)
-
-### User environment notes
-
-- Windows 11 + PowerShell (không Bash)
-- ngrok tunnel cho dev callback (ngrok http 3000). URL đổi mỗi restart → phải update `APP_CALLBACK_URL` secret.
-- Terminal 1: `npm run dev` trong vibeseek/. Terminal 2: `ngrok http 3000`.
-- 7 GitHub Actions secrets đã set (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_STORAGE_BUCKET=vibeseek-videos, GEMINI_API_KEY, GROQ_API_KEY, RENDER_CALLBACK_SECRET, APP_CALLBACK_URL).
-- `.env.local` có: 7 keys trên + NEXT_PUBLIC_*, GITHUB_REPO_OWNER=Kien118, GITHUB_REPO_NAME=vibeseek, GITHUB_DISPATCH_TOKEN=ghp_... (classic PAT, `repo` + `workflow` scopes).
-
-### Branch/PR state
-
-- `main` branch fully up-to-date. No open PRs.
-- All Phase 1 task branches deleted (local + remote).
-- Latest commit: architect hotfix VideoPlayer POLL_MAX_ATTEMPTS → 240.
+- Each agent round-trip ≈ 10–30 min
+- Each hotfix ≈ 5–10 min architect time + ≈ 1 min user time (restart dev server)
+- Each wasted Gemini request during E2E debugging ≈ 1/1500 of daily quota
+- The three-strikes rule exists because beyond three patches it is cheaper to rethink than to keep patching
 
 ---
 
-## Step 3 — Lessons Learned From Agents (for prompt tuning)
+## Step 4 — Environment notes (still true as of 2026-04-17)
 
-Đã làm việc với 2 agent types trong Phase 0/1:
-
-### `claude-opus-4-6` executor
-- **Strength:** Code quality cao, thoughtful decisions (vd T-105 BOM + relative path fix, T-106 helpers dedup).
-- **Weakness:** Đôi khi quên AGENT_LOG entries (T-006, T-108 tsbuildinfo lẫn).
-- **Prompt tuning:** Nhấn mạnh "BẮT BUỘC Append AGENT_LOG.md khi start + done + blocked" + "CHỈ sửa file trong Files to touch".
-
-### `Antigravity` executor
-- **Strength:** Thực thi nhanh, biết dùng gh CLI, test thực tế.
-- **Weakness:** Hay quên workflow steps (push branch, open PR). Đôi khi commit lên sai branch (T-004 làm trên branch T-003). PR description bị corrupt (escape character issues).
-- **Prompt tuning:** Nhấn mạnh "git push -u origin <branch> + gh pr create" là bắt buộc, kèm cụ thể gh command template.
-
-### Common agent pitfalls — liệt kê trong prompt để họ tránh
-- Quên push branch / quên open PR
-- Quên append AGENT_LOG
-- Quên set Status = review trong task file
-- Commit lên nhầm branch (song song 2 task)
-- Fake-tick AC mà không test
-- Commit tsconfig.tsbuildinfo hoặc files khác ngoài scope
+- Windows 11, bash shell (forward slashes OK). PowerShell doesn't support `&&` — use `;` or separate commands. `curl` is aliased to `Invoke-WebRequest`, use `curl.exe`.
+- `.env.local` in `vibeseek/` has all 11 required env vars (Supabase URL+keys, Gemini, Groq, GitHub dispatch token, Supabase storage bucket, render callback secret)
+- ngrok required only when testing video render callback locally (not for Phase 3 chat)
+- GitHub Actions secrets: 7 configured per blueprint §8.2
+- Dev server: `cd vibeseek && npm run dev`, hot-reload works for API routes + client components. After major dep changes or weird errors, wipe `.next`: `Remove-Item -Recurse -Force .next` (PowerShell) before restarting.
+- User role on repo: `write` (collaborator), not admin. Cannot flip `delete_branch_on_merge` setting. Architect deletes branches manually via `git push origin --delete` in close workflow.
 
 ---
 
-## Step 4 — Recommended first action in new session
+## Step 5 — Memory files architect should load (via memory system, not by reading the file in repo)
 
-Sau khi architect đọc xong 3 files (blueprint, tasks/README.md, AGENT_LOG.md), họ nên:
+All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 
-1. Xác nhận với user: "Đã nắm context. Phase 1 verified, phase 2 sẵn sàng."
-2. Review roadmap §10 Phase 2 (T-201..T-205):
-   - T-201: migration `leaderboard_profiles` + `quiz_attempts` tables
-   - T-202: `utils/anon-id.ts` (localStorage anon_id)
-   - T-203: `lib/ai/quiz.ts` + async trigger trong `/api/vibefy`
-   - T-204: `/api/quiz/submit` + `/api/leaderboard`
-   - T-205: UI (QuizCard, `/quiz/[documentId]`, LeaderboardTable, `/leaderboard`)
-3. Viết 5 task specs chi tiết trong `tasks/T-201-*.md` → `tasks/T-205-*.md` (như Phase 1 pattern).
-4. Commit task specs lên main.
-5. Cung cấp user prompt ready-to-paste cho agent T-201.
-
-### Dependency graph Phase 2
-
-```
-T-201 (DB migration) ──┬──► T-203 (quiz gen uses DB)
-                       ├──► T-204 (API uses DB)
-                       └──► T-205 (UI uses API + DB)
-T-202 (anon_id util) ──┴──► T-204 (anon_id for leaderboard)
-```
-
-Batch A có thể parallel: **T-201 + T-202** (independent).
-Batch B: **T-203 + T-204** sau Batch A.
-Batch C: **T-205** cuối cùng.
+- `user_wangnhat.md` — user profile
+- `feedback_vibeseek_architect_role.md` — three fixed triggers + hard rules
+- `feedback_write_exact_commands.md` — always write literal commands inline
+- `feedback_vibeseek_phase2_lessons.md` — **NEW** — eight Phase 2 hotfix lessons
+- `project_vibeseek_state_2026_04_17.md` — **NEW** — snapshot of live DB + APIs + UI
+- `reference_vibeseek_paths.md` — SSOT file paths + gh CLI commands
 
 ---
 
-## Step 5 — Files paste-ready for new session
+## Step 6 — First actions in new session (ordered)
 
-New Claude session sẽ đọc:
+1. Read this file (you did).
+2. Read the 4 memory files above (via auto-memory, they'll be loaded).
+3. Read `ARCHITECT_BLUEPRINT.md` §1, §2, §3, §13 (sections 10–12 as needed for Phase 3 spec work).
+4. Read last 20 lines of `AGENT_LOG.md`.
+5. `git log --oneline -15 main` to confirm latest state.
+6. Respond to user with: "Đã nắm context Phase 0/1/2. Đề xuất quy trình Phase 3 mới (7 bước + 4 triggers). Duyệt để tôi bắt đầu viết spec T-301 → T-305?"
+7. On user approval, draft Phase 3 specs WITH failure-modes + test-plan sections per the pipeline.
 
-1. `D:\WangNhat\Study\VibeCode\ARCHITECT_BLUEPRINT.md` (~900 dòng, full context)
-2. `D:\WangNhat\Study\VibeCode\tasks\README.md` (workflow + prompt template)
-3. `D:\WangNhat\Study\VibeCode\AGENT_LOG.md` (toàn bộ lịch sử agent)
-4. `D:\WangNhat\Study\VibeCode\SESSION_HANDOFF.md` (file này)
-
-Không cần đọc từng task file phase trước nếu chỉ làm Phase 2 — có thể đọc khi cần tham khảo pattern.
-
----
-
-## Step 6 — If user has quick question before Phase 2
-
-Short answers to likely quick questions:
-- "Phase 1 còn gì sót?" → Video quality polish (P-401..P-405), không phải core chức năng. Skip cho sau.
-- "E2E test có cần chạy lại không?" → Không trừ khi có breaking change. Mỗi lần chạy tốn Gemini quota.
-- "Có cần deploy Vercel không?" → Không bắt buộc Phase 2 (callback không liên quan Phase 2 features). Sẽ deploy khi làm chatbot streaming hoặc cần demo public.
+Do **NOT** skip step 6 — the user explicitly asked for a workflow proposal before jumping into spec work.
