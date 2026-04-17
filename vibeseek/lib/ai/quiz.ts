@@ -27,6 +27,21 @@ function isQuotaError(err: unknown): boolean {
   )
 }
 
+// JSON.parse on a truncated response throws SyntaxError "Unterminated string" or similar.
+// Empty-response and validation-shape errors are also retriable — the next model may return
+// a complete well-formed payload even if this one was malformed.
+function isRetriableModelError(err: unknown): boolean {
+  if (isQuotaError(err)) return true
+  if (err instanceof SyntaxError) return true
+  const message = err instanceof Error ? err.message : String(err)
+  return (
+    message.includes('Empty response') ||
+    message.includes('must have exactly 4 options') ||
+    message.includes('correct_index out of range') ||
+    message.includes('returned empty array')
+  )
+}
+
 function parseQuizResponse(rawText: string, expectedCount: number): QuizDraft[] {
   const cleaned = rawText
     .replace(/^```json\s*/i, '')
@@ -78,7 +93,7 @@ export async function generateQuizzesForCards(
       const response = await genAI.models.generateContent({
         model: modelName,
         contents: fullPrompt,
-        config: { temperature: 0.5, maxOutputTokens: 4096 },
+        config: { temperature: 0.5, maxOutputTokens: 8192 },
       })
       const rawText = response.text
       if (!rawText) throw new Error('Empty response while generating quiz')
@@ -87,8 +102,9 @@ export async function generateQuizzesForCards(
       console.log(`[Quiz] ${modelName} -> ${drafts.length} quizzes`)
       return drafts
     } catch (err) {
-      if (!isQuotaError(err)) throw err
-      console.warn(`[Quiz] ${modelName} quota exceeded, trying next...`)
+      if (!isRetriableModelError(err)) throw err
+      const reason = err instanceof Error ? err.message.slice(0, 120) : String(err)
+      console.warn(`[Quiz] ${modelName} failed (retriable): ${reason}. Trying next...`)
     }
   }
 
@@ -98,7 +114,7 @@ export async function generateQuizzesForCards(
       { role: 'system', content: QUIZ_BATCH_SYSTEM_PROMPT },
       { role: 'user', content: QUIZ_BATCH_USER_PROMPT(cards) },
     ],
-    { responseFormat: 'json_object' }
+    { responseFormat: 'json_object' },
   )
   return parseQuizResponse(raw, cards.length)
 }
