@@ -104,6 +104,7 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 ## 2026-04-18
 
 - **—:—** [T-301] claude-opus-4-6 executor started. Enable pgvector + card_embeddings + raw_text column + quiz UNIQUE sync on branch `task/T-301-pgvector-card-embeddings-migration`.
+- **—:—** [T-301] claude-opus-4-6 executor completed. Appended DDL (vector ext + card_embeddings + HNSW + RLS + raw_text + UNIQUE sync) to schema.sql. Added `raw_text: extractedText` to /api/vibefy INSERT. tsc clean. Status → review.
 
 ## 2026-04-18 — Phase 3 specs drafted + blueprint updated
 

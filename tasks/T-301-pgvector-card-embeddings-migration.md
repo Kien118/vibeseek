@@ -1,6 +1,6 @@
 # T-301 · Migration — enable `pgvector` + create `card_embeddings`
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** HIGH (foundation cho Phase 3)
 **Blueprint ref:** §2.5 RAG flow, §5.2 schema, §12 Q-06/Q-07
 **Branch:** `task/T-301-pgvector-card-embeddings-migration`
