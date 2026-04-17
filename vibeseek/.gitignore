@@ -1,6 +1,12 @@
 node_modules/
 .next/
 
+# TypeScript incremental build cache — never commit
+tsconfig.tsbuildinfo
+
+# Agent smoke tests / throwaway scripts
+scripts/smoke-*.ts
+
 # Local env (never commit real secrets)
 .env*.local
 !.env.local.example
