@@ -1,10 +1,10 @@
 # T-203 · `lib/ai/quiz.ts` — batch quiz generation (Gemini → Groq)
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** HIGH
 **Blueprint ref:** §7.3 (fallback chain), §7.5 (quiz rules), §11
 **Branch:** `task/T-203-quiz-generation-lib`
-**Assignee:** _(tba)_
+**Assignee:** claude-opus-4-6
 **Depends on:** _(none — can run parallel with T-201, T-202)_
 
 ## Context
@@ -166,11 +166,11 @@ export async function generateQuizzesForCards(
 ```
 
 ## Acceptance criteria
-- [ ] AC-1: `vibeseek/lib/ai/prompts.ts` giữ nguyên prompts cũ + append 2 const mới (`QUIZ_BATCH_SYSTEM_PROMPT`, `QUIZ_BATCH_USER_PROMPT`).
-- [ ] AC-2: `vibeseek/lib/ai/quiz.ts` exports `generateQuizzesForCards` + interface `QuizDraft`.
-- [ ] AC-3: `npx tsc --noEmit` pass.
-- [ ] AC-4: `npm run build` pass.
-- [ ] AC-5: Smoke test — agent tạo script dùng thử:
+- [x] AC-1: `vibeseek/lib/ai/prompts.ts` giữ nguyên prompts cũ + append 2 const mới (`QUIZ_BATCH_SYSTEM_PROMPT`, `QUIZ_BATCH_USER_PROMPT`).
+- [x] AC-2: `vibeseek/lib/ai/quiz.ts` exports `generateQuizzesForCards` + interface `QuizDraft`.
+- [x] AC-3: `npx tsc --noEmit` pass.
+- [x] AC-4: `npm run build` pass.
+- [x] AC-5: Smoke test — agent tạo script dùng thử:
   ```ts
   // vibeseek/scripts/smoke-quiz.ts (temporary, not committed)
   import { generateQuizzesForCards } from '@/lib/ai/quiz'
@@ -181,20 +181,22 @@ export async function generateQuizzesForCards(
   generateQuizzesForCards(cards).then(console.log)
   ```
   Chạy với `npx tsx vibeseek/scripts/smoke-quiz.ts` (cần env GEMINI_API_KEY). Verify: output là array 2 object, mỗi object đúng shape `QuizDraft`, correct_index 0-3, options.length===4. **XOÁ file smoke sau khi verify — KHÔNG commit.** Nếu hết quota Gemini → agent log lại errors để reviewer tự chạy.
-- [ ] AC-6: Khi `cards = []` → hàm return `[]` ngay (không call AI).
-- [ ] AC-7: Khi AI return options ≠ 4 hoặc correct_index ngoài 0-3 → throw validation error (kiểm tra `parseQuizResponse`).
+- [x] AC-6: Khi `cards = []` → hàm return `[]` ngay (không call AI).
+- [x] AC-7: Khi AI return options ≠ 4 hoặc correct_index ngoài 0-3 → throw validation error (kiểm tra `parseQuizResponse`).
 
 ## Definition of Done
-- [ ] All AC pass (AC-5 có thể partial nếu hết quota Gemini — ghi Decisions log)
-- [ ] AGENT_LOG.md entry started + completed
-- [ ] PR opened
-- [ ] Status = `review`
+- [x] All AC pass (AC-5 có thể partial nếu hết quota Gemini — ghi Decisions log)
+- [x] AGENT_LOG.md entry started + completed
+- [x] PR opened
+- [x] Status = `review`
 
 ## Questions / Blockers
 _(none)_
 
 ## Decisions log
-_(agent ghi)_
+- [2026-04-17] Smoke: gemini-2.0-flash + 2.0-flash-lite quota exceeded, gemini-2.5-flash succeeded (2 quizzes, correct shape). Fallback chain works.
+- [2026-04-17] Used relative import in smoke script for tsx compat. Smoke file deleted before commit.
+- [2026-04-17] Console log emojis removed from quiz.ts to avoid encoding issues.
 
 ## Notes for reviewer
 - Pattern follow processor.ts `generateVideoStoryboard` chính xác — Gemini 3-model chain → Groq fallback.
