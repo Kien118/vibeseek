@@ -163,7 +163,7 @@ T-301 (pgvector + card_embeddings DDL) ──► T-302 (embeddings.ts + /api/emb
                                                         └──► T-304 (/api/chat SSE) ──► T-305 (ChatPanel + page)
 ```
 
-- [T-301 Migration pgvector + card_embeddings + sync quiz UNIQUE](./T-301-pgvector-card-embeddings-migration.md) — 📝 todo
+- [T-301 Migration pgvector + card_embeddings + sync quiz UNIQUE](./T-301-pgvector-card-embeddings-migration.md) — ✅ done (PR #23, merge `d630f8e`)
 - [T-302 `lib/ai/embeddings.ts` + `POST /api/embeddings/ensure`](./T-302-embeddings-lib-and-ensure-endpoint.md) — 📝 todo
 - [T-303 `lib/ai/chat.ts` RAG retrieval + streaming wrapper + RPC](./T-303-chat-lib-rag-streaming.md) — 📝 todo
 - [T-304 `POST /api/chat` SSE route](./T-304-chat-sse-api-route.md) — 📝 todo
