@@ -1,9 +1,9 @@
 # T-203 · `lib/ai/quiz.ts` — batch quiz generation (Gemini → Groq)
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH
 **Blueprint ref:** §7.3 (fallback chain), §7.5 (quiz rules), §11
-**Branch:** `task/T-203-quiz-generation-lib`
+**Branch:** `task/T-203-quiz-generation-lib` (merged, deleted)
 **Assignee:** claude-opus-4-6
 **Depends on:** _(none — can run parallel with T-201, T-202)_
 
