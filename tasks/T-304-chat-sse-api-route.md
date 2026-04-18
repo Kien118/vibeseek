@@ -1,6 +1,6 @@
 # T-304 · `POST /api/chat` — Server-Sent Events streaming route
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH
 **Blueprint ref:** §2.5 chat flow, §6.7 API contract, §12 Q-08/Q-09
 **Branch:** `task/T-304-chat-sse-api-route`
