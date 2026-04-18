@@ -1,6 +1,6 @@
 # T-305 · `ChatPanel.tsx` + `/chat/[documentId]` page + dashboard link
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** HIGH (Phase 3 UX)
 **Blueprint ref:** §2.5 chat flow, §6.6b/§6.7 APIs, §12 Q-09
 **Branch:** `task/T-305-chat-panel-and-page`
