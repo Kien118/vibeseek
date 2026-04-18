@@ -1,6 +1,6 @@
 # T-303 · `lib/ai/chat.ts` — RAG retrieval + streaming (Gemini → Groq)
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH (core Phase 3)
 **Blueprint ref:** §2.5 RAG flow, §6.7 chat API, §7.3 fallback chain, §12 Q-07
 **Branch:** `task/T-303-chat-lib-rag-streaming`
