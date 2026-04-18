@@ -164,7 +164,7 @@ T-301 (pgvector + card_embeddings DDL) ──► T-302 (embeddings.ts + /api/emb
 ```
 
 - [T-301 Migration pgvector + card_embeddings + sync quiz UNIQUE](./T-301-pgvector-card-embeddings-migration.md) — ✅ done (PR #23, merge `d630f8e`)
-- [T-302 `lib/ai/embeddings.ts` + `POST /api/embeddings/ensure`](./T-302-embeddings-lib-and-ensure-endpoint.md) — 📝 todo
+- [T-302 `lib/ai/embeddings.ts` + `POST /api/embeddings/ensure`](./T-302-embeddings-lib-and-ensure-endpoint.md) — ✅ done (PR #24, merge `a9cc2d5`). Decision D-1: model `gemini-embedding-001` + `outputDimensionality: 768` (text-embedding-004 404 via @google/genai@1.50.0 SDK).
 - [T-303 `lib/ai/chat.ts` RAG retrieval + streaming wrapper + RPC](./T-303-chat-lib-rag-streaming.md) — 📝 todo
 - [T-304 `POST /api/chat` SSE route](./T-304-chat-sse-api-route.md) — 📝 todo
 - [T-305 `ChatPanel` + `/chat/[documentId]` page + dashboard link](./T-305-chat-panel-and-page.md) — 📝 todo

@@ -1,6 +1,6 @@
 # T-302 · `lib/ai/embeddings.ts` + `POST /api/embeddings/ensure`
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** HIGH (foundation cho RAG retrieval)
 **Blueprint ref:** §2.5 RAG flow, §6.6b API contract, §12 Q-06
 **Branch:** `task/T-302-embeddings-lib-and-ensure-endpoint`
