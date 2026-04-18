@@ -1,6 +1,6 @@
 # T-302 · `lib/ai/embeddings.ts` + `POST /api/embeddings/ensure`
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** HIGH (foundation cho RAG retrieval)
 **Blueprint ref:** §2.5 RAG flow, §6.6b API contract, §12 Q-06
 **Branch:** `task/T-302-embeddings-lib-and-ensure-endpoint`
@@ -336,7 +336,17 @@ Expected: HTTP 503, body `{"error":"embedding_unavailable","detail":"DEBUG_FORCE
 _(none at spec time)_
 
 ## Decisions log
-_(agent fills during execution — note smoke results, any edge-case encountered)_
+
+**D-1: Model name changed from `text-embedding-004` to `gemini-embedding-001`**
+- `text-embedding-004` returns 404 via `@google/genai@1.50.0` SDK (confirmed via both SDK call and direct REST to `generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent`).
+- `gemini-embedding-001` is Google's documented successor, accessible via the new SDK.
+- Using `config: { outputDimensionality: 768 }` parameter to match the existing `vector(768)` column in `card_embeddings` (T-301 DDL, already applied to Supabase).
+- Smoke test verified: 2 vectors × 768 dims with real floats. DB column compatibility maintained.
+
+**D-2: Smoke test results (2026-04-18)**
+- `embedTexts(['Bubble Sort...', 'Quick Sort...'])` → `vector count: 2 / dim[0]: 768` ✓
+- `DEBUG_FORCE_GEMINI_FAIL=true` → throws immediately, exit 1 ✓
+- Smoke script deleted before commit ✓
 
 ## Notes for reviewer
 - **Phase 2 lessons applied preemptively:** retry classifier bao gồm 429/500/503/UNAVAILABLE/overloaded/deadline (F-1); shape validation 2 tầng (F-3/F-4); upsert onConflict thay check-then-insert (F-5); `supabaseAdmin` no-store fetch đã baseline (F-6); explicit `runtime = 'nodejs'` (F-7).
