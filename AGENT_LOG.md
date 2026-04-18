@@ -122,3 +122,4 @@ Events: `started` · `completed` · `blocked` · `resumed` · `merged`
 ## 2026-04-19
 
 - **—:—** [T-303] claude-sonnet-4-6 executor started. Create `lib/ai/chat.ts` (RAG retrieval + streaming fallback chain) + append `CHAT_SYSTEM_PROMPT` to `prompts.ts` on branch `task/T-303-chat-lib-rag-streaming`.
+- **—:—** [T-303] claude-sonnet-4-6 executor completed. Appended `CHAT_SYSTEM_PROMPT` to `prompts.ts`; created `chat.ts` with `retrieveContext` + `streamChatResponse` + all exported types. tsc clean, build pass. Smoke Test 3: retrieveContext returned 5 cards + 2000-char snippet; 2.0-flash+lite both 429 → Groq fallback (345 chars output). Smoke Test 4 (DEBUG_FORCE_CHAT_GEMINI_FAIL=true): embed still works, stream log `[chat] falling back to Groq`, 40-char chunk simulate, 87 chars output. Smoke file deleted. Status → review.
