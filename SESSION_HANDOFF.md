@@ -10,10 +10,12 @@
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
 Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
-Gen Z Việt Nam. Tôi đã hoàn tất **Phase 0/1/2/3/4-full** (P + T), tổng 9/9
-Phase 4 tasks merged. Phiên này ta hoặc (A) E2E full smoke Phase 4 dashboard
-upload + all features, (B) pivot **Phase 5** (scope TBD), hoặc (C) đóng
-session nếu MVP đủ demo-ready.
+Gen Z Việt Nam. **Phase 0/1/2/3/4-FULL đã sealed + E2E verified** (8/8 smoke
+tests pass 2026-04-19). MVP production-ready marker earned. Phase 4 video
+4-feature stack (P-401 subtitles + P-402 phonetic TTS + P-404 gradient +
+P-405 fade) compose correctly trong real render. Phiên này ta làm Phase 5
+(scope TBD — T-405 dashboard persistence là top candidate từ UX gaps phát
+hiện trong E2E smoke) HOẶC đóng session nếu demo sắp tới.
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -87,11 +89,32 @@ When component has both `Effect A: load → setState` and `Effect B: save(state)
 
 ---
 
-## Step 4 — Proposed workflow for next session
+## Step 4 — Proposed workflow for next session (post-Phase-4 E2E)
 
-Phase 4 video quality done. Two paths forward:
+Phase 4 fully sealed + E2E verified. 4 UX gaps surfaced during smoke (all pre-existing, not Phase 4 regressions). Two paths forward:
 
-### Option A — Phase 4 core polish (T-401..T-404)
+### Option A — Phase 5 T-405 "Dashboard persistence + cross-page nav" (recommended, consolidates 3 UX gaps)
+
+**Scope:**
+- Dashboard mount reads `anon_id` → fetch recent `vibe_documents` from Supabase → render list with per-doc links (Quiz / Chat / Video). Eliminates re-upload-on-reload.
+- VideoPlayer: on dashboard mount, fetch latest `render_jobs` for recent doc → if status=rendering resume polling; if status=ready render MP4 directly. Extend POLL_MAX_ATTEMPTS 240→360 (12→18 min) OR swap to Supabase Realtime channel subscribe.
+- Populated leaderboard gains "← Về Dashboard" link in header (consistency with other pages).
+
+**Why now:** biggest demo-blocker. Smoke test showed user must upload PDF twice in same session. Any presenter would hit this live.
+
+### Option B — Phase 5 other directions
+- SSML voice switching (if P-402 phonetic feels unnatural to target audience after more user tests)
+- Per-scene distinct visuals + ffmpeg xfade concat (true blueprint P-405 original intent — architect overrode to ASS \\fad for MVP)
+- Redis/Upstash chat rate-limit (cross-instance when deploy Vercel)
+- Persistent chat_messages DB (cross-device sync, Q-09 deferred)
+- Deploy Vercel production (domain + SSL + env rotation)
+
+### Architect recommendation
+**Option A first** — UX gap has 10× impact on demo experience vs any Phase 5B item. Then evaluate Phase 5B based on demo feedback.
+
+### Old Phase 4 core polish queued path (now done, kept for history reference)
+
+#### Option A (OLD, NOW COMPLETE) — Phase 4 core polish (T-401..T-404)
 - T-401 Error boundaries + empty states (React App Router error.tsx patterns)
 - T-402 3D scene loading skeletons (DOJO mascot page startup)
 - T-403 PWA manifest (optional, `manifest.json` + icons)
