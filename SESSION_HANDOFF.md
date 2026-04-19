@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** end of Phase 2 E2E, 2026-04-17. Commit tip: `f49013e`.
+> **Last refresh:** end of Phase 3 (2026-04-19). Commit tip: `cf75ca1` (architect close T-305 + Phase 3 recap).
 
 ---
 
@@ -9,9 +9,11 @@
 
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
-Vibe Cards + video 9:16 + quiz + leaderboard cho sinh viên Gen Z Việt Nam.
-Tôi đã hoàn tất Phase 0, Phase 1, Phase 2 với bạn ở phiên trước. Phiên này
-ta tiếp tục sang Phase 3 (Chatbot RAG).
+Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
+Gen Z Việt Nam. Tôi đã hoàn tất Phase 0/1/2/3 với bạn. Phiên này ta chuyển
+sang Phase 4 (Polish — core + video quality P-401..P-405), HOẶC chạy E2E
+full Phase 3 trước khi qua Phase 4 (Test 4 rate limit UI, Test 5 Strict
+Mode idempotent ensure, Test 6 error state, Test 7 mobile).
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -19,118 +21,132 @@ Git user: twangnhat-05 · email: dev2@wolffungame.com
 
 TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ, đọc theo thứ tự:
 
-1. SESSION_HANDOFF.md (file này) — TL;DR + "new ways of working" đề xuất cho
-   phase 3 (rút ra từ 8 hotfix Phase 2).
-2. ARCHITECT_BLUEPRINT.md §1/§2/§3 — vision, architecture, tech stack locked.
-   §10 roadmap tổng, §13 changelog mới nhất.
-3. AGENT_LOG.md 20 dòng cuối — bắt kịp lịch sử gần nhất (Phase 2 E2E + 8 hotfixes).
-4. memory/feedback_vibeseek_phase2_lessons.md — checklist failure modes để
-   preempt trong spec + review Phase 3. **BẮT BUỘC ÁP DỤNG.**
-5. memory/project_vibeseek_state_2026_04_17.md — snapshot DB + API + UI hiện tại.
+1. SESSION_HANDOFF.md (file này) — TL;DR + proposed way of working cho phase
+   tiếp theo.
+2. ARCHITECT_BLUEPRINT.md §1/§2/§3 — vision, architecture, stack. §10 roadmap
+   (Phase 3 marked complete, Phase 4 queued). §13 changelog top.
+3. AGENT_LOG.md — 30 dòng cuối để bắt nhịp T-305 close + Phase 3 complete marker.
+4. memory/feedback_vibeseek_phase3_lessons.md — **NEW** — 7-step pipeline
+   validated + 2 new UI failure modes (dark-body color inherit, mount-time
+   load/persist race). **BẮT BUỘC ÁP DỤNG trong Phase 4.**
+5. memory/feedback_vibeseek_phase2_lessons.md — Phase 2 checklist vẫn valid.
+6. memory/project_vibeseek_state_2026_04_19.md — **NEW** — DB/API/UI snapshot
+   sau Phase 3.
 
-Sau đó: xác nhận với tôi `sẵn sàng cho Phase 3` + đề xuất QUY TRÌNH PHASE 3
-MỚI dựa trên bài học Phase 2. Không viết spec vội — chờ tôi duyệt quy trình.
+Sau đó: xác nhận `sẵn sàng cho Phase 4` (HOẶC `E2E full Phase 3 trước`) + đề
+xuất quy trình. Không viết spec vội.
 ```
 
 ---
 
-## Step 1 — What shipped through Phase 2
+## Step 1 — What shipped through Phase 3
 
 | Phase | Tasks | Status |
 |---|---|---|
 | 0 Hygiene | T-001…T-006 | ✅ done |
 | 1 Video renderer | T-101…T-108 | ✅ done + E2E verified |
-| 2 Quiz + Leaderboard | T-201…T-206 | ✅ done + E2E verified after 8 hotfixes |
-| 3 Chatbot RAG | T-301…T-305 | 📝 specs NOT written yet |
-| 4 Polish | T-401…T-404 + P-401…P-405 | 📝 video quality issues queued |
+| 2 Quiz + Leaderboard | T-201…T-206 | ✅ done + E2E verified (8 hotfixes) |
+| 3 Chatbot RAG | T-301…T-305 | ✅ done (1 hotfix) |
+| 4 Polish | T-401…T-404 + P-401…P-405 | 📝 specs NOT written yet |
 
 Commit tips worth knowing:
-- `f49013e` — Phase 2 E2E verified marker
-- `10bb068` — "Phase 2 COMPLETE" (post-merge, before E2E fixes)
-- `92d91d` → `35e6eb4` — 8 hotfix commits during E2E (see §13 changelog)
+- `cf75ca1` — architect close T-305 + Phase 3 complete marker
+- `08c803a` — T-305 merge (ChatPanel + `/chat/[documentId]` + dashboard link + localStorage)
+- `49f628d` — T-305 hotfix (input text color + saveHistory empty-guard)
+- `1c023f7` — T-304 merge (SSE `/api/chat` route)
+- `7e7ea3a` — T-303 merge (`chat.ts` RAG retrieve + stream)
+- `a9cc2d5` — T-302 merge (`embeddings.ts` + `/api/embeddings/ensure`)
+- `d630f8e` — T-301 merge (pgvector + card_embeddings + raw_text)
 
 ---
 
-## Step 2 — What went wrong in Phase 2 (don't repeat)
+## Step 2 — What worked in Phase 3 (keep doing)
 
-**Eight hotfixes in one E2E session** came from specs and reviews that missed foreseeable failure modes. User feedback verbatim: *"phiên này bạn làm chưa tốt lắm, có nhiều chỗ phải sửa đi sửa lại"*.
+**One hotfix across five tasks** vs Phase 2's eight hotfixes. The 7-step pipeline proposed after Phase 2 delivered. Read `memory/feedback_vibeseek_phase3_lessons.md` end-to-end. The short list:
 
-Read `memory/feedback_vibeseek_phase2_lessons.md` end-to-end. The short list:
-
-1. `maxOutputTokens: 4096` is too small for Vietnamese batch JSON → always 16384
-2. Retry loops must treat `SyntaxError`, 503, 500, shape-validation errors as retriable — not just 429
-3. Every Gemini call site needs a Groq fallback. Audit all three in Phase 3
-4. Next.js 14 monkey-patches `fetch` with data cache. supabase-js reads go stale unless you inject `cache: 'no-store'` into `createClient`'s `global.fetch`
-5. React Strict Mode dev remounts components. Use canonical `let ignore = false` per effect, not `useRef` guards. Prevent duplicate INSERTs at the DB layer with UNIQUE constraints, not in the frontend
-6. List components reusing instances across items need `key={item.id}` on the list entry
-7. Any in-page data mutation that affects a global badge/indicator needs a CustomEvent broadcast — don't rely on route change to refresh
+1. Every spec gets a **Failure modes** table (8–15 items). Every listed mode must have explicit defensive code. Agent shipped them, zero post-merge hotfixes from in-spec failure modes in Phase 3.
+2. Every spec gets a **Local test plan** with curl/SQL-ready commands (3–7 tests). Caught T-305 localStorage race in 30 seconds.
+3. Every spec gets **Files NOT to touch**. Zero scope explosions in Phase 3.
+4. **Architect pre-flight audit against real code** before dispatch (2026-04-18 caught 6 drift issues — wrong imports, missing DB column, SDK API shape). Saved 6 would-be hotfixes.
+5. **Architect local-runs** the feature during review (not just tsc) — but DOES NOT `npm run build` while user's dev server is active (breaks `.next/server/` chunks).
+6. **Three-strikes circuit breaker** held: T-305 hit 2 bugs → direct-fix on branch with user approval. Phase 2 pattern of 8 patch-in-place was replaced.
 
 ---
 
-## Step 3 — Proposed workflow change for Phase 3 (architect to propose to user in first message)
+## Step 3 — Two new UI failure modes discovered in Phase 3
 
-User asked at end of Phase 2: *"ở phiên sau bạn sẽ cho tôi một quy trình tốt nhất khi bạn đóng vai trò là kiến trúc sư"*. Here is the improved pipeline to pitch:
+Add these to the Phase 2 checklist when reviewing any new UI:
 
-### The seven-step Phase 3 pipeline
+### 9. Dark-theme app + light-theme widget = invisible text
+`app/globals.css` sets `body { color: white }`. Any element inside a `bg-white` card without an explicit `text-*` class inherits white and goes invisible. Reviewer must grep for `bg-white` on the diff and confirm sibling `text-*` classes on every text element (input, textarea, span, etc.).
 
-1. **Spec draft with failure-mode budget.** Each task spec (`tasks/T-XXX-*.md`) must include a dedicated **"Failure modes"** section listing every realistic way the feature can fail: quota, timeout, race condition, Strict Mode, stale cache, empty input, invalid JSON, auth edge case. The spec must describe the defensive code the agent must write for each.
-2. **User-runnable test plan embedded in spec.** Each spec ends with 3–5 explicit commands (curl, SQL, browser steps) the user can run in ~10 minutes to sanity-check the feature before review. No hand-wave "AC-X deferred to E2E".
-3. **Architect pre-flight before dispatch.** Architect drafts all specs for a batch, user reviews + approves the batch spec plan **before** any agent is dispatched. Catches spec gaps early (cheap) instead of after PR (expensive).
-4. **Agent prompt with scope fence.** Prompt includes explicit "Files to touch" list (already done in Phase 2 after round-1 scope explosion) + "Files NOT to touch" for parallel batches.
-5. **Architect local-runs the feature during review.** Not just `tsc + build + read diff`. Actually start the dev server, hit the endpoint with curl, verify the row in DB, click the UI button once. This is what Phase 2 reviews skipped and is why 8 hotfixes happened post-merge instead of pre-merge.
-6. **Three-strikes circuit breaker.** If the same feature needs a third hotfix in one E2E session, **stop**. Collect all known bugs into a single consolidated fix task, write a proper spec for it, dispatch to agent. No architect firefighting in-place with protocol exceptions. (Phase 2 burned 8 exceptions → became noise in history.)
-7. **E2E verification as a formal step per batch.** Before marking a phase "complete", run an explicit E2E checklist. If any check fails, that's a task, not a hotfix.
-
-### New protocol triggers for user
-
-| Trigger | Architect action |
-|---|---|
-| `review PR cho T-XXX` | Fetch PR, read diff, **start dev server + exercise the feature**, verify AC + failure-modes-section → verdict |
-| `merged T-XXX` | Close task, delete branch local + remote, append AGENT_LOG, push |
-| `stuck ở bước N` | Debug step-by-step, explicit options |
-| `E2E fail: <feature>` (NEW) | If <3 bugs so far this E2E: architect hotfix directly with user's explicit approval. If ≥3: stop, create consolidated fix task, dispatch |
-
-### Cost model the user should know
-
-- Each agent round-trip ≈ 10–30 min
-- Each hotfix ≈ 5–10 min architect time + ≈ 1 min user time (restart dev server)
-- Each wasted Gemini request during E2E debugging ≈ 1/1500 of daily quota
-- The three-strikes rule exists because beyond three patches it is cheaper to rethink than to keep patching
+### 10. Mount-time useEffect race between load + persist
+When component has both `Effect A: load → setState` and `Effect B: save(state)`, Effect B fires in the same commit as Effect A but with the initial empty-state closure — wipes storage before the load's setState propagates. Fix: make the persist helper defensively refuse to write empty-equivalent values, and add a `clearHelper()` for intentional clears. Document the contract change.
 
 ---
 
-## Step 4 — Environment notes (still true as of 2026-04-17)
+## Step 4 — Proposed workflow for next session
 
-- Windows 11, bash shell (forward slashes OK). PowerShell doesn't support `&&` — use `;` or separate commands. `curl` is aliased to `Invoke-WebRequest`, use `curl.exe`.
-- `.env.local` in `vibeseek/` has all 11 required env vars (Supabase URL+keys, Gemini, Groq, GitHub dispatch token, Supabase storage bucket, render callback secret)
-- ngrok required only when testing video render callback locally (not for Phase 3 chat)
-- GitHub Actions secrets: 7 configured per blueprint §8.2
-- Dev server: `cd vibeseek && npm run dev`, hot-reload works for API routes + client components. After major dep changes or weird errors, wipe `.next`: `Remove-Item -Recurse -Force .next` (PowerShell) before restarting.
-- User role on repo: `write` (collaborator), not admin. Cannot flip `delete_branch_on_merge` setting. Architect deletes branches manually via `git push origin --delete` in close workflow.
+User can pick one of two directions. Architect proposes based on user's choice:
+
+### Option A — **E2E full Phase 3 before closing the phase**
+Only Test 2 + 3 of T-305 ran during review. Remaining user-runnable tests:
+- Test 4 — rate limit UI: fire 12 POSTs, confirm 10×200 + 2×429
+- Test 5 — Strict Mode idempotent `/api/embeddings/ensure`: hard-refresh chat page, check Network tab + DB count unchanged
+- Test 6 — error state: `DEBUG_FORCE_GEMINI_FAIL=true` → chat page shows "Thử lại" UX
+- Test 7 — mobile viewport: iPhone 13 DevTools, confirm no overflow / badge overlap
+
+If any of these fail → hotfix commit + retest. If zero fail → Phase 3 formally sealed.
+
+### Option B — **Pivot to Phase 4 (video quality polish)**
+Users reported Phase 1 video quality issues during 2026-04-17 E2E. Queued tasks:
+- P-401 Subtitle overflow on 1080x1920 (fix ffmpeg `force_style` + SRT line-split)
+- P-402 English-in-Vietnamese TTS mispronunciation (phonetic rewrite OR bilingual voice concat)
+- P-403 Narration duration overshoot scene (limit narration to `duration_sec × 1.5` từ, or probe TTS + extend scene)
+- P-404 Monochrome ffmpeg background (upgrade to `testsrc2` gradient or Pexels loop)
+- P-405 Scene hard cuts (add `xfade` crossfade 0.3s)
+
+Plus core polish T-401..T-404 (error boundaries, 3D skeleton, PWA manifest, log cleanup).
+
+### Architect recommendation
+Option A first (20–30 min user effort, definitive close). Then Option B. Don't bundle — closing Phase 3 cleanly makes Phase 4 specs easier to audit against a stable baseline.
 
 ---
 
-## Step 5 — Memory files architect should load (via memory system, not by reading the file in repo)
+## Step 5 — Environment notes (still true as of 2026-04-19)
+
+- Windows 11, bash shell (forward slashes OK). PowerShell doesn't support `&&` — use `;` or separate commands. `curl` is aliased to `Invoke-WebRequest`; use `curl.exe` for native.
+- `.env.local` in `vibeseek/` has 11 core env vars + 2 Phase 3 debug flags (`DEBUG_FORCE_GEMINI_FAIL`, `DEBUG_FORCE_CHAT_GEMINI_FAIL`).
+- ngrok only for Phase 1 render-callback (not needed Phase 3/4 so far).
+- GitHub Actions secrets: 7 per blueprint §8.2.
+- Dev server: `cd vibeseek && npm run dev`. After any main pull or weird error, wipe `.next`: `Remove-Item -Recurse -Force .next` (PS) / `rm -rf .next` (Git Bash).
+- **DO NOT run `npm run build` while user's dev server is active** — corrupts `.next/server/` chunks. tsc alone is enough for review type-check.
+- User role on repo: `write` (not admin) — architect deletes branches manually via `git push origin --delete`.
+
+---
+
+## Step 6 — Memory files architect should load
 
 All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 
 - `user_wangnhat.md` — user profile
-- `feedback_vibeseek_architect_role.md` — three fixed triggers + hard rules
+- `feedback_vibeseek_architect_role.md` — triggers + hard rules
 - `feedback_write_exact_commands.md` — always write literal commands inline
-- `feedback_vibeseek_phase2_lessons.md` — **NEW** — eight Phase 2 hotfix lessons
-- `project_vibeseek_state_2026_04_17.md` — **NEW** — snapshot of live DB + APIs + UI
-- `reference_vibeseek_paths.md` — SSOT file paths + gh CLI commands
+- `feedback_vibeseek_phase2_lessons.md` — Phase 2 hotfix checklist
+- `feedback_vibeseek_phase3_lessons.md` — **NEW** Phase 3 pipeline validation + 2 new UI failure modes
+- `project_vibeseek_state_2026_04_19.md` — **NEW** post-Phase-3 snapshot
+- `project_vibeseek_state_2026_04_17.md` — superseded, kept for history
+- `reference_vibeseek_paths.md` — SSOT file paths + gh CLI
 
 ---
 
-## Step 6 — First actions in new session (ordered)
+## Step 7 — First actions in new session
 
 1. Read this file (you did).
-2. Read the 4 memory files above (via auto-memory, they'll be loaded).
-3. Read `ARCHITECT_BLUEPRINT.md` §1, §2, §3, §13 (sections 10–12 as needed for Phase 3 spec work).
-4. Read last 20 lines of `AGENT_LOG.md`.
-5. `git log --oneline -15 main` to confirm latest state.
-6. Respond to user with: "Đã nắm context Phase 0/1/2. Đề xuất quy trình Phase 3 mới (7 bước + 4 triggers). Duyệt để tôi bắt đầu viết spec T-301 → T-305?"
-7. On user approval, draft Phase 3 specs WITH failure-modes + test-plan sections per the pipeline.
+2. Read the memory files above (auto-loaded).
+3. Read `ARCHITECT_BLUEPRINT.md` §1, §2, §3, §10, §13.
+4. `git log --oneline -10 main` to confirm tip is `cf75ca1` (or newer if user merged more between sessions).
+5. Ask user: "Phase 3 đóng dứt điểm bằng E2E full (Option A) hay pivot Phase 4 luôn (Option B)?"
+6. On user choice, draft specs per the Phase 3 pipeline (Failure modes + Local test plan + Files NOT to touch).
 
-Do **NOT** skip step 6 — the user explicitly asked for a workflow proposal before jumping into spec work.
+Do **NOT** skip step 5. Pattern that worked twice (Phase 2 → Phase 3 transition, and this one if user follows) is propose-then-spec, never spec-first.
