@@ -1,6 +1,6 @@
 # P-402 · English terms mispronounced by vi-VN TTS — dual-field narration
 
-**Status:** `todo`
+**Status:** `in-progress`
 **Severity:** MEDIUM (Phase 4 video quality polish)
 **Blueprint ref:** §10 Phase 4 · P-402
 **Branch:** `task/P-402-english-tts-pronunciation`
