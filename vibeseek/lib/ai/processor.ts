@@ -171,6 +171,7 @@ export interface VideoScene {
   title: string
   visual_prompt: string
   narration: string
+  speakable_narration: string
   on_screen_text: string[]
   duration_sec: number
 }
@@ -217,6 +218,7 @@ function parseStoryboardResponse(
   const normalizedScenes = Array.isArray(parsed.scenes)
     ? parsed.scenes.map((scene, idx) => {
         const narration = String(scene?.narration || '')
+        const speakable_narration = String(scene?.speakable_narration || '').trim() || narration
         const originalDuration = Math.min(15, Math.max(4, Number(scene?.duration_sec) || 6))
 
         const words = countWords(narration)
@@ -234,6 +236,7 @@ function parseStoryboardResponse(
           title: String(scene?.title || `Scene ${idx + 1}`),
           visual_prompt: String(scene?.visual_prompt || ''),
           narration,
+          speakable_narration,
           on_screen_text: Array.isArray(scene?.on_screen_text) ? scene.on_screen_text.map(String) : [],
           duration_sec,
         }
