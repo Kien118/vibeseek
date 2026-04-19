@@ -1,6 +1,6 @@
 # T-402 · 3D scene outer loading skeleton
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** LOW (Phase 4 core polish — cosmetic)
 **Blueprint ref:** §10 Phase 4 Core polish · T-402
 **Branch:** `task/T-402-3d-loading-skeleton`
@@ -193,7 +193,11 @@ All three should return empty diffs. Only `app/page.tsx` + new `CanvasSkeleton.t
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills — especially if `next/dynamic` API changed in the installed Next.js version)_
+- **D-1** — `next/dynamic` API on Next.js 14.2.x unchanged vs spec. Canonical `dynamic(() => import(...), { ssr: false, loading: () => <CanvasSkeleton /> })` applied byte-for-byte from spec §2. `'use client'` kept on `app/page.tsx` (spec-noted rationale: explicit client boundary keeps behavior obvious).
+- **D-2** — `CanvasSkeleton.tsx` written verbatim from spec §1: pure Tailwind JSX (`fixed inset-0`, `animate-pulse` glow, `text-white/60` caption). Zero imports beyond React's implicit JSX runtime — no `@react-three/*`, no `three`, no `framer-motion`. `animate-pulse` is Tailwind core so no `tailwind.config.ts` touch (F-9 preempted). Phase 3 F-1 dark-body inherit preempted via explicit `text-white/60`.
+- **D-3** — **AC-5 `npm run build` deferred to architect review.** Dev server detected LISTENING on `:3000` (PID 24640, `netstat -ano`). Per Phase 3 lesson (SESSION_HANDOFF step 5 + `memory/feedback_vibeseek_phase3_lessons.md`), running `npm run build` while dev server is active corrupts `.next/server/` chunks. Executor ran AC-4 `npx tsc --noEmit` (exit 0) as the safe type-check proxy. Architect to run AC-5 + chunk-split verification after pausing dev server.
+- **D-4** — Protected-region grep clean: `git diff main -- vibeseek/components/3d/LandingSceneCanvas.tsx vibeseek/components/3d/SceneLoader.tsx vibeseek/components/3d/Experience.tsx` returned empty — AC-8 satisfied. `app/page.tsx` diff is a clean swap (-1 static import line, +8 lines for `import dynamic`, `import CanvasSkeleton`, `const LandingSceneCanvas = dynamic(...)` block) — AC-3 satisfied (replacement, not addition). Final PR diff = 4 files (page.tsx, CanvasSkeleton.tsx new, tasks/T-402-…md, AGENT_LOG.md), matches DoD cap.
+- **D-5** — Multi-agent concurrency note for this session: T-401 + T-403+T-404 executors ran in parallel. A T-401 commit `7e75cc9` briefly landed via branch-switching chaos; it has since been confirmed on `task/T-401-error-boundaries` (correct branch). A `rescue/T-401-commit-landed-on-T-402-branch` ref was created as a safety backup — can be deleted once T-401 PR is open. T-402 branch `task/T-402-3d-loading-skeleton` final base is `206d606` (main), clean of cross-task contamination.
 
 ## Notes for reviewer
 - Small task, should take executor <20 minutes / <50 LOC total.
