@@ -45,6 +45,12 @@ export default function LeaderboardPage() {
   return (
     <main className="min-h-screen max-w-3xl mx-auto px-4 py-16 text-white space-y-8">
       <header className="space-y-2">
+        <Link
+          href="/dashboard"
+          className="inline-block text-sm text-white/60 hover:text-white transition-colors"
+        >
+          ← Về Dashboard
+        </Link>
         <p className="text-white/50 font-mono uppercase text-xs">VibeSeek Leaderboard</p>
         <h1 className="font-display text-4xl">Top vibe</h1>
       </header>

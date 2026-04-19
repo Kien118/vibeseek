@@ -1,13 +1,20 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import UploadZone from '@/components/UploadZone'
 import ProgressBar from '@/components/ProgressBar'
 import GlowButton from '@/components/GlowButton'
 import VibeCard from '@/components/VibeCard'
 import VideoPlayer from '@/components/VideoPlayer'
+import DocumentHistory from '@/components/DocumentHistory'
 import type { VibeCard as VibeCardType } from '@/utils/supabase'
+import {
+  loadDocHistory,
+  addDocToHistory,
+  removeDocFromHistory,
+  type DocHistoryEntry,
+} from '@/utils/doc-history'
 
 interface VideoScene {
   scene_index: number
@@ -35,6 +42,11 @@ export default function DashboardPage() {
   const [cards, setCards] = useState<Array<Omit<VibeCardType, 'id' | 'document_id' | 'created_at'>>>([])
   const [documentId, setDocumentId] = useState<string | null>(null)
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
+  const [docHistory, setDocHistory] = useState<DocHistoryEntry[]>([])
+
+  useEffect(() => {
+    setDocHistory(loadDocHistory())
+  }, [])
 
   const fileLabel = useMemo(() => (file ? `${file.name} (${Math.round(file.size / 1024)} KB)` : 'No file selected'), [file])
   const totalVibePoints = useMemo(() => cards.reduce((sum, card) => sum + card.vibe_points, 0), [cards])
@@ -80,6 +92,15 @@ export default function DashboardPage() {
 
       setCards(payload.cards ?? [])
       setDocumentId(payload.documentId ?? null)
+      if (payload.documentId && payload.documentId !== 'local') {
+        const entry: DocHistoryEntry = {
+          documentId: payload.documentId,
+          title: title || file.name.replace(/\.pdf$/i, ''),
+          createdAt: Date.now(),
+        }
+        addDocToHistory(entry)
+        setDocHistory(loadDocHistory())
+      }
       setProgress(100)
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unknown error')
@@ -119,6 +140,11 @@ export default function DashboardPage() {
     } finally {
       setIsGeneratingVideo(false)
     }
+  }
+
+  const handleRemoveFromHistory = (id: string) => {
+    removeDocFromHistory(id)
+    setDocHistory(loadDocHistory())
   }
 
   return (
@@ -168,7 +194,9 @@ export default function DashboardPage() {
           {error && <p className="dashboard-error">{error}</p>}
         </section>
 
-        {cards.length === 0 && !isProcessing && !isGeneratingVideo && !currentJobId && (
+        <DocumentHistory entries={docHistory} onRemove={handleRemoveFromHistory} />
+
+        {docHistory.length === 0 && cards.length === 0 && !isProcessing && !isGeneratingVideo && !currentJobId && (
           <section className="dashboard-empty-state glass text-center p-12 space-y-4">
             <div className="text-6xl">📚</div>
             <h2 className="text-xl font-bold text-white">Chưa có tài liệu nào</h2>
