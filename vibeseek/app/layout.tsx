@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { JetBrains_Mono, Plus_Jakarta_Sans, Syne } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import VibePointsBadge from '@/components/VibePointsBadge'
@@ -26,6 +26,16 @@ export const metadata: Metadata = {
   title: 'VibeSeek — Catch the Knowledge Vibe',
   description: 'Biến PDF khô khan thành micro-content hấp dẫn cho Gen Z.',
   keywords: ['learning', 'AI', 'PDF', 'Gen Z', 'education'],
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'VibeSeek',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#a855f7',
 }
 
 export default function RootLayout({
