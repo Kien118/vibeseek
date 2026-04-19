@@ -1,6 +1,6 @@
 # T-405 · Dashboard persistence + leaderboard back-link (client-side)
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** MEDIUM (Phase 5 UX — demo blocker)
 **Blueprint ref:** surfaced in Phase 4 E2E smoke (2026-04-19) — dashboard state loss on reload/navigation + populated leaderboard missing back-link
 **Branch:** `task/T-405-dashboard-persistence`
