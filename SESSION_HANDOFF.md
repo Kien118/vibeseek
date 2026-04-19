@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** Phase 3 fully sealed (2026-04-19). Commit tip: `3b3ba5c` (T-305 hotfix 2 chat header badge overlap). **7/7 E2E tests pass. 2 hotfixes total vs Phase 2 baseline 8.**
+> **Last refresh:** Phase 4 video quality complete (2026-04-19). Commit tip: `8682a3e` P-404 merge + architect close commit appended. **Phase 4 video: 5/5 tasks, 1 hotfix total (P-401 libass PlayRes only).**
 
 ---
 
@@ -10,9 +10,12 @@
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
 Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
-Gen Z Việt Nam. Tôi đã hoàn tất Phase 0/1/2/3 với bạn (Phase 3 đã E2E
-seal — 7/7 tests pass, 2 hotfixes). Phiên này ta chuyển sang Phase 4
-(Polish — T-401..T-404 core + P-401..P-405 video quality).
+Gen Z Việt Nam. Tôi đã hoàn tất Phase 0/1/2/3/4-video-quality với bạn
+(Phase 4 P-401..P-405 đã xong 5/5, chỉ 1 hotfix P-401 libass PlayRes).
+Phiên này ta làm **Phase 4 core polish** (T-401..T-404: error boundaries,
+3D skeleton, PWA manifest, log cleanup) HOẶC pivot **Phase 5** (scope TBD
+— per-scene distinct visuals, SSML voice switching, Redis rate-limit, or
+persistent chat_messages).
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -45,8 +48,10 @@ xuất quy trình. Không viết spec vội.
 | 0 Hygiene | T-001…T-006 | ✅ done |
 | 1 Video renderer | T-101…T-108 | ✅ done + E2E verified |
 | 2 Quiz + Leaderboard | T-201…T-206 | ✅ done + E2E verified (8 hotfixes) |
-| 3 Chatbot RAG | T-301…T-305 | ✅ done (1 hotfix) |
-| 4 Polish | T-401…T-404 + P-401…P-405 | 📝 specs NOT written yet |
+| 3 Chatbot RAG | T-301…T-305 | ✅ done (2 hotfixes) |
+| 4 Polish — video quality | P-401…P-405 | ✅ done (1 hotfix, all 5 merged 2026-04-19) |
+| 4 Polish — core | T-401…T-404 | 📝 specs NOT written yet |
+| 5 TBD | — | — |
 
 Commit tips worth knowing:
 - `cf75ca1` — architect close T-305 + Phase 3 complete marker
@@ -84,23 +89,34 @@ When component has both `Effect A: load → setState` and `Effect B: save(state)
 
 ---
 
-## Step 4 — Proposed workflow for Phase 4
+## Step 4 — Proposed workflow for next session
 
-Phase 3 closed clean. Phase 4 queued:
+Phase 4 video quality done. Two paths forward:
 
-- **Core polish (T-4xx):** T-401 error boundaries + empty states, T-402 3D scene loading skeletons, T-403 PWA manifest (optional), T-404 dọn `debug-*.log`.
-- **Video quality polish (P-4xx) — found during 2026-04-17 Phase 1 E2E:** P-401 subtitle overflow on 1080x1920 (fix ffmpeg `force_style` + SRT line-split), P-402 English-in-Vietnamese TTS mispronunciation (phonetic rewrite OR bilingual voice concat), P-403 narration duration overshoot scene (limit `duration_sec × 1.5` words, OR probe TTS + extend scene), P-404 monochrome ffmpeg background (upgrade to `testsrc2` gradient or Pexels loop), P-405 scene hard cuts (add `xfade` crossfade 0.3s).
+### Option A — Phase 4 core polish (T-401..T-404)
+- T-401 Error boundaries + empty states (React App Router error.tsx patterns)
+- T-402 3D scene loading skeletons (DOJO mascot page startup)
+- T-403 PWA manifest (optional, `manifest.json` + icons)
+- T-404 Dọn `debug-*.log` (hygiene, .gitignore update)
 
-### Architect's proposal for Phase 4 pipeline
-Continue the 7-step pipeline from Phase 3 (validated: 2 hotfixes across 5 tasks). Two adjustments based on Phase 3 lessons:
+These are React/Next.js UI concerns. Phase 2/3 UI failure modes (dark-body color inherit, mount-time load/persist race, fixed-badge overlap) + Phase 3 pipeline directly apply. Architect frame-extract technique from Phase 4 does NOT apply (UI review needs dev-server run).
 
-1. **Add `E2E test hygiene` section to any rate-limit/quota-related spec.** Phase 3 Test 4 false-negative (Date.now() unique keys + 60s bucket pollution) wasted 10 min. Spec must bake fixed literal key into test script + document cool-down window.
-2. **Add `badge/overlay overlap check` to UI review template.** Phase 3 Test 7 caught late because reviewer only ran desktop viewport. Any new page that renders while `VibePointsBadge` is visible must be checked at 390px (iPhone 13) before approve.
+### Option B — Phase 5 scope discussion
+Possible directions:
+- **Per-scene distinct visuals** — true per-scene background images (Gemini visual_prompt → Imagen/DALL-E/Leonardo? Cost concern) + ffmpeg `xfade` concat = the original blueprint P-405 prescription, if P-405 `\fad` alone feels insufficient in Phase 4 user test.
+- **SSML voice switching** — if P-402 `speakable_narration` phonetic feels unnatural after user runs AC-9, consider `<voice name="en-US-*">` inline for English substrings. Research edge-tts SSML support first.
+- **Redis/Upstash rate-limit** — swap in-memory `chat:${anonId}` bucket in `lib/rate-limit.ts` for a cross-instance store. Only needed if moving off single-server / deploying to Vercel.
+- **Persistent chat_messages** — reinstate DB table deferred in Q-09 Phase 3. Adds cross-device sync at cost of PII storage complexity.
 
-Video-quality specs (P-4xx) are ffmpeg/edge-tts territory, not React/Next.js, so Phase 2 UI failure modes don't map directly. New failure modes to expect: ffmpeg filter syntax errors, TTS voice availability, encoding codec mismatches, duration edge cases (0s scenes). Spec should list these per task.
+Architect recommendation: **Option A** first. Small scope, unblocks mobile install (PWA), wraps Phase 4 cleanly. Then re-evaluate Option B based on P-402/P-404/P-405 subjective user feedback.
 
-### Start order (architect recommendation)
-P-401 first (subtitle overflow — highest visible polish, low risk) → P-403 (duration — requires coordination with Gemini prompt changes, medium risk) → P-402 (bilingual TTS — most complex, highest risk) → P-405 (crossfade — quick win) → P-404 (background — cosmetic) → T-4xx core polish in parallel with any P-4xx.
+### Pipeline adjustments carried forward
+- **Spec has `Failure modes` (8-15 items), `Files NOT to touch`, `Local test plan` sections** — mature, keep.
+- **Architect pre-flight audit** against real codebase before dispatch — mature.
+- **Architect local-runs before approve** — for UI, dev server; for video, frame-extract + anullsrc bypass (Phase 4 lesson). Don't `npm run build` during dev server active (Phase 3 lesson).
+- **Three-strikes circuit breaker** — held across Phase 2 (8 hotfix chaos), Phase 3 (2 hotfix), Phase 4 (1 hotfix). Keep.
+- **Protected-region grep** — new in Phase 4. For any render.mjs / processor.ts / prompts.ts touch, grep diff for sentinels from prior phases to verify no regression.
+- **Architect overrides of blueprint prescriptions are expected** (Phase 4: 3/5 overrides). Document in spec Context section + Decisions log.
 
 ---
 
@@ -136,8 +152,8 @@ All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 1. Read this file (you did).
 2. Read the memory files above (auto-loaded).
 3. Read `ARCHITECT_BLUEPRINT.md` §1, §2, §3, §10, §13.
-4. `git log --oneline -10 main` to confirm tip is `3b3ba5c` (or newer if user merged more between sessions).
-5. Propose Phase 4 start order (P-401 → P-403 → P-402 → P-405 → P-404, T-4xx in parallel) with 2 pipeline adjustments (rate-limit test hygiene + badge overlap UI review step). Wait for user approval.
-6. On user approval, draft Phase 4 specs per validated Phase 3 pipeline (Failure modes + Local test plan + Files NOT to touch + new "E2E test hygiene" + "badge overlap check" sections where relevant).
+4. `git log --oneline -10 main` to confirm tip is close to `8682a3e` (P-404 merge) or the architect-close commit right after.
+5. Ask user: "Phase 4 core polish (T-401..T-404) hay Phase 5 scope discussion?"
+6. On user choice, draft spec(s) per validated Phase 3+4 pipeline (Failure modes, Files NOT to touch, Local test plan, protected-region grep sentinels, appropriate review technique per task domain).
 
 Do **NOT** skip step 5. Pattern that worked twice (Phase 2 → Phase 3 transition, and this one if user follows) is propose-then-spec, never spec-first.

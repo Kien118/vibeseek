@@ -1,6 +1,6 @@
 # P-404 · Background đơn sắc → animated gradient
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** LOW (Phase 4 cosmetic polish)
 **Blueprint ref:** §10 Phase 4 · P-404
 **Branch:** `task/P-404-background-gradient`
