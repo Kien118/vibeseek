@@ -1,6 +1,6 @@
 # T-402 · 3D scene outer loading skeleton
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** LOW (Phase 4 core polish — cosmetic)
 **Blueprint ref:** §10 Phase 4 Core polish · T-402
 **Branch:** `task/T-402-3d-loading-skeleton`

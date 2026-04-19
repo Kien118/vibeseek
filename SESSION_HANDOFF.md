@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** Phase 4 video quality complete (2026-04-19). Commit tip: `8682a3e` P-404 merge + architect close commit appended. **Phase 4 video: 5/5 tasks, 1 hotfix total (P-401 libass PlayRes only).**
+> **Last refresh:** Phase 4 FULLY COMPLETE — video + core polish (2026-04-19). Commit tip: `fbdc577` T-401 merge + architect close. **Phase 4 overall: 9/9 tasks, 1 hotfix total, 3 blueprint overrides, 2 rebase-rescues for parallel-dispatch AGENT_LOG conflicts.**
 
 ---
 
@@ -10,12 +10,10 @@
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
 Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
-Gen Z Việt Nam. Tôi đã hoàn tất Phase 0/1/2/3/4-video-quality với bạn
-(Phase 4 P-401..P-405 đã xong 5/5, chỉ 1 hotfix P-401 libass PlayRes).
-Phiên này ta làm **Phase 4 core polish** (T-401..T-404: error boundaries,
-3D skeleton, PWA manifest, log cleanup) HOẶC pivot **Phase 5** (scope TBD
-— per-scene distinct visuals, SSML voice switching, Redis rate-limit, or
-persistent chat_messages).
+Gen Z Việt Nam. Tôi đã hoàn tất **Phase 0/1/2/3/4-full** (P + T), tổng 9/9
+Phase 4 tasks merged. Phiên này ta hoặc (A) E2E full smoke Phase 4 dashboard
+upload + all features, (B) pivot **Phase 5** (scope TBD), hoặc (C) đóng
+session nếu MVP đủ demo-ready.
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -50,8 +48,8 @@ xuất quy trình. Không viết spec vội.
 | 2 Quiz + Leaderboard | T-201…T-206 | ✅ done + E2E verified (8 hotfixes) |
 | 3 Chatbot RAG | T-301…T-305 | ✅ done (2 hotfixes) |
 | 4 Polish — video quality | P-401…P-405 | ✅ done (1 hotfix, all 5 merged 2026-04-19) |
-| 4 Polish — core | T-401…T-404 | 📝 specs NOT written yet |
-| 5 TBD | — | — |
+| 4 Polish — core | T-401…T-404 | ✅ done (0 hotfix, 2 rebase-rescues — parallel dispatch AGENT_LOG conflicts) |
+| 5 TBD | — | 📝 scope not yet decided |
 
 Commit tips worth knowing:
 - `cf75ca1` — architect close T-305 + Phase 3 complete marker

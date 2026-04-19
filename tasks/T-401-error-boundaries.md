@@ -1,6 +1,6 @@
 # T-401 · Error boundaries + empty states
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MEDIUM (Phase 4 core polish — user-visible UX)
 **Blueprint ref:** §10 Phase 4 Core polish · T-401
 **Branch:** `task/T-401-error-boundaries`
