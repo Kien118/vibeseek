@@ -1,6 +1,6 @@
 # P-402 · English terms mispronounced by vi-VN TTS — dual-field narration
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** MEDIUM (Phase 4 video quality polish)
 **Blueprint ref:** §10 Phase 4 · P-402
 **Branch:** `task/P-402-english-tts-pronunciation`
@@ -284,7 +284,10 @@ Use a job with English terms. Listen to output MP4 audio.
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills)_
+- **D-1** (agent, 2026-04-19): Chose smoke strategy (b) — inline-copy parser logic in `scripts/smoke-p402.ts`. Zero drift risk after deletion; matches P-401/P-403 precedent. No temporary export in `processor.ts` ever added, so AC-10 grep guaranteed clean.
+- **D-2** (agent, 2026-04-19): Part 2 Gemini smoke ran despite quota on flash/flash-lite — retried once after 30s and 2.5-flash succeeded. Logged 4 scene narration↔speakable diffs in PR body. All 4 scenes DISTINCT (phonetic applied) — prompt works on first real call. Scene 1 also triggered P-403 safety-net (21 words > 7s × 2.5 → duration_sec 7→11), confirming P-402 changes don't regress P-403.
+- **D-3** (agent, 2026-04-19): Added `speakable_narration` extraction as a single line immediately after `narration` extraction (not refactored into a helper). Keeps the scene-mapping block compact and matches the spec's diff shape byte-for-byte.
+- **D-4** (agent, 2026-04-19): Render.mjs TTS block change is isolated to lines 204-218 (the TTS for-loop). Subtitle generation block at line 257+ (ASS dialogue + `splitNarrationLines(narration, 36)` + P-401 ASS header) is verified unchanged via `git diff main -- scripts/render/render.mjs`.
 
 ## Notes for reviewer
 - Phase 4 lessons apply:
