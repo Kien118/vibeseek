@@ -1,6 +1,6 @@
 # P-405 · Scene transitions feel abrupt — ASS subtitle fade
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** LOW (Phase 4 cosmetic polish)
 **Blueprint ref:** §10 Phase 4 · P-405
 **Branch:** `task/P-405-scene-transitions`
@@ -245,7 +245,11 @@ Expected content shows `Dialogue: 0,0:00:00.00,0:00:04.00,Default,,0,0,0,,{\fad(
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills)_
+
+- **D-1** (executor 2026-04-19): Applied spec §1 verbatim — single edit to `render.mjs` L280 prepending `{\\fad(300,300)}` to the text field inside the template literal. No other lines touched in the dialogue loop or anywhere else in render.mjs.
+- **D-2** (executor 2026-04-19): Smoke script `scripts/render/smoke-p405.mjs` authored verbatim from spec §2, incl. anullsrc bypass, `ffmpeg subtitles=` filter, and 4 diagnostic frame extractions at T=0.15/2.00/3.85/4.15s. Executed successfully — ffmpeg gyan.dev build 2026-04-09 on Windows; output PNGs visually verified via Read tool.
+- **D-3** (executor 2026-04-19): Visual confirmation — `frame-full.png` (T=2.0s, scene 1 mid) shows subtitle at full opacity (bright white); `frame-fade-in.png`/`frame-fade-out.png`/`frame-scene2-in.png` show the same text at visibly reduced opacity (~50%). PNG byte-size gradient (51763 B full > 49054 B scene2-in > 46262 B fade-in > 43668 B fade-out) corroborates visual finding. `\fad` tag honored by libass end-to-end.
+- **D-4** (executor 2026-04-19): AC-6 cleanup — smoke script + `smoke-out.mp4` + 4 PNG frames deleted before commit. AC-7 regression grep: `git diff main` produced only the single intended dialogue-line change; P-401 (PlayResX, V4+ Styles, splitNarrationLines, formatAssTime helpers) / P-402 (speakable_narration) / P-403 (OVERFLOW_RATIO, word-count parser) regions all byte-for-byte preserved.
 
 ## Notes for reviewer
 - Phase 4 lessons apply:
