@@ -310,7 +310,7 @@ async function main() {
     await run('ffmpeg', [
       '-y',
       '-f', 'lavfi',
-      '-i', `color=c=#1a1a2e:s=1080x1920:d=${Math.ceil(totalDuration)}`,
+      '-i', `gradients=s=1080x1920:d=${Math.ceil(totalDuration)}:c0=0x1a1a2e:c1=0x2d1b4e:x0=0:y0=0:x1=1080:y1=1920:speed=0.008:rate=30`,
       '-i', audioPath,
       '-vf', `subtitles=subtitles.ass`,
       '-c:v', 'libx264',
