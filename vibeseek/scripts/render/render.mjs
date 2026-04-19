@@ -126,7 +126,7 @@ async function probeDuration(filePath) {
  * Single words longer than the cap get their own line (no mid-word break).
  * Returns [] for empty / whitespace-only input.
  */
-function splitNarrationLines(text, maxCharsPerLine = 40) {
+function splitNarrationLines(text, maxCharsPerLine = 36) {
   const words = text.trim().split(/\s+/).filter(Boolean)
   if (words.length === 0) return []
   const lines = []
@@ -146,19 +146,14 @@ function splitNarrationLines(text, maxCharsPerLine = 40) {
 }
 
 /**
- * Format seconds to SRT timestamp: HH:MM:SS,mmm
+ * Format seconds to ASS timestamp: H:MM:SS.cc (centiseconds).
  */
-function formatSrtTime(seconds) {
+function formatAssTime(seconds) {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
   const s = Math.floor(seconds % 60)
-  const ms = Math.round((seconds % 1) * 1000)
-  return (
-    String(h).padStart(2, '0') + ':' +
-    String(m).padStart(2, '0') + ':' +
-    String(s).padStart(2, '0') + ',' +
-    String(ms).padStart(3, '0')
-  )
+  const cs = Math.round((seconds % 1) * 100)
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
 }
 
 // ---------------------------------------------------------------------------
@@ -244,10 +239,11 @@ async function main() {
     const totalDuration = await probeDuration(audioPath)
     console.log(`Total audio duration: ${totalDuration.toFixed(2)}s`)
 
-    // 7. Generate SRT subtitles
-    console.log('Generating SRT subtitles...')
-    const srtPath = join(workDir, 'subtitles.srt')
-    let srtContent = ''
+    // 7. Generate ASS subtitles (explicit PlayResX/Y so libass doesn't scale up
+    // from its default 384x288 canvas — root cause of the Phase 1 overflow bug).
+    console.log('Generating ASS subtitles...')
+    const assPath = join(workDir, 'subtitles.ass')
+    let dialogueLines = ''
     let cumulativeTime = 0
 
     // Get individual scene durations for accurate timing
@@ -268,9 +264,7 @@ async function main() {
       const endTime = cumulativeTime + dur
       cumulativeTime = endTime
 
-      srtContent += `${wavIdx + 1}\n`
-      srtContent += `${formatSrtTime(startTime)} --> ${formatSrtTime(endTime)}\n`
-      const allLines = splitNarrationLines(narration, 40)
+      const allLines = splitNarrationLines(narration, 36)
       let displayLines
       if (allLines.length <= 2) {
         displayLines = allLines
@@ -278,13 +272,31 @@ async function main() {
         // Cap at 2 lines — line 2 gets ellipsis. Narration audio still plays full.
         displayLines = [allLines[0], allLines[1].replace(/[.,!?…\s]*$/, '') + '…']
       }
-      srtContent += displayLines.join('\n') + '\n\n'
+      // ASS uses `\N` for hard newline; join our manually-split lines with it.
+      const text = displayLines.join('\\N')
+      dialogueLines += `Dialogue: 0,${formatAssTime(startTime)},${formatAssTime(endTime)},Default,,0,0,0,,${text}\n`
       wavIdx++
     }
 
-    // Write SRT with UTF-8 BOM for Vietnamese diacritics
-    const BOM = '\uFEFF'
-    await writeFile(srtPath, BOM + srtContent, 'utf-8')
+    const assHeader = [
+      '[Script Info]',
+      'ScriptType: v4.00+',
+      'PlayResX: 1080',
+      'PlayResY: 1920',
+      'WrapStyle: 2',
+      'ScaledBorderAndShadow: yes',
+      '',
+      '[V4+ Styles]',
+      'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding',
+      // FontSize=56 reads as 56/1920 ≈ 2.9% of height — legible in 9:16 vertical format.
+      // Alignment=2 bottom-center. MarginV=160 from bottom edge.
+      'Style: Default,Arial,56,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,2,2,40,40,160,1',
+      '',
+      '[Events]',
+      'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text',
+    ].join('\n') + '\n'
+
+    await writeFile(assPath, assHeader + dialogueLines, 'utf-8')
 
     // 8. Render video with ffmpeg
     // Use relative paths for the subtitles filter to avoid Windows drive-letter
@@ -297,7 +309,7 @@ async function main() {
       '-f', 'lavfi',
       '-i', `color=c=#1a1a2e:s=1080x1920:d=${Math.ceil(totalDuration)}`,
       '-i', audioPath,
-      '-vf', `subtitles=subtitles.srt:force_style='Fontsize=40,Alignment=2,MarginV=160,FontName=Arial,WrapStyle=2,Outline=2,Shadow=1,PrimaryColour=&H00FFFFFF&,OutlineColour=&H00000000&'`,
+      '-vf', `subtitles=subtitles.ass`,
       '-c:v', 'libx264',
       '-preset', 'fast',
       '-pix_fmt', 'yuv420p',

@@ -16,7 +16,7 @@
 
 **Blueprint prescription (§10 P-401):** "force_style='MaxLineCount=2,FontSize=40' + SRT generator split lines > 40 chars".
 
-**Architect note (2026-04-19):** libass `force_style` does NOT accept `MaxLineCount` — that's an ASS Dialogue field, not a style override. The real fix is to pre-split the narration at word boundaries into lines ≤ ~40 chars, join them with `\n` (libass renders newlines in SRT), and let libass honor the manual wrap via `WrapStyle=2`. FontSize drops 48 → 40. For 2-line cap: truncate surplus lines + append `…` ellipsis; audio remains full-length (narration plays in full, subtitle shows first 2 lines only).
+**Architect note (2026-04-19, REVISED post-review):** The SRT-based fix from the initial spec was insufficient. **Root cause discovered during review:** libass with SRT input uses a default canvas `PlayResX=384, PlayResY=288` — fonts get scaled up ~3–6× when rendered onto a 1080×1920 video, regardless of `force_style='Fontsize=N'`. The `subtitles` filter's `original_size=1080x1920` option does not fix the scale. **Real fix:** emit a full ASS file with an explicit `[Script Info]` header declaring `PlayResX: 1080, PlayResY: 1920`, embed the `[V4+ Styles]` + `[Events]` sections, and drop `force_style` entirely. libass then renders at the correct scale. Manual line-split at word boundaries (≤36 chars/line) + 2-line cap with `…` ellipsis on line 2 when overflow. Fontsize=56 against the explicit 1920-tall canvas = readable on mobile 9:16.
 
 ## Files to touch
 - `vibeseek/scripts/render/render.mjs` — add splitter helper + update SRT writer + update ffmpeg force_style
@@ -34,7 +34,7 @@
 
 ## Architect's spec
 
-### 1. Add helper `splitNarrationLines(text, maxCharsPerLine = 40)`
+### 1. Add helper `splitNarrationLines(text, maxCharsPerLine = 36)`
 
 Place above `formatSrtTime` (near other helpers, ~line 125):
 
@@ -44,7 +44,7 @@ Place above `formatSrtTime` (near other helpers, ~line 125):
  * Single words longer than the cap get their own line (no mid-word break).
  * Returns [] for empty / whitespace-only input.
  */
-function splitNarrationLines(text, maxCharsPerLine = 40) {
+function splitNarrationLines(text, maxCharsPerLine = 36) {
   const words = text.trim().split(/\s+/).filter(Boolean)
   if (words.length === 0) return []
   const lines = []
@@ -73,7 +73,7 @@ srtContent += `${narration}\n\n`
 
 with:
 ```javascript
-const allLines = splitNarrationLines(narration, 40)
+const allLines = splitNarrationLines(narration, 36)
 let displayLines
 if (allLines.length <= 2) {
   displayLines = allLines
@@ -84,24 +84,56 @@ if (allLines.length <= 2) {
 srtContent += displayLines.join('\n') + '\n\n'
 ```
 
-### 3. Update ffmpeg force_style (line 268 currently)
+### 3. REVISED: SRT → ASS with explicit PlayRes
 
-Replace:
+**Why:** SRT lacks a `[Script Info]` header; libass falls back to `PlayResX=384, PlayResY=288` default, which causes 3-6× font scale-up on 1080x1920 output. `force_style='Fontsize=N'` operates in that mismatched coordinate space, so no value of N gives predictable size. See Decisions log / failure mode F-13.
+
+**Implementation:**
+
+(a) Replace `formatSrtTime` with `formatAssTime` (ASS uses `H:MM:SS.cc`):
 ```javascript
-'-vf', `subtitles=subtitles.srt:force_style='Fontsize=48,Alignment=2,MarginV=200,FontName=Arial'`,
+function formatAssTime(seconds) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const cs = Math.round((seconds % 1) * 100)
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
+}
 ```
 
-with:
-```javascript
-'-vf', `subtitles=subtitles.srt:force_style='Fontsize=40,Alignment=2,MarginV=160,FontName=Arial,WrapStyle=2,Outline=2,Shadow=1,PrimaryColour=&H00FFFFFF&,OutlineColour=&H00000000&'`,
+(b) Emit ASS instead of SRT. Header block:
+```
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,56,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,3,2,2,40,40,160,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 ```
 
-**Rationale for each parameter:**
-- `Fontsize=40` — fits more chars per line at 1080 width (from 48).
-- `MarginV=160` — slightly tighter bottom margin (from 200) so 2-line subs don't run into frame bottom.
-- `WrapStyle=2` — disable libass auto-wrap; honor our manual `\n` exactly.
-- `Outline=2,Shadow=1` — readable on any background; Phase 4 P-404 will swap the monochrome bg for a gradient, outlines stay legible.
-- `PrimaryColour=&H00FFFFFF&` (white fill) + `OutlineColour=&H00000000&` (black outline) — explicit defaults; avoid Fontconfig/libass fallback differences between Windows local and Ubuntu GH Actions runner.
+Dialogue line per scene: `Dialogue: 0,{startAss},{endAss},Default,,0,0,0,,{text with \N}`
+Display lines joined with ASS hard-newline `\N` (escaped as `\\N` in the JS template string).
+
+(c) ffmpeg command simplified:
+```javascript
+'-vf', `subtitles=subtitles.ass`,
+```
+No `force_style`, no `original_size` — ASS header carries the full style + coordinate system.
+
+**Style field semantics:**
+- `Fontsize=56` at 1920-tall canvas = ~2.9% of height, legible on mobile 9:16
+- `Alignment=2` = bottom-center
+- `MarginV=160,MarginL=40,MarginR=40` = 160px from bottom edge, 40px each side
+- `Outline=2, Shadow=2, BorderStyle=1` = white text, 2px black outline, 2px shadow — stays readable when Phase 4 P-404 swaps the monochrome background for gradient/pattern
+- `PrimaryColour=&H00FFFFFF` = white fill, `OutlineColour=&H00000000` = black outline. Explicit avoids Fontconfig/libass fallback drift between Windows dev and Ubuntu GH runner.
+- `ScaledBorderAndShadow: yes` = outline/shadow scale with PlayRes (guards against future runner font-substitution quirks).
 
 ### 4. Create `scripts/render/smoke-p401.mjs` (LOCAL SMOKE — delete before PR)
 
@@ -229,6 +261,7 @@ main().catch(err => { console.error(err); process.exit(1) })
 | F-10 | Very short narration (< 10 chars) leaves huge empty screen | Out of scope — font visible, frame bg visible, acceptable. |
 | F-11 | Changing FontSize 48 → 40 retroactively shrinks all existing videos' subtitle size | By design — user explicitly flagged 48 too big. Acceptable. |
 | F-12 | Agent copies helpers into smoke but forgets to keep in sync if render.mjs helpers change mid-task | Agent keeps render.mjs the source of truth; smoke copies at task-start and is deleted before PR. Sync risk ends with deletion. |
+| F-13 | **libass SRT default PlayRes=384×288 scales font 3-6× up on 1080×1920 output** — no `force_style='Fontsize=N'` value gives predictable size because it operates in default coordinate space | **Emit ASS with explicit `PlayResX: 1080, PlayResY: 1920` in `[Script Info]`.** Do NOT rely on `subtitles=…:original_size=1080x1920` — that filter option does not fix this specific scaling. Root cause of the Phase 1 E2E "subtitle tràn" bug user reported 2026-04-17. |
 
 ## Local test plan
 
@@ -282,7 +315,8 @@ Upload a real PDF via dashboard → video renders via GH Actions → download MP
 _(none — spec self-contained)_
 
 ## Decisions log
-- **2026-04-19 · claude-opus-4-7** — AC-5 smoke (`node smoke-p401.mjs`) blocked locally: `spawn edge-tts ENOENT`. The Python module `edge_tts` IS installed (`python -m edge_tts --version` → 7.2.8), but the `edge-tts` CLI shim isn't on PATH in this Git Bash environment. Did NOT modify `render.mjs`'s `tts()` helper (would violate "3 targeted edits only" constraint) and did NOT alter `smoke-p401.mjs`'s verbatim-copy of that helper. AC-4 syntax check pass on both files. AC-1/2/3 code-level pass by inspection. User must verify AC-5/AC-6 locally with proper `edge-tts` CLI on PATH (`pipx install edge-tts` or add Python Scripts dir to PATH).
+- **2026-04-19 · claude-opus-4-7 (executor)** — AC-5 smoke (`node smoke-p401.mjs`) blocked locally: `spawn edge-tts ENOENT`. The Python module `edge_tts` IS installed (`python -m edge_tts --version` → 7.2.8), but the `edge-tts` CLI shim isn't on PATH in this Git Bash environment. Did NOT modify `render.mjs`'s `tts()` helper (would violate "3 targeted edits only" constraint) and did NOT alter `smoke-p401.mjs`'s verbatim-copy of that helper. AC-4 syntax check pass on both files. AC-1/2/3 code-level pass by inspection. User must verify AC-5/AC-6 locally with proper `edge-tts` CLI on PATH (`pipx install edge-tts` or add Python Scripts dir to PATH).
+- **2026-04-19 · architect (post-review hotfix)** — Agent implementation followed spec exactly. During review, architect bypassed edge-tts blocker via silent `anullsrc` audio + ffmpeg frame extraction. First smoke revealed text rendered ~3-6× larger than Fontsize= requested. Root cause: libass SRT input defaults to `PlayResX=384 PlayResY=288` canvas → font scales up on 1080x1920 output. Iterated Fontsize 40→32→28→24 + char caps 40→32→28→36 — overflow persisted because font was being SCALED not sized. Added `original_size=1080x1920` filter option — no effect (that option controls something else). **Real fix: emit `.ass` with explicit `PlayResX/PlayResY: 1080/1920` header + embedded `[V4+ Styles]` block; drop `force_style` entirely.** Fontsize=56 on the correct canvas = legible. Frame extraction from smoke-out.mp4 at scene 1/2/3 timestamps confirmed proper bottom-anchored 2-line render with ellipsis. This also explains the Phase 1 E2E "subtitle tràn" bug root cause. Spec §2/§3 rewritten to match final ASS implementation; F-13 added to failure modes checklist.
 
 ## Notes for reviewer
 - Phase 3 pipeline applies: reviewer runs smoke locally (Test 2+3) before approve.
