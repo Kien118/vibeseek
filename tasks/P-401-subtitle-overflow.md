@@ -282,7 +282,7 @@ Upload a real PDF via dashboard → video renders via GH Actions → download MP
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills — especially if libass behavior on local ffmpeg differs from expected, or if 40 chars/line still overflows and need to drop further)_
+- **2026-04-19 · claude-opus-4-7** — AC-5 smoke (`node smoke-p401.mjs`) blocked locally: `spawn edge-tts ENOENT`. The Python module `edge_tts` IS installed (`python -m edge_tts --version` → 7.2.8), but the `edge-tts` CLI shim isn't on PATH in this Git Bash environment. Did NOT modify `render.mjs`'s `tts()` helper (would violate "3 targeted edits only" constraint) and did NOT alter `smoke-p401.mjs`'s verbatim-copy of that helper. AC-4 syntax check pass on both files. AC-1/2/3 code-level pass by inspection. User must verify AC-5/AC-6 locally with proper `edge-tts` CLI on PATH (`pipx install edge-tts` or add Python Scripts dir to PATH).
 
 ## Notes for reviewer
 - Phase 3 pipeline applies: reviewer runs smoke locally (Test 2+3) before approve.

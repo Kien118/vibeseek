@@ -122,6 +122,30 @@ async function probeDuration(filePath) {
 }
 
 /**
+ * Split a narration string into lines ≤ maxCharsPerLine at word boundaries.
+ * Single words longer than the cap get their own line (no mid-word break).
+ * Returns [] for empty / whitespace-only input.
+ */
+function splitNarrationLines(text, maxCharsPerLine = 40) {
+  const words = text.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return []
+  const lines = []
+  let current = ''
+  for (const w of words) {
+    if (!current) {
+      current = w
+    } else if ((current + ' ' + w).length <= maxCharsPerLine) {
+      current += ' ' + w
+    } else {
+      lines.push(current)
+      current = w
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
+
+/**
  * Format seconds to SRT timestamp: HH:MM:SS,mmm
  */
 function formatSrtTime(seconds) {
@@ -246,7 +270,15 @@ async function main() {
 
       srtContent += `${wavIdx + 1}\n`
       srtContent += `${formatSrtTime(startTime)} --> ${formatSrtTime(endTime)}\n`
-      srtContent += `${narration}\n\n`
+      const allLines = splitNarrationLines(narration, 40)
+      let displayLines
+      if (allLines.length <= 2) {
+        displayLines = allLines
+      } else {
+        // Cap at 2 lines — line 2 gets ellipsis. Narration audio still plays full.
+        displayLines = [allLines[0], allLines[1].replace(/[.,!?…\s]*$/, '') + '…']
+      }
+      srtContent += displayLines.join('\n') + '\n\n'
       wavIdx++
     }
 
@@ -265,7 +297,7 @@ async function main() {
       '-f', 'lavfi',
       '-i', `color=c=#1a1a2e:s=1080x1920:d=${Math.ceil(totalDuration)}`,
       '-i', audioPath,
-      '-vf', `subtitles=subtitles.srt:force_style='Fontsize=48,Alignment=2,MarginV=200,FontName=Arial'`,
+      '-vf', `subtitles=subtitles.srt:force_style='Fontsize=40,Alignment=2,MarginV=160,FontName=Arial,WrapStyle=2,Outline=2,Shadow=1,PrimaryColour=&H00FFFFFF&,OutlineColour=&H00000000&'`,
       '-c:v', 'libx264',
       '-preset', 'fast',
       '-pix_fmt', 'yuv420p',
