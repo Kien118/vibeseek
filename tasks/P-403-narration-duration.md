@@ -1,6 +1,6 @@
 # P-403 · Narration duration vs scene duration_sec — word-count budget
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** MEDIUM (Phase 4 video quality polish)
 **Blueprint ref:** §10 Phase 4 · P-403
 **Branch:** `task/P-403-narration-duration`
@@ -261,7 +261,14 @@ Render a real video after P-403 merge. Check that subtitle timing (SRT timestamp
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills)_
+
+- **D-1 (smoke strategy):** picked option (b) — inline-copy of `parseStoryboardResponse` + `countWords` + constants into `scripts/smoke-p403.ts`. Rationale: avoid adding a throw-away `export` to `processor.ts` and the risk of forgetting to revert it (spec F-9 / AC-8). The smoke file is self-contained and deleted before PR, so short-term duplication has no drift surface.
+- **D-2 (smoke cleanup):** after tsc + build + Part 1 + Part 2 all pass, deleted `scripts/smoke-p403.ts`. Verified `processor.ts` exports unchanged vs `main` (`git diff main -- lib/ai/processor.ts | grep '^[+-]export'` = empty).
+- **D-3 (Part 2 real Gemini):** ran with `.env.local` sourced. `gemini-2.0-flash` + `gemini-2.0-flash-lite` both quota'd, `gemini-2.5-flash` succeeded. Two scenes triggered the safety-net extension:
+  - scene 1: 20 words / 6s → extended to 10s (final ratio 2.00 w/s)
+  - scene 3: 21 words / 8s → extended to 11s (final ratio 1.91 w/s)
+  - scenes 2 + 4 were already in-budget at source (2.25 + 2.38 w/s respectively). All final scene ratios ≤ 2.38 w/s < OVERFLOW_RATIO=2.5. Prompt+parser combo works end-to-end against the same model user most commonly hits.
+- **D-4 (smoke type cast):** Part 2 sample cards required `card_type: 'concept' as const` (vs plain `string`) to satisfy the `Pick<VibeCard, 'card_type' | ...>` union literal type in `generateVideoStoryboard`. Cosmetic; no impact on production code.
 
 ## Notes for reviewer
 - Phase 4 lessons apply:
