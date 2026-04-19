@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { getOrCreateAnonId } from '@/utils/anon-id'
 import LeaderboardTable, { LeaderboardRow } from '@/components/LeaderboardTable'
 import { Loader2 } from 'lucide-react'
@@ -70,6 +71,20 @@ export default function LeaderboardPage() {
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-indigo-400" /></div>
+      ) : rows.length === 0 ? (
+        <div className="text-center p-12 space-y-4">
+          <div className="text-6xl">🏆</div>
+          <h2 className="text-xl font-bold text-white">Chưa có ai trên bảng</h2>
+          <p className="text-white/60 text-sm max-w-md mx-auto">
+            Hoàn thành quiz đầu tiên để xuất hiện trên leaderboard.
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm hover:opacity-90"
+          >
+            Về Dashboard
+          </Link>
+        </div>
       ) : (
         <LeaderboardTable rows={rows} highlightAnonId={anonId} />
       )}

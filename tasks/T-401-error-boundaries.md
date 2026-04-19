@@ -1,6 +1,6 @@
 # T-401 · Error boundaries + empty states
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** MEDIUM (Phase 4 core polish — user-visible UX)
 **Blueprint ref:** §10 Phase 4 Core polish · T-401
 **Branch:** `task/T-401-error-boundaries`
@@ -349,7 +349,18 @@ New incognito → /leaderboard. Expected: 🏆 empty-state prompt with "Về Das
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills — especially if dashboard/leaderboard page.tsx has unexpected state variable names or existing empty-branch logic that needs different integration)_
+
+**D-1 · Dashboard state variable = `cards`, not `documents`.** Spec suggested `documents.length === 0`; actual state in `app/dashboard/page.tsx` is `cards: Array<Omit<VibeCardType, ...>>` (line 35). Used `cards.length === 0` per F-4 guidance (matches actual code).
+
+**D-2 · Dashboard empty-state trigger = `cards.length === 0 && !isProcessing && !isGeneratingVideo && !currentJobId`.** The dashboard is an upload studio (form always visible), not a list view. Gating only on `cards.length === 0` would flash the empty state during an active upload (between `setCards([])` in `handleAnalyzePdf` L59 and the response). Added the three activity flags to ensure the empty state only appears on idle first-visit or post-error states, never during active pipeline work. Kept inline between upload form and result sections, styled with `glass` class + `dashboard-empty-state` id (consistent with adjacent `dashboard-result glass` sections).
+
+**D-3 · Leaderboard state variable = `rows`, not `profiles`.** Spec suggested `profiles.length === 0`; actual state in `app/leaderboard/page.tsx` is `rows: LeaderboardRow[]` (line 9). Used `rows.length === 0` per F-4. Integrated as a new branch in the existing `loading ? ... : ...` ternary → `loading ? <Loader/> : rows.length === 0 ? <EmptyState/> : <Table/>`. Added `import Link from 'next/link'` since the existing file didn't have it but the empty state needs the secondary CTA link.
+
+**D-4 · AC-8 `npm run build` deferred to user.** Dev server detected listening on :3000 (PID 24640) at time of completion. Per Phase 3 lesson (SESSION_HANDOFF Step 5), running `npm run build` while user's dev server is active corrupts `.next/server/` chunks. AC-7 `npx tsc --noEmit` exit 0 verified. AC-8 left for user to run after stopping dev server, or for architect review step.
+
+**D-5 · Text-color defensive pattern.** Every string element in all 6 new files + 2 empty states uses an explicit `text-white` / `text-white/70` / `text-white/60` / `text-white/80` class, preempting Phase 3 F-1 (dark-body color inherit). Reviewer can `grep -r "text-" vibeseek/app/error.tsx vibeseek/app/not-found.tsx vibeseek/app/*/error.tsx vibeseek/app/*/[documentId]/error.tsx` to confirm zero default-colored text nodes.
+
+**D-6 · Escaped right-side quote chars in global error body (`&ldquo;`/`&rdquo;`).** React 18 + Next.js ESLint's `react/no-unescaped-entities` flags raw `"..."` inside JSX text. Used HTML entities for the quoted "Thử lại" reference to pass lint without wrapping the whole string in `{'...'}`.
 
 ## Notes for reviewer
 - Reviewer runs dev server + visits each error path per Test 2/3.
