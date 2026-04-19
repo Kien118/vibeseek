@@ -1,6 +1,6 @@
 # P-404 · Background đơn sắc → animated gradient
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** LOW (Phase 4 cosmetic polish)
 **Blueprint ref:** §10 Phase 4 · P-404
 **Branch:** `task/P-404-background-gradient`
@@ -137,12 +137,12 @@ main().catch(e => { console.error(e); process.exit(1) })
 ```
 
 ## Acceptance criteria
-- [ ] **AC-1:** `render.mjs` ffmpeg `-i color=...` argument swapped to `-i gradients=s=1080x1920:d=...:c0=0x1a1a2e:c1=0x2d1b4e:x0=0:y0=0:x1=1080:y1=1920:speed=0.008:rate=30`. Exactly 1 line changed.
-- [ ] **AC-2:** `node --check scripts/render/render.mjs` exit 0.
-- [ ] **AC-3 (architect-runnable via anullsrc bypass):** smoke-p404.mjs renders 10s MP4 + extracts 3 frames. Architect opens PNGs — frames at T=0.1s, 5.0s, 9.9s show the gradient's color distribution shifting subtly (upper-left corner darker/lighter relative to lower-right across the 3 frames).
+- [x] **AC-1:** `render.mjs` ffmpeg `-i color=...` argument swapped to `-i gradients=s=1080x1920:d=...:c0=0x1a1a2e:c1=0x2d1b4e:x0=0:y0=0:x1=1080:y1=1920:speed=0.008:rate=30`. Exactly 1 line changed.
+- [x] **AC-2:** `node --check scripts/render/render.mjs` exit 0.
+- [x] **AC-3 (architect-runnable via anullsrc bypass):** smoke-p404.mjs renders 10s MP4 + extracts 3 frames. Architect opens PNGs — frames at T=0.1s, 5.0s, 9.9s show the gradient's color distribution shifting subtly (upper-left corner darker/lighter relative to lower-right across the 3 frames).
 - [ ] **AC-4 (User-runnable, post-merge):** Render real video via dashboard. Watch: background should no longer be flat dark blue — should show a subtle gradient with gentle movement. Subtitles + fades (P-405) + audio (P-402) all still work correctly.
-- [ ] **AC-5:** `smoke-p404.mjs` deleted before PR. No touches to any other file beyond the 1-line swap.
-- [ ] **AC-6:** P-401 ASS header, P-402 TTS path, P-403 word-count safety-net, P-405 `\fad` tag all untouched. Grep final diff for `PlayResX`, `speakable_narration`, `OVERFLOW_RATIO`, `splitNarrationLines`, `\\fad` — zero diff lines on these.
+- [x] **AC-5:** `smoke-p404.mjs` deleted before PR. No touches to any other file beyond the 1-line swap.
+- [x] **AC-6:** P-401 ASS header, P-402 TTS path, P-403 word-count safety-net, P-405 `\fad` tag all untouched. Grep final diff for `PlayResX`, `speakable_narration`, `OVERFLOW_RATIO`, `splitNarrationLines`, `\\fad` — zero diff lines on these.
 
 ## Definition of Done
 - All AC pass
@@ -212,7 +212,11 @@ User uploads a PDF → render completes → dashboard video player. Watch 10-20s
 _(none — spec self-contained)_
 
 ## Decisions log
-_(agent fills)_
+
+- **D-1 (executor, 2026-04-19):** Spec applied byte-for-byte. Single array element at `vibeseek/scripts/render/render.mjs` L313 swapped from `` `color=c=#1a1a2e:s=1080x1920:d=${Math.ceil(totalDuration)}` `` → `` `gradients=s=1080x1920:d=${Math.ceil(totalDuration)}:c0=0x1a1a2e:c1=0x2d1b4e:x0=0:y0=0:x1=1080:y1=1920:speed=0.008:rate=30` ``. `git diff main` shows 1 added line + 1 removed line. No other render.mjs region touched.
+- **D-2 (executor, 2026-04-19):** Local ffmpeg has `gradients` filter (`ffmpeg -filters | grep gradients` → `.S gradients |->V Draw a gradients.`). F-1 fallback path not needed. Same gyan.dev Windows build the architect verified.
+- **D-3 (executor, 2026-04-19):** AC-3 smoke results: 10s MP4 (465310 B) + 3 PNG frames at T=0.1s/5.0s/9.9s with sizes 49484 / 72563 / 51664 B. Different sizes alone confirm non-static frames. Visual Read on the PNGs: T=0.1s shows diagonal navy upper-left → purple lower-right; T=5.0s the gradient has cycled toward a more uniform deep purple wash; T=9.9s vertical purple banding emerges with a darker upper-left corner. Color distribution clearly shifts between frames → `speed=0.008` is animating as designed (F-8 cleared). Subtitle "Nền gradient chạy mượt" remains crisp white with black outline against the dark gradient (F-3 cleared).
+- **D-4 (executor, 2026-04-19):** Smoke artifacts (`smoke-out.mp4`, `frame-t0.png`, `frame-t5.png`, `frame-t10.png`, `smoke-p404.mjs`) deleted pre-commit. `git status` post-cleanup shows only `vibeseek/scripts/render/render.mjs` modified. No artifact leak (F-7 cleared). No new deps, no new files in final diff.
 
 ## Notes for reviewer
 - Phase 4 lesson frame-extract technique is the architect verification tool. Expect reviewer to run `smoke-p404.mjs` locally (or equivalent architect-side smoke) + open 3 PNGs to confirm gradient motion.
