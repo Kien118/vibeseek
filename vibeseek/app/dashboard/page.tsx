@@ -174,12 +174,20 @@ export default function DashboardPage() {
               <h2>Generated Vibe Cards: {cards.length}</h2>
               <p>Total vibe points: +{totalVibePoints}</p>
               {documentId && documentId !== 'local' && (
-                <Link
-                  href={`/quiz/${documentId}`}
-                  className="inline-block mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
-                >
-                  🎯 Làm Quiz
-                </Link>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Link
+                    href={`/quiz/${documentId}`}
+                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+                  >
+                    🎯 Làm Quiz
+                  </Link>
+                  <Link
+                    href={`/chat/${documentId}`}
+                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+                  >
+                    💬 Chat với DOJO
+                  </Link>
+                </div>
               )}
             </div>
             <div className="dashboard-card-grid">
