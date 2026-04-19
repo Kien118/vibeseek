@@ -1,6 +1,6 @@
 # P-405 · Scene transitions feel abrupt — ASS subtitle fade
 
-**Status:** `todo`
+**Status:** `in-progress`
 **Severity:** LOW (Phase 4 cosmetic polish)
 **Blueprint ref:** §10 Phase 4 · P-405
 **Branch:** `task/P-405-scene-transitions`
