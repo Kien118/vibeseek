@@ -168,6 +168,16 @@ export default function DashboardPage() {
           {error && <p className="dashboard-error">{error}</p>}
         </section>
 
+        {cards.length === 0 && !isProcessing && !isGeneratingVideo && !currentJobId && (
+          <section className="dashboard-empty-state glass text-center p-12 space-y-4">
+            <div className="text-6xl">📚</div>
+            <h2 className="text-xl font-bold text-white">Chưa có tài liệu nào</h2>
+            <p className="text-white/60 text-sm max-w-md mx-auto">
+              Upload PDF đầu tiên để bắt đầu tạo Vibe Cards, Quiz, và chat với DOJO.
+            </p>
+          </section>
+        )}
+
         {cards.length > 0 && (
           <section className="dashboard-result glass">
             <div className="dashboard-result-header">
