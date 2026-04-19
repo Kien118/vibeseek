@@ -192,6 +192,16 @@ function isQuotaError(err: unknown): boolean {
   )
 }
 
+// Helper: count words (whitespace-separated, Vietnamese-safe — diacritics are part of words).
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
+// edge-tts vi-VN-HoaiMyNeural speaking rate. Conservative; empirically 1.5-2.5.
+const WORDS_PER_SECOND = 2
+// Safety-net trigger: Gemini is allowed up to this ratio before we auto-extend.
+const OVERFLOW_RATIO = 2.5
+
 // Helper: parse and validate raw storyboard JSON text
 function parseStoryboardResponse(
   rawText: string,
@@ -205,14 +215,29 @@ function parseStoryboardResponse(
   const parsed = JSON.parse(cleaned) as Partial<VideoStoryboard>
 
   const normalizedScenes = Array.isArray(parsed.scenes)
-    ? parsed.scenes.map((scene, idx) => ({
-        scene_index: Number(scene?.scene_index) || idx + 1,
-        title: String(scene?.title || `Scene ${idx + 1}`),
-        visual_prompt: String(scene?.visual_prompt || ''),
-        narration: String(scene?.narration || ''),
-        on_screen_text: Array.isArray(scene?.on_screen_text) ? scene.on_screen_text.map(String) : [],
-        duration_sec: Math.min(15, Math.max(4, Number(scene?.duration_sec) || 6)),
-      }))
+    ? parsed.scenes.map((scene, idx) => {
+        const narration = String(scene?.narration || '')
+        const originalDuration = Math.min(15, Math.max(4, Number(scene?.duration_sec) || 6))
+
+        const words = countWords(narration)
+        let duration_sec = originalDuration
+        if (words > originalDuration * OVERFLOW_RATIO) {
+          duration_sec = Math.min(15, Math.ceil(words / WORDS_PER_SECOND))
+          console.warn(
+            `[storyboard] scene ${idx + 1} narration ${words} words > ${originalDuration}s × ${OVERFLOW_RATIO} budget; ` +
+            `extending duration_sec ${originalDuration} → ${duration_sec}`
+          )
+        }
+
+        return {
+          scene_index: Number(scene?.scene_index) || idx + 1,
+          title: String(scene?.title || `Scene ${idx + 1}`),
+          visual_prompt: String(scene?.visual_prompt || ''),
+          narration,
+          on_screen_text: Array.isArray(scene?.on_screen_text) ? scene.on_screen_text.map(String) : [],
+          duration_sec,
+        }
+      })
     : []
 
   if (normalizedScenes.length === 0) {
