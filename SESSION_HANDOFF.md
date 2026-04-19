@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** end of Phase 3 (2026-04-19). Commit tip: `cf75ca1` (architect close T-305 + Phase 3 recap).
+> **Last refresh:** Phase 3 fully sealed (2026-04-19). Commit tip: `3b3ba5c` (T-305 hotfix 2 chat header badge overlap). **7/7 E2E tests pass. 2 hotfixes total vs Phase 2 baseline 8.**
 
 ---
 
@@ -10,10 +10,9 @@
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
 Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
-Gen Z Việt Nam. Tôi đã hoàn tất Phase 0/1/2/3 với bạn. Phiên này ta chuyển
-sang Phase 4 (Polish — core + video quality P-401..P-405), HOẶC chạy E2E
-full Phase 3 trước khi qua Phase 4 (Test 4 rate limit UI, Test 5 Strict
-Mode idempotent ensure, Test 6 error state, Test 7 mobile).
+Gen Z Việt Nam. Tôi đã hoàn tất Phase 0/1/2/3 với bạn (Phase 3 đã E2E
+seal — 7/7 tests pass, 2 hotfixes). Phiên này ta chuyển sang Phase 4
+(Polish — T-401..T-404 core + P-401..P-405 video quality).
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -85,31 +84,23 @@ When component has both `Effect A: load → setState` and `Effect B: save(state)
 
 ---
 
-## Step 4 — Proposed workflow for next session
+## Step 4 — Proposed workflow for Phase 4
 
-User can pick one of two directions. Architect proposes based on user's choice:
+Phase 3 closed clean. Phase 4 queued:
 
-### Option A — **E2E full Phase 3 before closing the phase**
-Only Test 2 + 3 of T-305 ran during review. Remaining user-runnable tests:
-- Test 4 — rate limit UI: fire 12 POSTs, confirm 10×200 + 2×429
-- Test 5 — Strict Mode idempotent `/api/embeddings/ensure`: hard-refresh chat page, check Network tab + DB count unchanged
-- Test 6 — error state: `DEBUG_FORCE_GEMINI_FAIL=true` → chat page shows "Thử lại" UX
-- Test 7 — mobile viewport: iPhone 13 DevTools, confirm no overflow / badge overlap
+- **Core polish (T-4xx):** T-401 error boundaries + empty states, T-402 3D scene loading skeletons, T-403 PWA manifest (optional), T-404 dọn `debug-*.log`.
+- **Video quality polish (P-4xx) — found during 2026-04-17 Phase 1 E2E:** P-401 subtitle overflow on 1080x1920 (fix ffmpeg `force_style` + SRT line-split), P-402 English-in-Vietnamese TTS mispronunciation (phonetic rewrite OR bilingual voice concat), P-403 narration duration overshoot scene (limit `duration_sec × 1.5` words, OR probe TTS + extend scene), P-404 monochrome ffmpeg background (upgrade to `testsrc2` gradient or Pexels loop), P-405 scene hard cuts (add `xfade` crossfade 0.3s).
 
-If any of these fail → hotfix commit + retest. If zero fail → Phase 3 formally sealed.
+### Architect's proposal for Phase 4 pipeline
+Continue the 7-step pipeline from Phase 3 (validated: 2 hotfixes across 5 tasks). Two adjustments based on Phase 3 lessons:
 
-### Option B — **Pivot to Phase 4 (video quality polish)**
-Users reported Phase 1 video quality issues during 2026-04-17 E2E. Queued tasks:
-- P-401 Subtitle overflow on 1080x1920 (fix ffmpeg `force_style` + SRT line-split)
-- P-402 English-in-Vietnamese TTS mispronunciation (phonetic rewrite OR bilingual voice concat)
-- P-403 Narration duration overshoot scene (limit narration to `duration_sec × 1.5` từ, or probe TTS + extend scene)
-- P-404 Monochrome ffmpeg background (upgrade to `testsrc2` gradient or Pexels loop)
-- P-405 Scene hard cuts (add `xfade` crossfade 0.3s)
+1. **Add `E2E test hygiene` section to any rate-limit/quota-related spec.** Phase 3 Test 4 false-negative (Date.now() unique keys + 60s bucket pollution) wasted 10 min. Spec must bake fixed literal key into test script + document cool-down window.
+2. **Add `badge/overlay overlap check` to UI review template.** Phase 3 Test 7 caught late because reviewer only ran desktop viewport. Any new page that renders while `VibePointsBadge` is visible must be checked at 390px (iPhone 13) before approve.
 
-Plus core polish T-401..T-404 (error boundaries, 3D skeleton, PWA manifest, log cleanup).
+Video-quality specs (P-4xx) are ffmpeg/edge-tts territory, not React/Next.js, so Phase 2 UI failure modes don't map directly. New failure modes to expect: ffmpeg filter syntax errors, TTS voice availability, encoding codec mismatches, duration edge cases (0s scenes). Spec should list these per task.
 
-### Architect recommendation
-Option A first (20–30 min user effort, definitive close). Then Option B. Don't bundle — closing Phase 3 cleanly makes Phase 4 specs easier to audit against a stable baseline.
+### Start order (architect recommendation)
+P-401 first (subtitle overflow — highest visible polish, low risk) → P-403 (duration — requires coordination with Gemini prompt changes, medium risk) → P-402 (bilingual TTS — most complex, highest risk) → P-405 (crossfade — quick win) → P-404 (background — cosmetic) → T-4xx core polish in parallel with any P-4xx.
 
 ---
 
@@ -145,8 +136,8 @@ All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 1. Read this file (you did).
 2. Read the memory files above (auto-loaded).
 3. Read `ARCHITECT_BLUEPRINT.md` §1, §2, §3, §10, §13.
-4. `git log --oneline -10 main` to confirm tip is `cf75ca1` (or newer if user merged more between sessions).
-5. Ask user: "Phase 3 đóng dứt điểm bằng E2E full (Option A) hay pivot Phase 4 luôn (Option B)?"
-6. On user choice, draft specs per the Phase 3 pipeline (Failure modes + Local test plan + Files NOT to touch).
+4. `git log --oneline -10 main` to confirm tip is `3b3ba5c` (or newer if user merged more between sessions).
+5. Propose Phase 4 start order (P-401 → P-403 → P-402 → P-405 → P-404, T-4xx in parallel) with 2 pipeline adjustments (rate-limit test hygiene + badge overlap UI review step). Wait for user approval.
+6. On user approval, draft Phase 4 specs per validated Phase 3 pipeline (Failure modes + Local test plan + Files NOT to touch + new "E2E test hygiene" + "badge overlap check" sections where relevant).
 
 Do **NOT** skip step 5. Pattern that worked twice (Phase 2 → Phase 3 transition, and this one if user follows) is propose-then-spec, never spec-first.
