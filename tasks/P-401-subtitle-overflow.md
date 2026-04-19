@@ -1,6 +1,6 @@
 # P-401 · Subtitle overflow on 1080x1920 MP4
 
-**Status:** `in-progress`
+**Status:** `review`
 **Severity:** MEDIUM (Phase 4 video quality polish)
 **Blueprint ref:** §10 Phase 4 · P-401
 **Branch:** `task/P-401-subtitle-overflow`
