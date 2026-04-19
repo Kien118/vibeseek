@@ -208,9 +208,12 @@ async function main() {
         console.warn(`Scene ${i} has no narration text, skipping TTS`)
         continue
       }
+      const speakable = (typeof scene.speakable_narration === 'string' && scene.speakable_narration.trim())
+        ? scene.speakable_narration
+        : narration
       const wavPath = join(workDir, `scene-${i}.wav`)
-      console.log(`  TTS scene ${i}: "${narration.substring(0, 50)}..."`)
-      await tts(narration, wavPath)
+      console.log(`  TTS scene ${i}: "${speakable.substring(0, 50)}..."${speakable !== narration ? ' (phonetic)' : ''}`)
+      await tts(speakable, wavPath)
       wavFiles.push(wavPath)
     }
 

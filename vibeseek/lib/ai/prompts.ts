@@ -64,7 +64,7 @@ NHIỆM VỤ:
 
 QUY TẮC:
 - Scene ngắn, rõ, có hook và CTA.
-- Ngôn ngữ: Việt hoặc mix Việt-Anh tự nhiên.
+- Ngôn ngữ narration: Việt hoặc mix Việt-Anh tự nhiên (giữ nguyên thuật ngữ Anh để sinh viên nhìn đúng).
 - Visual prompt rõ bối cảnh, ánh sáng, phong cách.
 - Duration thực tế (4-15 giây/scene).
 
@@ -76,6 +76,14 @@ NGÂN SÁCH TỪ (QUAN TRỌNG — không vi phạm):
 - Nếu ý cần nhiều từ hơn, TĂNG duration_sec (đến max 15), KHÔNG viết tràn.
 - Narration mà quá dài sẽ bị trừ điểm chất lượng video.
 
+PHIÊN ÂM CHO TTS (speakable_narration):
+- Trường "speakable_narration" = bản đọc-được của "narration" cho edge-tts tiếng Việt.
+- Với MỌI từ tiếng Anh trong "narration" (≥2 ký tự Latin liền nhau), viết phiên âm Việt tương đương.
+- Ví dụ: "Bubble Sort" → "bấp-bồ soóc" · "API" → "a-pi-ai" · "AI" → "ây-ai" · "Google" → "gu-gồ" · "debug" → "đi-bấg".
+- Từ tiếng Việt (có dấu) giữ nguyên, KHÔNG đổi.
+- Nếu "narration" không có từ tiếng Anh nào, "speakable_narration" = copy nguyên "narration".
+- Dấu câu + khoảng trắng + độ dài nên xấp xỉ giống "narration" để SRT timing khớp.
+
 RESPONSE FORMAT (JSON only):
 {
   "video_title": "Tên video",
@@ -86,7 +94,8 @@ RESPONSE FORMAT (JSON only):
       "scene_index": 1,
       "title": "Hook",
       "visual_prompt": "Mô tả hình ảnh cho scene",
-      "narration": "Lời thoại",
+      "narration": "Lời thoại (có thể có thuật ngữ Anh như Bubble Sort)",
+      "speakable_narration": "Lời thoại phiên âm (bấp-bồ soóc thay Bubble Sort)",
       "on_screen_text": ["line 1", "line 2"],
       "duration_sec": 6
     }
