@@ -24,8 +24,10 @@ export function loadHistory(documentId: string): ChatHistoryMessage[] {
 
 export function saveHistory(documentId: string, messages: ChatHistoryMessage[]): void {
   if (typeof window === 'undefined') return
+  // Never overwrite with empty — prevents mount-time race wiping localStorage
+  // before the load effect's setState commits. Use clearHistory() to explicitly clear.
+  if (messages.length === 0) return
   try {
-    // Cap at 50 messages to avoid localStorage bloat
     const trimmed = messages.slice(-50)
     window.localStorage.setItem(KEY_PREFIX + documentId, JSON.stringify(trimmed))
   } catch {
