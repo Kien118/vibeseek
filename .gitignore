@@ -1,3 +1,7 @@
 # Test fixtures (never commit sample PDFs / HTML source documents)
 *.pdf
 test-pdf/
+
+# Editor / debug artifacts
+*.log
+.cursor/

@@ -1,0 +1,15 @@
+{
+  "name": "VibeSeek",
+  "short_name": "VibeSeek",
+  "description": "Biến PDF khô khan thành micro-content hấp dẫn cho Gen Z.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#a855f7",
+  "orientation": "portrait",
+  "lang": "vi",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

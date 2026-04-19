@@ -10,3 +10,7 @@ scripts/smoke-*.ts
 # Local env (never commit real secrets)
 .env*.local
 !.env.local.example
+
+# Editor / debug artifacts
+*.log
+.cursor/

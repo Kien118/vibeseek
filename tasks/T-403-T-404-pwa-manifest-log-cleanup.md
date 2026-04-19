@@ -1,6 +1,6 @@
 # T-403 + T-404 bundle · PWA manifest + debug log hygiene
 
-**Status:** `todo`
+**Status:** `review`
 **Severity:** LOW (Phase 4 core polish — hygiene)
 **Blueprint ref:** §10 Phase 4 Core polish · T-403 + T-404
 **Branch:** `task/T-403-T-404-pwa-manifest-log-cleanup`
