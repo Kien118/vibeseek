@@ -1,6 +1,6 @@
 # P-403 · Narration duration vs scene duration_sec — word-count budget
 
-**Status:** `review`
+**Status:** `done`
 **Severity:** MEDIUM (Phase 4 video quality polish)
 **Blueprint ref:** §10 Phase 4 · P-403
 **Branch:** `task/P-403-narration-duration`
