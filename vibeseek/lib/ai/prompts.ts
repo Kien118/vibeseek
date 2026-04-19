@@ -65,9 +65,16 @@ NHIỆM VỤ:
 QUY TẮC:
 - Scene ngắn, rõ, có hook và CTA.
 - Ngôn ngữ: Việt hoặc mix Việt-Anh tự nhiên.
-- Narration súc tích, dễ đọc bằng TTS.
 - Visual prompt rõ bối cảnh, ánh sáng, phong cách.
 - Duration thực tế (4-15 giây/scene).
+
+NGÂN SÁCH TỪ (QUAN TRỌNG — không vi phạm):
+- edge-tts giọng vi-VN-HoaiMyNeural đọc khoảng 2 từ/giây.
+- Mỗi scene, "narration" phải ≤ duration_sec × 2 TỪ tiếng Việt.
+- Ví dụ: scene 6 giây → tối đa 12 từ. Scene 10 giây → tối đa 20 từ. Scene 15 giây → tối đa 30 từ.
+- Đếm từ theo dấu cách: "Chào các bạn sinh viên" = 5 từ.
+- Nếu ý cần nhiều từ hơn, TĂNG duration_sec (đến max 15), KHÔNG viết tràn.
+- Narration mà quá dài sẽ bị trừ điểm chất lượng video.
 
 RESPONSE FORMAT (JSON only):
 {
