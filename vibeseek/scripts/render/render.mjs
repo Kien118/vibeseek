@@ -277,7 +277,7 @@ async function main() {
       }
       // ASS uses `\N` for hard newline; join our manually-split lines with it.
       const text = displayLines.join('\\N')
-      dialogueLines += `Dialogue: 0,${formatAssTime(startTime)},${formatAssTime(endTime)},Default,,0,0,0,,${text}\n`
+      dialogueLines += `Dialogue: 0,${formatAssTime(startTime)},${formatAssTime(endTime)},Default,,0,0,0,,{\\fad(300,300)}${text}\n`
       wavIdx++
     }
 
