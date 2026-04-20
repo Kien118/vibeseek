@@ -1,7 +1,7 @@
 # T-407 — `chat_messages` persistent DB (Q-09 reinstate)
 
-> **Phase 5 · Status:** review · **Owner:** claude-opus-4-7 executor · **Dispatch:** after user duyệt spec
-> **Base:** `main` (current tip `13c709b`) · **Expected PR diff:** 7 files (1 DDL + 2 API + 1 UI + 1 blueprint + task md + AGENT_LOG)
+> **Phase 5 · Status:** done · **Owner:** claude-opus-4-7 executor · **Merge:** `bb16ee8` (PR #37, 2026-04-20)
+> **Base:** `main` (tip `13c709b` at dispatch) · **Final PR diff:** 7 files (1 DDL + 2 API + 1 UI + 1 blueprint + task md + AGENT_LOG) · **Architect verify:** 15/15 code-ACs green (Tests 1-7 + RLS + cap enforce); AC-16/17 user-runnable browser E2E deferred post-merge.
 
 ---
 
