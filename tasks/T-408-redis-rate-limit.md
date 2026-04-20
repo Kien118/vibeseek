@@ -1,7 +1,7 @@
 # T-408 — Redis/Upstash rate-limit (cross-instance consistency)
 
-> **Phase 5 · Status:** review · **Owner:** claude-sonnet-4-6 executor · **Dispatch:** 2026-04-20
-> **Base:** `main` (current tip `f1da090`) · **Expected PR diff:** 8 files (1 lib rewrite + 2 API callers + package.json + .env.example + blueprint + task md + AGENT_LOG)
+> **Phase 5 · Status:** done · **Owner:** claude-sonnet-4-6 executor · **Merge:** `d00fc68` (PR #38, 2026-04-21)
+> **Base:** `main` (tip `f1da090` at dispatch) · **Final PR diff:** 9 files (8 spec + auto `package-lock.json`) · **Architect verify:** 16/16 AC green — Upstash counting proven via direct Redis REST query (`vibeseek:rl:chat:t408-definitive-*` keys showed count=6+1=7 split across window buckets, cross-process survives dev-server kill+restart).
 
 ---
 
