@@ -24,7 +24,7 @@ Trạng thái dự án (hôm nay):
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
-Git user: twangnhat-05 · email: dev2@wolffungame.com
+Git user: twangnhat-05 · email: twangnhat@gmail.com
 
 TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ, đọc theo thứ tự:
 
