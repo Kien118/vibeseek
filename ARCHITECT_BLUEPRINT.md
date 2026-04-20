@@ -168,7 +168,11 @@ Biến **tài liệu PDF học thuật dài + khô khan** thành **micro-content
 7. Server stream chunk về client qua Server-Sent Events (`text/event-stream`).
 8. Client append chunk vào message hiện tại, render progressively.
 
-**History persistence:** MVP KHÔNG lưu DB (client-only localStorage keyed theo `documentId`). Bảng `chat_messages` để lại schema §5.2 nhưng Phase 3 không dùng — Phase 4 sẽ enable nếu cần analytics/cross-device.
+**History persistence:** DB + localStorage hybrid (Phase 5 T-407).
+- DB (`chat_messages`) = SSOT, source for cross-device hydrate on mount.
+- localStorage = warm cache; survives between DB fetches, prevents flash-of-empty.
+- Server-side save in `/api/chat` (user msg before stream, assistant msg only on `done=true` with content).
+- Cap 50 per `(anon_id, document_id)`, FIFO delete via best-effort async enforce.
 
 ---
 
@@ -374,17 +378,19 @@ CREATE INDEX card_embeddings_document_idx ON card_embeddings(document_id);
 CREATE INDEX card_embeddings_vector_idx ON card_embeddings
   USING hnsw (embedding vector_cosine_ops);
 
--- Chat history — DEFERRED TO PHASE 4 (Q-09 resolved 2026-04-17: MVP client-only localStorage).
--- KHÔNG tạo trong Phase 3. Schema giữ lại để Phase 4 enable nếu cần analytics/cross-device.
--- CREATE TABLE chat_messages (
---   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
---   document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
---   anon_id TEXT,                             -- nullable cho demo
---   role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
---   content TEXT NOT NULL,
---   created_at TIMESTAMPTZ DEFAULT NOW()
--- );
--- CREATE INDEX chat_messages_doc_idx ON chat_messages(document_id, created_at);
+-- Chat history — Enabled in Phase 5 T-407 (2026-04-20). Q-09 reinstated as hybrid
+-- DB + localStorage cache per Q-01/Q-02/Q-03/Q-04. Service-role-only RLS (see §5.3).
+CREATE TABLE chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
+  anon_id TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+-- Composite index matches hot query: WHERE document_id = $1 AND anon_id = $2 ORDER BY created_at DESC LIMIT 50
+CREATE INDEX chat_messages_doc_anon_created_idx
+  ON chat_messages(document_id, anon_id, created_at DESC);
 ```
 
 ### 5.3. RLS Policies (MVP — public demo)
@@ -953,7 +959,7 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 - ✅ **Q-06** (Phase 3) Embeddings generate **lazy qua `/api/embeddings/ensure`** — KHÔNG fire-and-forget trong `/api/vibefy` (Vercel serverless terminate promise, học từ T-203). Endpoint idempotent: đếm rows khớp, thiếu mới gọi AI. §2.5.
 - ✅ **Q-07** (Phase 3) RAG context = **top-5 cards từ pgvector cosine + snippet ≤2000 ký tự từ `vibe_documents.raw_text`** (ưu tiên khu vực chứa keyword query, fallback 2000 đầu). Cards quá ngắn (~200 char) không đủ context cho câu hỏi phức tạp. §2.5.
 - ✅ **Q-08** (Phase 3) SSE route `/api/chat` dùng **`runtime = 'nodejs'` + `maxDuration = 60`**. Edge runtime loại — Gemini SDK cần Node API. 60s khớp Vercel Hobby trần (R-07). §6.7.
-- ✅ **Q-09** (Phase 3) Chat history MVP **client-only localStorage** theo key `documentId`. Bảng `chat_messages` §5.2 comment-out, để Phase 4 enable khi cần analytics/cross-device. Giảm DB write load + đơn giản spec.
+- ✅ **Q-09** (Phase 3) Chat history MVP **client-only localStorage** theo key `documentId`. Bảng `chat_messages` §5.2 comment-out, để Phase 4 enable khi cần analytics/cross-device. Giảm DB write load + đơn giản spec. **Resolved 2026-04-20 (T-407):** reinstated as hybrid DB + localStorage cache per Q-01/Q-02/Q-03/Q-04 design approval.
 
 ### Open Questions
 *(none — tất cả đã close. Thêm mới khi phát sinh.)*
@@ -972,6 +978,12 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 ---
 
 ## §13. Changelog
+
+### 2026-04-20 — T-407 chat_messages persistence (Phase 5)
+- Reinstated chat_messages table (Q-09 resolved hybrid).
+- API: /api/chat saves user + assistant msgs; new GET /api/chat/history for cross-device hydrate.
+- UI: ChatPanel 2-layer hydrate (localStorage fast + DB slow), hasInteractedRef guard.
+- Cap 50 per (anon_id, doc_id), service-role-only RLS.
 
 - **2026-04-19 (🎉 PHASE 4 FULLY COMPLETE — core polish sealed)** — All 4 core polish tasks merged: T-401 (error boundaries + empty states, merge `fbdc577`), T-402 (3D loading skeleton via next/dynamic, merge `9b2b025`), T-403+T-404 bundle (PWA manifest + debug log hygiene, merge `4cfdf7a`). **Phase 4 overall stats: 9/9 tasks, 1 hotfix total (only P-401 libass PlayRes), 3 architect overrides of blueprint prescriptions (P-401/P-405/P-404), 2 rebase-rescues for parallel-dispatch AGENT_LOG append conflicts, 1 multi-agent working-tree contamination scare (resolved without destructive ops).** Parallel dispatch of 3 agents taught a new lesson: AGENT_LOG append-only files guarantee N-1 merge conflicts when N parallel branches share base commit. Architect rebase-rescue after each merge is the required cleanup — cannot be avoided at agent protocol level. Logged as Phase 4 Lesson 18. Phase 4 video quality + core polish sealed. Next: Phase 5 (scope TBD) or Phase 4 E2E full smoke before locking. Previous Phase 4 video-only COMPLETE marker below remains for reference.
 - **2026-04-19 (🎉 PHASE 4 COMPLETE)** — Final Phase 4 task P-404 merged. All 5 video quality polish tasks done: P-401 (subtitle overflow via ASS + explicit PlayResX/Y) + P-402 (EN-in-VN TTS via `speakable_narration` dual-field) + P-403 (narration word-count budget with parser safety-net) + P-404 (animated gradient bg via `gradients` lavfi) + P-405 (subtitle fade via ASS `\fad(300,300)`). **Phase stats: 5/5 tasks, 1 hotfix total (only P-401 libass PlayRes), 3 architect overrides of blueprint prescriptions (P-401 `MaxLineCount`, P-405 `xfade`, P-404 `testsrc2`/stock video)** — all overrides because blueprint §10 recommendations were authored before real libass/ffmpeg behavior was validated. Architect frame-extract technique (from `feedback_vibeseek_phase4_lessons.md`) = the review method for every P-40x task after P-401 — bypasses edge-tts env blockers via silent `anullsrc` + extracts PNGs at diagnostic timestamps. Saved an estimated 10+ user round-trips over Phase 4. Merge `8682a3e`. Next: Phase 4 core polish T-401..T-404 (error boundaries, 3D skeleton, PWA, log cleanup) OR Phase 5 (TBD scope).

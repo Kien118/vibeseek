@@ -26,6 +26,35 @@ function jsonError(status: number, code: string, detail?: string) {
   })
 }
 
+// T-407: cap chat_messages rows per (document_id, anon_id) pair, FIFO delete oldest.
+const CHAT_HISTORY_CAP = 50
+
+async function enforceCap(docId: string, anonId: string): Promise<void> {
+  const { count, error: countErr } = await supabaseAdmin
+    .from('chat_messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('document_id', docId)
+    .eq('anon_id', anonId)
+
+  if (countErr || !count || count <= CHAT_HISTORY_CAP) return
+
+  const overflow = count - CHAT_HISTORY_CAP
+  const { data: victims } = await supabaseAdmin
+    .from('chat_messages')
+    .select('id')
+    .eq('document_id', docId)
+    .eq('anon_id', anonId)
+    .order('created_at', { ascending: true })
+    .limit(overflow)
+
+  if (!victims || victims.length === 0) return
+
+  await supabaseAdmin
+    .from('chat_messages')
+    .delete()
+    .in('id', victims.map(v => v.id))
+}
+
 export async function POST(req: NextRequest) {
   let body: ChatReqBody
   try {
@@ -91,7 +120,19 @@ export async function POST(req: NextRequest) {
   // Open SSE stream
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      let assistantText = ''
       try {
+        // T-407: Persist user message before opening stream (best-effort — don't block on failure).
+        const userInsert = await supabaseAdmin.from('chat_messages').insert({
+          document_id: documentId,
+          anon_id: anonId,
+          role: 'user',
+          content: message.trim(),
+        })
+        if (userInsert.error) {
+          console.warn('[chat] user msg persist failed', userInsert.error.message)
+        }
+
         const gen = streamChatResponse(ctx, history, message)
         let tokensUsed = 0
         while (true) {
@@ -106,8 +147,29 @@ export async function POST(req: NextRequest) {
             await gen.return?.(undefined as never)
             return
           }
+          assistantText += value.delta
           controller.enqueue(sseEvent({ delta: value.delta }))
         }
+
+        // T-407: Persist assistant message ONLY on successful completion with content.
+        // Reaching here means while-loop broke on `done=true` (not `desiredSize===null` abort).
+        if (tokensUsed > 0 && assistantText.length > 0) {
+          const asstInsert = await supabaseAdmin.from('chat_messages').insert({
+            document_id: documentId,
+            anon_id: anonId,
+            role: 'assistant',
+            content: assistantText,
+          })
+          if (asstInsert.error) {
+            console.warn('[chat] assistant msg persist failed', asstInsert.error.message)
+          }
+
+          // Best-effort cap enforce — don't block SSE close.
+          enforceCap(documentId, anonId).catch(err =>
+            console.warn('[chat] enforceCap failed', err)
+          )
+        }
+
         controller.enqueue(sseEvent({ done: true, tokensUsed }))
         controller.close()
       } catch (err) {

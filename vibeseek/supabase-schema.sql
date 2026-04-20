@@ -233,3 +233,33 @@ ALTER TABLE vibe_documents
 -- nhưng chưa có trong file SSOT. Nếu đã tồn tại thì command sau sẽ lỗi — bỏ qua.
 ALTER TABLE quiz_questions
   ADD CONSTRAINT quiz_questions_card_id_unique UNIQUE (card_id);
+
+-- =============================================================
+-- Phase 5 (T-407) — chat_messages persistence
+-- Reinstates Q-09 deferred table (blueprint §5.2). Service-role-only RLS
+-- (privacy: anon A must not read anon B's chat via public API).
+-- Run on Supabase Dashboard SQL Editor before merging this PR.
+-- =============================================================
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_id UUID NOT NULL REFERENCES vibe_documents(id) ON DELETE CASCADE,
+  anon_id TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Composite index matches the hot query pattern:
+--   SELECT ... WHERE document_id = $1 AND anon_id = $2 ORDER BY created_at DESC LIMIT 50
+CREATE INDEX IF NOT EXISTS chat_messages_doc_anon_created_idx
+  ON chat_messages(document_id, anon_id, created_at DESC);
+
+ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Service-role only — no public read (unlike quiz_attempts / card_embeddings).
+-- API routes use supabaseAdmin; browser never queries chat_messages directly.
+DROP POLICY IF EXISTS "chat_messages service only" ON chat_messages;
+CREATE POLICY "chat_messages service only" ON chat_messages
+  FOR ALL USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');

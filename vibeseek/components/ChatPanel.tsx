@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { getOrCreateAnonId } from '@/utils/anon-id' // architect audit 2026-04-18 — exact export name
+import { getOrCreateAnonId, peekAnonId } from '@/utils/anon-id' // architect audit 2026-04-18 — exact export names
 import {
   loadHistory, saveHistory, newMessageId, type ChatHistoryMessage,
 } from '@/utils/chat-history'
@@ -20,10 +20,37 @@ export default function ChatPanel({ documentId }: Props) {
   const [streamingId, setStreamingId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+  const hasInteractedRef = useRef(false)
 
-  // Load history once on mount
+  // T-407 hydrate strategy:
+  //   Fast path: paint localStorage cache immediately (no flash-of-empty).
+  //   Slow path: fetch DB authoritative history; replace cache if user hasn't
+  //              interacted yet. localStorage is write-through cache for next mount.
   useEffect(() => {
-    setMessages(loadHistory(documentId))
+    let ignore = false
+    hasInteractedRef.current = false  // reset per doc (route change may not remount)
+    const cached = loadHistory(documentId)
+    if (cached.length > 0) setMessages(cached)
+
+    const anonId = peekAnonId()
+    if (!anonId) return () => { ignore = true }
+
+    const qs = new URLSearchParams({ documentId, anonId }).toString()
+    fetch(`/api/chat/history?${qs}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (ignore) return
+        if (hasInteractedRef.current) return  // user already typed — don't clobber
+        if (data && Array.isArray(data.messages) && data.messages.length > 0) {
+          setMessages(data.messages)
+          saveHistory(documentId, data.messages)  // write-through cache
+        }
+      })
+      .catch(err => {
+        console.warn('[chat] history fetch failed, using localStorage cache', err)
+      })
+
+    return () => { ignore = true }
   }, [documentId])
 
   // Ensure embeddings on mount (idempotent)
@@ -69,6 +96,7 @@ export default function ChatPanel({ documentId }: Props) {
   async function send() {
     const text = input.trim()
     if (!text || phase === 'streaming' || phase !== 'ready') return
+    hasInteractedRef.current = true  // T-407: lock out DB hydrate overwrite
 
     const userMsg: ChatHistoryMessage = {
       id: newMessageId(),
