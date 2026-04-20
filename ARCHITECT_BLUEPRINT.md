@@ -198,6 +198,7 @@ Không thay đổi các mục dưới đây khi chưa cập nhật blueprint và
 | MP4 storage | **Supabase Storage** (1GB free, bucket `vibeseek-videos`) | Không cần thẻ tín dụng; dùng lại Supabase client; auto-cleanup qua cron khi gần cap |
 | Hosting app | **Vercel free** (Hobby) | Zero-config Next.js |
 | Job queue | **Supabase table `render_jobs`** (poll-based) | Không cần Redis/QStash |
+| Rate limit | **Upstash Redis (REST) + @upstash/ratelimit** | Cross-instance fixed-window 10/60s chat + 30/60s history |
 | Auth | ❌ **Không dùng MVP** — chỉ `anon_id` localStorage | Public demo; Supabase RLS mở |
 
 ### 3.1. Đã loại bỏ khỏi stack (KHÔNG DÙNG)
@@ -558,6 +559,7 @@ data: {"done":true,"tokensUsed":245}
 (Double newline `\n\n` sau mỗi event bắt buộc theo SSE spec.)
 **Errors trước khi stream mở:** 400 input sai shape, 404 document không tồn tại, 404 chưa có embeddings (UI phải gọi `/api/embeddings/ensure` trước), 429 rate limit (>10 msg/phút/anonId), 503 Gemini + Groq đều fail.
 **Error giữa stream:** server gửi `data: {"error":"...","done":true}` rồi close. Client render message lỗi inline, không throw.
+**Rate limit note (T-408):** Rate limit là Upstash-backed as of T-408 — consistent across serverless instances on Vercel. `/api/chat/history` dùng separate bucket `chat-history:{anonId}` 30/60s (không ảnh hưởng POST budget).
 
 ---
 
@@ -978,6 +980,12 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 ---
 
 ## §13. Changelog
+
+### 2026-04-20 — T-408 Redis rate-limit (Phase 5)
+- Replaced in-memory `Map` in `lib/rate-limit.ts` with Upstash `@upstash/ratelimit` fixed-window.
+- `consume()` now async — 2 caller sites updated (`/api/chat`, `/api/chat/history`).
+- Fail-open on Upstash unreachable (anti-spam, not security).
+- Unblocks T-406 Vercel deploy (cross-instance consistency).
 
 ### 2026-04-20 — T-407 chat_messages persistence (Phase 5)
 - Reinstated chat_messages table (Q-09 resolved hybrid).

@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Rate limit per anonId
-  const rl = consume(`chat:${anonId}`)
+  const rl = await consume(`chat:${anonId}`)
   if (!rl.ok) {
     return new Response(
       JSON.stringify({ error: 'rate_limited', retryAfterMs: rl.retryAfterMs }),
