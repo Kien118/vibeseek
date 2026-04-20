@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   if (!documentId) return jsonError(400, 'documentId_required')
   if (!anonId) return jsonError(400, 'anonId_required')
 
-  const rl = consume(`chat-history:${anonId}`, HISTORY_RATE_LIMIT, HISTORY_RATE_WINDOW_MS)
+  const rl = await consume(`chat-history:${anonId}`, HISTORY_RATE_LIMIT, HISTORY_RATE_WINDOW_MS)
   if (!rl.ok) {
     return new Response(
       JSON.stringify({ error: 'rate_limited', retryAfterMs: rl.retryAfterMs }),
