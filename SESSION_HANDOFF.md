@@ -93,7 +93,13 @@ When component has both `Effect A: load → setState` and `Effect B: save(state)
 
 Phase 4 fully sealed + E2E verified. 4 UX gaps surfaced during smoke (all pre-existing, not Phase 4 regressions). Two paths forward:
 
-### Option A — Phase 5 T-405 "Dashboard persistence + cross-page nav" (recommended, consolidates 3 UX gaps)
+### (Update 2026-04-20) T-405 merged `0ac1c0f` — 2/3 UX gaps closed. T-406 Vercel deploy attempted but deferred.
+
+**T-406 state:** pre-audit clean (no code blockers). Deploy blocked on Vercel GitHub App permission scope — user is collaborator on `Kien118/vibeseek` private repo; Vercel import page doesn't list repo even after Kien118 attempted GitHub App install. Root cause uncertain (3 candidates: (a) Kien118 missed tick `vibeseek` in "Only select repositories", (b) Vercel cache, (c) Vercel OAuth account scope mismatch). Resume when Kien118 + user can jointly debug 15 min — or pivot to fork-based path `twangnhat-05/vibeseek-fork` (trade-off: PR workflow disconnects from upstream).
+
+**Remaining Phase 5 candidates (unchanged):**
+
+### Option A (OLD, NOW COMPLETE) — Phase 5 T-405 "Dashboard persistence + cross-page nav"
 
 **Scope:**
 - Dashboard mount reads `anon_id` → fetch recent `vibe_documents` from Supabase → render list with per-doc links (Quiz / Chat / Video). Eliminates re-upload-on-reload.
