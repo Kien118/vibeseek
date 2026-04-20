@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** Phase 4 FULLY COMPLETE — video + core polish (2026-04-19). Commit tip: `fbdc577` T-401 merge + architect close. **Phase 4 overall: 9/9 tasks, 1 hotfix total, 3 blueprint overrides, 2 rebase-rescues for parallel-dispatch AGENT_LOG conflicts.**
+> **Last refresh:** Phase 5 mở rộng (2026-04-20). Commit tip: `8708b95`. T-405 ✅ merged. T-406 Vercel deploy ⏸ deferred do GitHub App permission blocker.
 
 ---
 
@@ -10,12 +10,17 @@
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
 Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
-Gen Z Việt Nam. **Phase 0/1/2/3/4-FULL đã sealed + E2E verified** (8/8 smoke
-tests pass 2026-04-19). MVP production-ready marker earned. Phase 4 video
-4-feature stack (P-401 subtitles + P-402 phonetic TTS + P-404 gradient +
-P-405 fade) compose correctly trong real render. Phiên này ta làm Phase 5
-(scope TBD — T-405 dashboard persistence là top candidate từ UX gaps phát
-hiện trong E2E smoke) HOẶC đóng session nếu demo sắp tới.
+Gen Z Việt Nam.
+
+Trạng thái dự án (hôm nay):
+- Phase 0 + 1 + 2 + 3 + 4-FULL (video P + core T) đã sealed + E2E verified
+  (8/8 smoke tests pass 2026-04-19).
+- Phase 5 đang tiếp: T-405 ✅ (dashboard persistence + leaderboard back-link,
+  merge 0ac1c0f). T-406 (Vercel deploy) ⏸ deferred do Vercel GitHub App
+  permission chưa grant được vibeseek cho collaborator account, cần Kien118
+  + user cùng debug 15 phút.
+- Tổng 30+ PRs merged, 12 hotfixes, 3 blueprint overrides (P-401 MaxLineCount,
+  P-405 xfade, P-404 testsrc2). MVP local demo-ready (`npm run dev`).
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -23,20 +28,28 @@ Git user: twangnhat-05 · email: dev2@wolffungame.com
 
 TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ, đọc theo thứ tự:
 
-1. SESSION_HANDOFF.md (file này) — TL;DR + proposed way of working cho phase
-   tiếp theo.
-2. ARCHITECT_BLUEPRINT.md §1/§2/§3 — vision, architecture, stack. §10 roadmap
-   (Phase 3 marked complete, Phase 4 queued). §13 changelog top.
-3. AGENT_LOG.md — 30 dòng cuối để bắt nhịp T-305 close + Phase 3 complete marker.
-4. memory/feedback_vibeseek_phase3_lessons.md — **NEW** — 7-step pipeline
-   validated + 2 new UI failure modes (dark-body color inherit, mount-time
-   load/persist race). **BẮT BUỘC ÁP DỤNG trong Phase 4.**
-5. memory/feedback_vibeseek_phase2_lessons.md — Phase 2 checklist vẫn valid.
-6. memory/project_vibeseek_state_2026_04_19.md — **NEW** — DB/API/UI snapshot
-   sau Phase 3.
+1. SESSION_HANDOFF.md (file này) — TL;DR + T-406 deferred state với 3 root
+   cause candidates + Phase 5 remaining options.
+2. ARCHITECT_BLUEPRINT.md §13 changelog 5 entries đầu — quick state recap.
+3. AGENT_LOG.md — 40 dòng cuối để bắt kịp T-405 close + T-406 defer log.
+4. memory/feedback_vibeseek_phase4_lessons.md — 18 lessons (libass PlayRes,
+   frame-extract, protected-region grep, parallel-dispatch AGENT_LOG conflicts,
+   minimize-asks). **BẮT BUỘC ÁP DỤNG.**
+5. memory/feedback_vibeseek_phase3_lessons.md — UI failure modes still valid.
+6. memory/feedback_vibeseek_phase2_lessons.md — Next.js 14 / Strict Mode gotchas.
+7. memory/feedback_minimize_user_asks.md — user directive về workflow.
+8. memory/project_vibeseek_state_2026_04_19_phase4.md — DB/API/UI snapshot
+   (still valid after T-405; T-405 thêm utils/doc-history.ts +
+   components/DocumentHistory.tsx không đổi DB).
 
-Sau đó: xác nhận `sẵn sàng cho Phase 4` (HOẶC `E2E full Phase 3 trước`) + đề
-xuất quy trình. Không viết spec vội.
+Sau đó user sẽ chọn 1 trong các tracks:
+- Resume T-406 Vercel deploy (Kien đã sẵn sàng debug)
+- Phase 5 remaining items: SSML voice switching / per-scene visuals + xfade /
+  persistent chat_messages DB / Redis chat rate-limit
+- E2E smoke lại sau T-405 changes
+- Đóng session nếu demo sắp tới
+
+Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
 ```
 
 ---
