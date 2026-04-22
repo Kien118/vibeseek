@@ -17,19 +17,21 @@ const config: Config = {
         mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
-        // Warm ink background system
+        // Warm ink background system — theme-aware via CSS vars (dark default,
+        // inverts under html[data-theme='light']). RGB triplets let Tailwind
+        // /opacity utilities (e.g. bg-ink-surface/80) work in both themes.
         ink: {
-          base:     '#17140F',
-          surface:  '#221D17',
-          elevated: '#2E2720',
-          border:   '#3A3229',
+          base:     'rgb(var(--color-ink-rgb) / <alpha-value>)',
+          surface:  'rgb(var(--color-surface-rgb) / <alpha-value>)',
+          elevated: 'rgb(var(--color-elevated-rgb) / <alpha-value>)',
+          border:   'rgb(var(--color-ink-border-rgb) / <alpha-value>)',
         },
-        // Paper text system
+        // Paper text system — theme-aware
         paper: {
-          cream: '#F5EFE4',
-          soft:  '#E8DFC9',
+          cream: 'rgb(var(--color-paper-rgb) / <alpha-value>)',
+          soft:  'rgb(var(--color-paper-soft-rgb) / <alpha-value>)',
         },
-        stone: '#9A928A',
+        stone: 'rgb(var(--color-stone-rgb) / <alpha-value>)',
         // Accents
         sunflower: {
           DEFAULT: '#F5B83E',
