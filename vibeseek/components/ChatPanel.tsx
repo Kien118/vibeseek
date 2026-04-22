@@ -30,6 +30,10 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
   const [conceptCardId, setConceptCardId] = useState<string | null>(initialConceptCardId ?? null)
   const [round, setRound] = useState(1) // 1..3 in Feynman mode, unused in default
   const [needConceptPicker, setNeedConceptPicker] = useState(false)
+  // P-511 item 13: idle state — show hint after 30s inactivity in input
+  const [idleLevel, setIdleLevel] = useState<0 | 1 | 2>(0)
+  const idleTimer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const idleTimer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // T-407 hydrate strategy:
   //   Fast path: paint localStorage cache immediately (no flash-of-empty).
@@ -104,6 +108,20 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, streamingId])
+
+  // P-511 item 13: idle timers — reset on any input/phase change
+  useEffect(() => {
+    if (idleTimer1Ref.current) clearTimeout(idleTimer1Ref.current)
+    if (idleTimer2Ref.current) clearTimeout(idleTimer2Ref.current)
+    setIdleLevel(0)
+    if (phase !== 'ready') return
+    idleTimer1Ref.current = setTimeout(() => setIdleLevel(1), 30_000)
+    idleTimer2Ref.current = setTimeout(() => setIdleLevel(2), 60_000)
+    return () => {
+      if (idleTimer1Ref.current) clearTimeout(idleTimer1Ref.current)
+      if (idleTimer2Ref.current) clearTimeout(idleTimer2Ref.current)
+    }
+  }, [input, phase, messages.length])
 
   // Persist history on change
   useEffect(() => {
@@ -365,6 +383,14 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
               onClick={() => handleToggleMode('default')}
             >Chat thường</button>
           </div>
+        </div>
+      )}
+
+      {idleLevel > 0 && phase === 'ready' && (
+        <div className="px-4 py-2 border-t border-terracotta/20 bg-terracotta/[0.06] text-xs text-terracotta/80 font-hand">
+          {idleLevel === 1
+            ? '💭 DOJO đang đợi... Gõ gì đó đi nào.'
+            : 'Anh ơi anh còn đó không? 🥺 Mình thử hỏi một câu gì đi!'}
         </div>
       )}
 

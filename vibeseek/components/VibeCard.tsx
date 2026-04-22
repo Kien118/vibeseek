@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { useRef } from 'react'
 import type { VibeCard as VibeCardType } from '@/utils/supabase'
 
 const cardTypeConfig = {
@@ -50,8 +51,28 @@ interface VibeCardProps {
 export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
   const config = cardTypeConfig[card.card_type]
 
+  // P-511 item 9: cursor parallax tilt (desktop only — graceful no-op on touch
+  // because pointer events won't fire without fine pointer). ±4deg range.
+  const cardRef = useRef<HTMLDivElement>(null)
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [4, -4]), { stiffness: 300, damping: 30 })
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-4, 4]), { stiffness: 300, damping: 30 })
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = cardRef.current?.getBoundingClientRect()
+    if (!rect) return
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5)
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5)
+  }
+  function handleMouseLeave() {
+    mouseX.set(0)
+    mouseY.set(0)
+  }
+
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -60,6 +81,9 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
         ease: [0.25, 0.46, 0.45, 0.94]
       }}
       whileHover={{ y: -4, scale: 1.01 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', transformPerspective: 1000 }}
       className={`
         relative rounded-2xl p-5
         bg-gradient-to-br ${config.color}
