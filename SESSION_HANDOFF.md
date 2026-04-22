@@ -268,6 +268,108 @@ All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 
 ---
 
+## Step 11 — NEXT SESSION TASK (P-501 B2-Lite, locked 2026-04-22)
+
+**User demo timeline:** 1 tuần from 2026-04-22. Risk tolerance LOW.
+
+**Chosen track:** P-501 B2-Lite — pre-made background pool + xfade crossfade. Architect rejected full B2 per-scene AI-generated visuals (image API unavailable) and user's Manim/infographic idea (too risky for 1-tuần + adds Python/LaTeX/Puppeteer deps). B2-Lite is scope-down that delivers visual diversity + true scene transitions without new deps.
+
+### P-501 scope outline (discussed, NOT YET SPEC'd)
+
+**What changes:**
+- `vibeseek/scripts/render/render.mjs` — add pool of 8-10 gradient palette variants (color pairs + speed variations). Parser picks N gradients (one per scene) deterministically (e.g. round-robin by scene index, or hash by scene.id for stability).
+- Single `-i gradients=...` input → N `-i gradients=...` inputs (one per scene, duration = scene duration).
+- Current simple filter chain → ffmpeg `filter_complex` with `xfade` chain: `[0:v][1:v]xfade=transition=fade:duration=0.3:offset=T0[v01]; [v01][2:v]xfade=...` etc.
+- Audio concat path unchanged; subtitle ASS overlay applied on final `[vN-1]` output.
+
+**What stays (protected):**
+- P-401 ASS header + `splitNarrationLines` + `formatAssTime` — subtitle rendering untouched
+- P-402 `speakable_narration` — TTS path untouched
+- P-403 `OVERFLOW_RATIO` / `WORDS_PER_SECOND` — parser duration extension untouched
+- P-405 `\fad(300,300)` — subtitle fade tag untouched
+- P-404 `gradients=...c0=0x1a1a2e:c1=0x2d1b4e:speed=0.008` — **EXTENDED** to pool (this is the task itself, but current values must remain as one entry in the pool for backward visual compat)
+
+**Palette pool draft (for spec phase):**
+1. Navy-purple (current P-404): `c0=0x1a1a2e c1=0x2d1b4e` + speed=0.008
+2. Purple-pink: `c0=0x2d1b4e c1=0xc026d3` + speed=0.010
+3. Teal-cyan: `c0=0x0f172a c1=0x0891b2` + speed=0.008
+4. Orange-red: `c0=0x7f1d1d c1=0xea580c` + speed=0.012
+5. Forest-emerald: `c0=0x064e3b c1=0x059669` + speed=0.008
+6. Indigo-fuchsia: `c0=0x312e81 c1=0xa21caf` + speed=0.010
+7. Slate-sky: `c0=0x1e293b c1=0x0284c7` + speed=0.008
+8. Rose-amber: `c0=0x9f1239 c1=0xd97706` + speed=0.011
+(Final palette list TBD in spec — designer taste call.)
+
+**Failure modes to preempt (for spec phase):**
+- F-1: xfade chain with N > 20 scenes OOM on GH Actions runner
+- F-2: filter_complex syntax errors across edge cases (1 scene, 2 scenes, many scenes)
+- F-3: xfade `offset` math wrong → black frames between scenes OR overlap
+- F-4: audio concat timing desync after xfade (total video duration changes slightly with N-1 transitions × 0.3s)
+- F-5: subtitle ASS overlay timing stays correct (uses absolute timestamps, should be robust)
+- F-6: palette pool too similar → no visual diversity in short videos (3-5 scenes)
+- F-7: random palette selection varies per render → user confusion when same PDF renders different each time. Decision needed: deterministic (hash) vs stochastic
+- F-8: Phase 4 protected regions — grep must return 0 lines for P-401/P-402/P-403/P-405 sentinels
+- F-9: Groq fallback path shares same render.mjs — must work with pool too
+- F-10: blueprint §10 P-405 says xfade which architect overrode in Phase 4 — update blueprint §13 to note this is the Phase 5 revisit + override repeal
+- F-11..F-15 TBD during spec
+
+**Test plan for spec phase:**
+- Test 1: unit — palette pool returns 8 distinct color pairs
+- Test 2: unit — scene-index-to-palette mapping stable (deterministic)
+- Test 3: integration — 3-scene render with xfade → verify 2 transition PNGs at boundaries show visible color delta (Phase 4 frame-extract technique)
+- Test 4: integration — 10-scene render → verify filter_complex compiles, output MP4 plays, total duration = sum(scenes) - 0.3 × (N-1) overlap
+- Test 5: integration — subtitle ASS overlay still renders correctly on all scenes post-xfade
+- Test 6: regression — P-404 original gradient (navy-purple) still available + used (palette index 0 = current)
+
+**Expected PR diff:** 3-4 files (render.mjs ~80 LOC added, task md, blueprint §13, AGENT_LOG). No new deps. No new env vars.
+
+**Executor model:** claude-opus-4-7 (complex ffmpeg filter_complex logic, Phase 4 protected region risk). NOT sonnet — xfade chain math is not mechanical.
+
+**Post-merge:** `cd vibeseek && vercel --prod --yes` to redeploy (deploy runbook §Step 2).
+
+### Bootstrap prompt for new session (copy-paste)
+
+```
+Bạn là Software Architect cho dự án VibeSeek. Resume session mới cho task
+P-501 B2-Lite (pre-made background pool + xfade crossfade).
+
+MVP đang LIVE: https://vibeseek-five.vercel.app (Vercel Hobby, sin1).
+Phase 5 at 4/N done (T-405/T-407/T-408/T-406). Demo 1 tuần tới.
+
+Task P-501 đã LOCK (user chốt 2026-04-22):
+- Pool 8-10 gradient palette variants trong render.mjs
+- ffmpeg xfade crossfade 0.3s giữa scenes
+- Không new deps, không AI image gen
+- Đúng blueprint P-405 original intent (architect override Phase 4 sang ASS
+  \fad, giờ revisit làm proper crossfade với multiple bg)
+
+TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ:
+1. Đọc SESSION_HANDOFF.md §Step 11 — P-501 scope outline + failure modes
+   + test plan drafted
+2. Đọc memory/feedback_vibeseek_phase4_lessons.md — libass + frame-extract
+   review technique (MUST USE for this task)
+3. Đọc memory/feedback_vibeseek_phase5_deploy_lessons.md — post-merge
+   redeploy runbook
+4. Đọc memory/project_vibeseek_state_2026_04_22_phase5.md — current state
+5. Đọc ARCHITECT_BLUEPRINT.md §13 top 5 changelog + §10 Phase 4 (P-404/P-405)
+6. git log --oneline -5 main — tip phải bắt đầu từ `a7abc4b` (docs handoff)
+   hoặc `8e3aefe` (architect close T-406)
+
+Sau đó confirm sẵn sàng + đề xuất quy trình P-501 (failure modes spec +
+Files NOT to touch + frame-extract verify + protected-region grep). Không
+viết spec vội — user phải duyệt quy trình trước.
+```
+
+### Post-P-501 close-out sẽ cần
+
+- Redeploy prod: `vercel --prod --yes`
+- Run smoke: render a real PDF + user verify visual diversity + no regression
+- Update blueprint §13 with P-501 entry + mark P-405 override repealed
+- Update SESSION_HANDOFF.md + state snapshot
+- **Demo rehearsal:** sau P-501 ship + verify, dành 1-2 ngày cuối tuần prep demo (script, test PDFs, backup recorded video)
+
+---
+
 ## Step 10 — Environment notes (still true 2026-04-22)
 
 - Windows 11, bash shell (forward slashes OK, `/dev/null` not `NUL`). PowerShell doesn't support `&&` — use `;` in PS.
