@@ -62,6 +62,7 @@ export default function GlowButton({
       whileHover={{ scale: disabled ? 1 : 1.03 }}
       whileTap={{ scale: disabled ? 1 : 0.97 }}
       className={`
+        btn-polish
         relative inline-flex items-center justify-center gap-2
         font-display font-semibold text-paper-cream rounded-xl
         bg-gradient-to-r ${v.bg}

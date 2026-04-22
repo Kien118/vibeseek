@@ -17,6 +17,7 @@
     "@supabase/supabase-js": "^2.43.4",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^11.2.10",
     "gsap": "^3.13.0",
     "lucide-react": "^0.395.0",
@@ -30,6 +31,7 @@
     "three": "^0.183.2"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^18",

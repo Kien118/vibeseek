@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import QuizCard, { QuizCardQuestion } from '@/components/QuizCard'
+import Confetti from '@/components/Confetti'
 import { getOrCreateAnonId } from '@/utils/anon-id'
 
 type Phase = 'loading' | 'quizzing' | 'done' | 'error'
@@ -113,8 +114,11 @@ export default function QuizPage() {
   }
 
   if (phase === 'done') {
+    const scoreRatio = questions.length > 0 ? correctCount / questions.length : 0
+    const celebrate = scoreRatio >= 0.7
     return (
       <main className="min-h-screen flex flex-col items-center justify-center text-paper-cream gap-6 px-6">
+        {celebrate && <Confetti trigger={celebrate} />}
         <h1 className="font-display text-4xl">Xong rồi! 🎉</h1>
         <p className="text-paper-cream/70">Đúng {correctCount}/{questions.length} câu · +{pointsEarned} vibe points</p>
         <div className="flex gap-3">

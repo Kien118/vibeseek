@@ -646,3 +646,64 @@ body::before {
   padding: 0.2rem 0.55rem;
   background: rgba(34,29,23,0.6);
 }
+
+/* =========================================================
+ * P-506: Button hover/press polish — design-doc item 4
+ * Hover: translateY(-2px) + glow shadow fade-in 200ms
+ * Press: scale(0.96) 100ms bounce
+ * Mobile gated via @media (hover: hover) — no hover on touch
+ * ========================================================= */
+
+.btn-polish {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  will-change: transform, box-shadow;
+}
+.btn-polish:active {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+@media (hover: hover) {
+  .btn-polish:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(245, 184, 62, 0.30), 0 0 60px rgba(245, 184, 62, 0.12); /* sunflower glow */
+  }
+}
+
+.btn-polish-terra {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  will-change: transform, box-shadow;
+}
+.btn-polish-terra:active {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+@media (hover: hover) {
+  .btn-polish-terra:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(217, 108, 79, 0.28), 0 0 60px rgba(217, 108, 79, 0.12); /* terracotta glow */
+  }
+}
+
+.btn-polish-sage {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  will-change: transform, box-shadow;
+}
+.btn-polish-sage:active {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+@media (hover: hover) {
+  .btn-polish-sage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(122, 155, 126, 0.28), 0 0 60px rgba(122, 155, 126, 0.12); /* sage glow */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-polish, .btn-polish-terra, .btn-polish-sage,
+  .btn-polish:hover, .btn-polish-terra:hover, .btn-polish-sage:hover,
+  .btn-polish:active, .btn-polish-terra:active, .btn-polish-sage:active {
+    transform: none;
+    transition: none;
+  }
+}
