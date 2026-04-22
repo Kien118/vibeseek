@@ -34,6 +34,16 @@
   --color-error: #C85A3C;         /* error */
 
   --color-bg: var(--color-ink);   /* backward alias from P-503 */
+
+  /* RGB triplets — theme-aware tokens for Tailwind with /opacity support.
+   * Keep in sync with the hex vars above. Light mode overrides further down. */
+  --color-ink-rgb: 23 20 15;
+  --color-surface-rgb: 34 29 23;
+  --color-elevated-rgb: 46 39 32;
+  --color-ink-border-rgb: 58 50 41;
+  --color-paper-rgb: 245 239 228;
+  --color-paper-soft-rgb: 232 223 201;
+  --color-stone-rgb: 154 146 138;
 }
 
 * {
@@ -389,8 +399,13 @@ body {
   align-content: center;
   width: min(680px, 92vw);
   margin-left: clamp(1rem, 7vw, 8rem);
-  color: #F5EFE4;
+  color: var(--color-paper);
   text-shadow: 0 3px 30px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='light'] .landing-panel {
+  /* On cream bg the dark-shadow halo looks smudged; swap to soft paper glow. */
+  text-shadow: 0 2px 18px rgba(245, 239, 228, 0.7);
 }
 
 .landing-panel h1,
@@ -409,7 +424,7 @@ body {
 }
 
 .landing-panel p {
-  color: rgba(245,239,228,0.86);
+  color: rgb(var(--color-paper-rgb) / 0.86);
   line-height: 1.6;
   max-width: 58ch;
 }
@@ -418,7 +433,7 @@ body {
   font-family: var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(245,239,228,0.65);
+  color: rgb(var(--color-paper-rgb) / 0.65);
   font-size: 0.72rem;
 }
 
@@ -429,9 +444,9 @@ body {
 }
 
 .landing-features > div {
-  border: 1px solid rgba(245,239,228,0.2);
+  border: 1px solid rgb(var(--color-paper-rgb) / 0.2);
   border-radius: 0.9rem;
-  background: rgba(23,20,15,0.58);
+  background: rgb(var(--color-ink-rgb) / 0.58);
   backdrop-filter: blur(12px);
   padding: 1rem;
 }
@@ -440,7 +455,9 @@ body {
   width: fit-content;
   border: 1px solid rgba(245, 184, 62, 0.9);
   background: linear-gradient(135deg, #F5B83E 0%, #E89A2B 100%);
-  color: var(--color-ink);
+  /* Keep dark ink literal — sunflower bg is identical in both themes, we need
+   * fixed high contrast, not theme-inverted text. */
+  color: #17140F;
   border-radius: 0.9rem;
   padding: 0.85rem 1.5rem;
   font-family: var(--font-display);
@@ -765,6 +782,15 @@ html[data-theme='light'] {
   --color-paper-soft: #2E2720;    /* elevated becomes secondary text */
   --color-stone: #6B6459;         /* mid-tone stays warm */
   --color-bg: var(--color-ink);
+
+  /* RGB triplets swap together so Tailwind /opacity utilities invert too */
+  --color-ink-rgb: 245 239 228;
+  --color-surface-rgb: 232 223 201;
+  --color-elevated-rgb: 220 210 186;
+  --color-ink-border-rgb: 199 191 169;
+  --color-paper-rgb: 23 20 15;
+  --color-paper-soft-rgb: 46 39 32;
+  --color-stone-rgb: 107 100 89;
 }
 
 html[data-theme='light'] body {
@@ -849,7 +875,7 @@ html[data-theme='light'] body {
   font-family: var(--font-body);
   font-weight: 500;
   font-size: 0.86rem;
-  color: rgba(245, 239, 228, 0.72);
+  color: rgb(var(--color-paper-rgb) / 0.72);
   text-decoration: none;
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
@@ -858,7 +884,7 @@ html[data-theme='light'] body {
 
 .landing-header-nav-link:hover {
   color: var(--color-paper);
-  background: rgba(245, 239, 228, 0.06);
+  background: rgb(var(--color-paper-rgb) / 0.06);
 }
 
 .landing-header-cta {
@@ -868,7 +894,8 @@ html[data-theme='light'] body {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.86rem;
-  color: var(--color-ink);
+  /* Sunflower bg is fixed in both themes → keep ink literal for contrast. */
+  color: #17140F;
   background: var(--color-sunflower);
   padding: 0.45rem 1rem;
   border-radius: 999px;
