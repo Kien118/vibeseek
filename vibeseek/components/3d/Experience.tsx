@@ -16,6 +16,14 @@ export default function Experience() {
     const isMobile = size.width < 768
     const progress = scroll.offset
 
+    // Sync r3f virtual scroll progress → DOM ScrollBurst (window.scrollY ở
+    // landing luôn = 0 vì ScrollControls hijack scroll).
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('vibeseek:scroll-progress', { detail: { progress } }),
+      )
+    }
+
     /**
      * Camera stays relatively stable – the robot GROUP handles
      * scale-down / shift-right / rotation via its own useFrame.

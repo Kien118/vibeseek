@@ -16,7 +16,7 @@ const LandingSceneCanvas = dynamic(
 export default function HomePage() {
   return (
     <main className="landing-page">
-      <ScrollBurst showDebugMeter={true} />
+      <ScrollBurst useR3fScroll />
       <header className="landing-header">
         <div className="landing-header-inner">
           <Link href="/" className="landing-header-brand">

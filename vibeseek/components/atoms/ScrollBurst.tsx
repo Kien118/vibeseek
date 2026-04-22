@@ -34,12 +34,20 @@ interface ScrollBurstProps {
   burstEnd?: number;
   /** Hiện meter debug ở góc (chỉ dùng lúc dev). Default false */
   showDebugMeter?: boolean;
+  /**
+   * Khi landing page dùng r3f ScrollControls (virtual scroll trong Canvas),
+   * window.scrollY luôn = 0 → items không bung. Bật flag này để ScrollBurst
+   * nghe CustomEvent 'vibeseek:scroll-progress' do Experience.tsx dispatch
+   * mỗi frame với detail.progress (0-1).
+   */
+  useR3fScroll?: boolean;
 }
 
 export default function ScrollBurst({
   burstStart = 0.6,
   burstEnd = 0.92,
   showDebugMeter = false,
+  useR3fScroll = false,
 }: ScrollBurstProps) {
   const bgRef = useRef<HTMLDivElement>(null);
   const meterRef = useRef<HTMLDivElement>(null);
@@ -75,11 +83,22 @@ export default function ScrollBurst({
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     let ticking = false;
+    let r3fProgress = 0;
 
     const updateBurst = () => {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? Math.min(scrollY / docHeight, 1) : 0;
+      let scrollY: number;
+      let docHeight: number;
+      let progress: number;
+
+      if (useR3fScroll) {
+        progress = Math.max(0, Math.min(1, r3fProgress));
+        docHeight = window.innerHeight * 2; // virtual 3-page scroll
+        scrollY = progress * docHeight;
+      } else {
+        scrollY = window.scrollY;
+        docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        progress = docHeight > 0 ? Math.min(scrollY / docHeight, 1) : 0;
+      }
 
       // Burst factor: 0 (ẩn) → 1 (full)
       let burstFactor: number;
@@ -133,11 +152,28 @@ export default function ScrollBurst({
       }
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const onR3fProgress = (evt: Event) => {
+      const detail = (evt as CustomEvent<{ progress: number }>).detail;
+      if (!detail) return;
+      r3fProgress = detail.progress;
+      if (!ticking) {
+        requestAnimationFrame(updateBurst);
+        ticking = true;
+      }
+    };
+
+    if (useR3fScroll) {
+      window.addEventListener("vibeseek:scroll-progress", onR3fProgress);
+    } else {
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
     updateBurst(); // initial
 
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [burstStart, burstEnd]);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("vibeseek:scroll-progress", onR3fProgress);
+    };
+  }, [burstStart, burstEnd, useR3fScroll]);
 
   return (
     <>
