@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import CanvasSkeleton from '@/components/3d/CanvasSkeleton'
+import ScrollBurst from '@/components/atoms/ScrollBurst'
 
 const LandingSceneCanvas = dynamic(
   () => import('@/components/3d/LandingSceneCanvas'),
@@ -15,6 +16,7 @@ const LandingSceneCanvas = dynamic(
 export default function HomePage() {
   return (
     <main className="landing-page">
+      <ScrollBurst showDebugMeter={true} />
       <header className="landing-header">
         <div className="landing-header-inner">
           <Link href="/" className="landing-header-brand">

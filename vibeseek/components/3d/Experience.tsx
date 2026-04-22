@@ -63,7 +63,7 @@ export default function Experience() {
 
       <Scroll html>
         <div className="landing-overlay">
-          <section className="landing-panel landing-hero">
+          <section className="relative z-10 landing-panel landing-hero">
             <p className="landing-kicker">VibeSeek</p>
             <h1>Learning with DOJO.</h1>
             <p>
@@ -71,7 +71,7 @@ export default function Experience() {
             </p>
           </section>
 
-          <section className="landing-panel landing-features">
+          <section className="relative z-10 landing-panel landing-features">
             <div>
               <h2>Feynman Reverse</h2>
               <p>Đảo vai giữa thầy và trò — bạn dạy lại cho Bé DOJO (AI 10 tuổi). Càng giải thích đơn giản, càng chứng minh bạn đã thực sự hiểu.</p>
@@ -86,7 +86,7 @@ export default function Experience() {
             </div>
           </section>
 
-          <section className="landing-panel landing-cta">
+          <section className="relative z-10 landing-panel landing-cta">
             <p className="landing-kicker">Sẵn sàng học cùng DOJO chưa?</p>
             <h2>Upload PDF đầu tiên — feed học tập của bạn sẽ có trong 10 giây.</h2>
             <button type="button" onClick={() => router.push('/dashboard')}>Start now ✦</button>
