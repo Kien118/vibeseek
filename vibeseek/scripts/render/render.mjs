@@ -19,10 +19,14 @@
 import { createClient } from '@supabase/supabase-js'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { readFile, writeFile, mkdir, rm, copyFile } from 'node:fs/promises'
+import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { randomUUID } from 'node:crypto'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const run = promisify(execFile)
 
@@ -160,6 +164,18 @@ function splitNarrationLines(text, maxCharsPerLine = 36) {
   }
   if (current) lines.push(current)
   return lines
+}
+
+/**
+ * P-510: escape a string for ffmpeg drawtext `text=` option value.
+ * Order matters — backslash first.
+ */
+function escapeDrawtext(s) {
+  return s
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/:/g, '\\:')
+    .replace(/%/g, '\\%')
 }
 
 /**
@@ -318,6 +334,13 @@ async function main() {
 
     await writeFile(assPath, assHeader + dialogueLines, 'utf-8')
 
+    // P-510: copy title font to workDir so ffmpeg drawtext uses relative path
+    // (avoids Windows `C:/` drive-letter colon breaking filter option parsing
+    // + makes the ffmpeg call portable across Linux/Windows without path escaping).
+    const fontSrc = join(__dirname, 'title-font.ttf')
+    const fontDst = join(workDir, 'title-font.ttf')
+    await copyFile(fontSrc, fontDst)
+
     // 8. Render video with ffmpeg
     // Use relative paths for the subtitles filter to avoid Windows drive-letter
     // colon being parsed as an ffmpeg filter option separator.
@@ -340,24 +363,37 @@ async function main() {
       )
     }
 
-    // Build filter_complex: xfade chain + subtitle overlay on final output.
-    let filterComplex
+    // P-510: per-scene drawtext pre-composite (title card + scene kicker)
+    // BEFORE xfade chain. Labels [s0]..[s(N-1)] for pre-composited scenes,
+    // [vxf0]..[vxf(N-2)] for xfade outputs. Subtitle overlay on final [vout].
+    const sceneDrawtextParts = []
+    for (let i = 0; i < N; i++) {
+      const scene = scenes[i]
+      const rawTitle = (scene.title || `Scene ${i + 1}`).slice(0, 50)
+      const title = escapeDrawtext(rawTitle)
+      const kicker = `${String(i + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`
+      const kickerDraw = `drawtext=fontfile=title-font.ttf:text='${kicker}':fontsize=28:fontcolor=0x5B89B0:x=(w-text_w)/2:y=80:borderw=2:bordercolor=0x17140F`
+      const titleDraw = `drawtext=fontfile=title-font.ttf:text='${title}':fontsize=64:fontcolor=0xF5EFE4:x=(w-text_w)/2:y=140:box=1:boxcolor=0x221D17@0.75:boxborderw=24`
+      sceneDrawtextParts.push(`[${i}:v]${kickerDraw},${titleDraw}[s${i}]`)
+    }
+
+    // Build filter_complex: per-scene drawtext → xfade chain → subtitle on final [vout].
+    const xfadeParts = []
     if (N === 1) {
-      filterComplex = '[0:v]subtitles=subtitles.ass[vout]'
+      xfadeParts.push('[s0]subtitles=subtitles.ass[vout]')
     } else {
-      const parts = []
       let cumulative = 0
-      let prevLabel = '[0:v]'
+      let prevLabel = '[s0]'
       for (let k = 0; k < N - 1; k++) {
         cumulative += sceneDurations[k]
         const offset = (cumulative - XFADE_DURATION).toFixed(3)
         const outLabel = `[vxf${k}]`
-        parts.push(`${prevLabel}[${k + 1}:v]xfade=transition=fade:duration=${XFADE_DURATION}:offset=${offset}${outLabel}`)
+        xfadeParts.push(`${prevLabel}[s${k + 1}]xfade=transition=fade:duration=${XFADE_DURATION}:offset=${offset}${outLabel}`)
         prevLabel = outLabel
       }
-      parts.push(`${prevLabel}subtitles=subtitles.ass[vout]`)
-      filterComplex = parts.join(';')
+      xfadeParts.push(`${prevLabel}subtitles=subtitles.ass[vout]`)
     }
+    const filterComplex = [...sceneDrawtextParts, ...xfadeParts].join(';')
 
     await run('ffmpeg', [
       '-y',
