@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/utils/supabase'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!   // public RLS read is fine
-)
-
 export async function GET(_req: NextRequest, { params }: { params: { jobId: string } }) {
-  const { data, error } = await supabase
+  // Use supabaseAdmin (service role + noStoreFetch) to bypass Next.js fetch
+  // cache — same hotfix pattern as commit eefa538 (Phase 2 hotfix). Anon
+  // client with default fetch would serve stale status='queued' forever
+  // after render.mjs has already transitioned the row to 'ready' in DB.
+  const { data, error } = await supabaseAdmin
     .from('render_jobs')
     .select('id,status,video_url,duration_sec,error_message')
     .eq('id', params.jobId)
