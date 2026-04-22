@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** 2026-04-22 post-T-406. MVP LIVE on production. Commit tip: `8e3aefe`. Phase 5 at 4/N (T-405, T-407, T-408, T-406 done, 1 hotfix total).
+> **Last refresh:** 2026-04-22 post-P-501. MVP LIVE on production. Commit tip: `76c324f`. Phase 5 at 5/N (T-405, T-407, T-408, T-406, P-501 done, 1 hotfix total).
 
 ---
 
@@ -71,10 +71,13 @@ Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
 | 4 Polish — video | P-401..P-405 | ✅ done (1 hotfix P-401) |
 | 4 Polish — core | T-401..T-404 | ✅ done (0 hotfix) |
 | **5 Deploy + persist** | **T-405, T-407, T-408, T-406** | **✅ done (1 hotfix T-406)** |
-| 5 Remaining | B2/B3/B4 TBD | 📝 candidates, not yet scoped |
+| **5 Video polish** | **P-501 (B2-Lite palette pool + xfade)** | **✅ done 2026-04-22 (0 hotfix)** |
+| 5 Remaining | B3/B4/B5 TBD | 📝 candidates, deferred post-demo |
 
 Tip commits worth knowing:
-- `8e3aefe` — architect close T-406 (current main tip)
+- `76c324f` — PR #40 merge (P-501 B2-Lite palette pool + xfade, current main tip)
+- `4f7015f` — P-501 implementation commit
+- `8e3aefe` — architect close T-406
 - `a6bc36e` — T-406 merge (Vercel deploy PR #39)
 - `d00fc68` — T-408 Upstash rate-limit
 - `bb16ee8` — T-407 chat_messages
@@ -268,105 +271,90 @@ All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 
 ---
 
-## Step 11 — NEXT SESSION TASK (P-501 B2-Lite, locked 2026-04-22)
+## Step 11 — NEXT SESSION TASK (post-P-501, demo rehearsal)
 
-**User demo timeline:** 1 tuần from 2026-04-22. Risk tolerance LOW.
+**User demo timeline:** ~1 tuần from 2026-04-22 (demo ≈ 2026-04-29). Risk tolerance LOW. MVP + P-501 visual polish both shipped.
 
-**Chosen track:** P-501 B2-Lite — pre-made background pool + xfade crossfade. Architect rejected full B2 per-scene AI-generated visuals (image API unavailable) and user's Manim/infographic idea (too risky for 1-tuần + adds Python/LaTeX/Puppeteer deps). B2-Lite is scope-down that delivers visual diversity + true scene transitions without new deps.
+### P-501 close-out recap (2026-04-22)
 
-### P-501 scope outline (discussed, NOT YET SPEC'd)
+- **Merged:** PR #40, commit `4f7015f`, merge SHA `76c324f`.
+- **Scope shipped:** `render.mjs` +57/-4 LOC (8-entry `GRADIENT_POOL` + deterministic `POOL[i % 8]` picker + `XFADE_DURATION=0.3s` + filter_complex xfade chain + subtitle overlay on `[vout]`).
+- **Architect direct-implemented** (no executor dispatch) — user feedback 2026-04-22 post-merge: **future tasks should dispatch to sub-agents with right-sized models (Sonnet default, Opus 4.7 only when genuinely complex)** to save cost. Rule saved in `memory/feedback_dispatch_sub_agents_cost_aware.md`.
+- **Post-merge redeploy done:** `vercel --prod --yes` → deployment `dpl_9MQMXk548GZB1Rf2hGucD3Vgu9PG` READY, aliased to `vibeseek-five.vercel.app`, `X-Vercel-Id: sin1::sin1::...` verified (edge + function both Singapore).
+- **Math verified:** 3-scene synth 12.000s + 10-scene synth 54.000s exact (0.000 drift). Protected-region grep 0 matches for P-401/P-402/P-403/P-405 sentinels.
+- **0 hotfix. Phase 5 progress: 5/N tasks done, 1 hotfix total (only T-406 CR env upload).**
 
-**What changes:**
-- `vibeseek/scripts/render/render.mjs` — add pool of 8-10 gradient palette variants (color pairs + speed variations). Parser picks N gradients (one per scene) deterministically (e.g. round-robin by scene index, or hash by scene.id for stability).
-- Single `-i gradients=...` input → N `-i gradients=...` inputs (one per scene, duration = scene duration).
-- Current simple filter chain → ffmpeg `filter_complex` with `xfade` chain: `[0:v][1:v]xfade=transition=fade:duration=0.3:offset=T0[v01]; [v01][2:v]xfade=...` etc.
-- Audio concat path unchanged; subtitle ASS overlay applied on final `[vN-1]` output.
+### AC-14 still pending (user browser smoke on prod)
 
-**What stays (protected):**
-- P-401 ASS header + `splitNarrationLines` + `formatAssTime` — subtitle rendering untouched
-- P-402 `speakable_narration` — TTS path untouched
-- P-403 `OVERFLOW_RATIO` / `WORDS_PER_SECOND` — parser duration extension untouched
-- P-405 `\fad(300,300)` — subtitle fade tag untouched
-- P-404 `gradients=...c0=0x1a1a2e:c1=0x2d1b4e:speed=0.008` — **EXTENDED** to pool (this is the task itself, but current values must remain as one entry in the pool for backward visual compat)
+Upload a real PDF (≥3 scenes recommended) on https://vibeseek-five.vercel.app → wait for render complete (~5-12 min on GH Actions) → download + play MP4. Verify:
+1. Scenes have visibly DIFFERENT background palettes (not all same navy-purple).
+2. Transitions between scenes CROSSFADE smoothly (0.3s fade, not hard cut).
+3. Subtitle `\fad(300,300)` still fades in/out per scene (P-405 orthogonal).
+4. Audio sync preserved — subtitle timing matches TTS.
+5. Total video duration = sum of scene durations.
 
-**Palette pool draft (for spec phase):**
-1. Navy-purple (current P-404): `c0=0x1a1a2e c1=0x2d1b4e` + speed=0.008
-2. Purple-pink: `c0=0x2d1b4e c1=0xc026d3` + speed=0.010
-3. Teal-cyan: `c0=0x0f172a c1=0x0891b2` + speed=0.008
-4. Orange-red: `c0=0x7f1d1d c1=0xea580c` + speed=0.012
-5. Forest-emerald: `c0=0x064e3b c1=0x059669` + speed=0.008
-6. Indigo-fuchsia: `c0=0x312e81 c1=0xa21caf` + speed=0.010
-7. Slate-sky: `c0=0x1e293b c1=0x0284c7` + speed=0.008
-8. Rose-amber: `c0=0x9f1239 c1=0xd97706` + speed=0.011
-(Final palette list TBD in spec — designer taste call.)
+If AC-14 fails: check GH Actions logs first (`render-video.yml`), then examine `render_jobs.storyboard` JSONB vs new render.mjs logic. Rollback plan: `git revert 4f7015f` → redeploy. (0% expected — feasibility + stress smoke green pre-merge.)
 
-**Failure modes to preempt (for spec phase):**
-- F-1: xfade chain with N > 20 scenes OOM on GH Actions runner
-- F-2: filter_complex syntax errors across edge cases (1 scene, 2 scenes, many scenes)
-- F-3: xfade `offset` math wrong → black frames between scenes OR overlap
-- F-4: audio concat timing desync after xfade (total video duration changes slightly with N-1 transitions × 0.3s)
-- F-5: subtitle ASS overlay timing stays correct (uses absolute timestamps, should be robust)
-- F-6: palette pool too similar → no visual diversity in short videos (3-5 scenes)
-- F-7: random palette selection varies per render → user confusion when same PDF renders different each time. Decision needed: deterministic (hash) vs stochastic
-- F-8: Phase 4 protected regions — grep must return 0 lines for P-401/P-402/P-403/P-405 sentinels
-- F-9: Groq fallback path shares same render.mjs — must work with pool too
-- F-10: blueprint §10 P-405 says xfade which architect overrode in Phase 4 — update blueprint §13 to note this is the Phase 5 revisit + override repeal
-- F-11..F-15 TBD during spec
+### Demo rehearsal plan (2 ngày cuối tuần before 2026-04-29)
 
-**Test plan for spec phase:**
-- Test 1: unit — palette pool returns 8 distinct color pairs
-- Test 2: unit — scene-index-to-palette mapping stable (deterministic)
-- Test 3: integration — 3-scene render with xfade → verify 2 transition PNGs at boundaries show visible color delta (Phase 4 frame-extract technique)
-- Test 4: integration — 10-scene render → verify filter_complex compiles, output MP4 plays, total duration = sum(scenes) - 0.3 × (N-1) overlap
-- Test 5: integration — subtitle ASS overlay still renders correctly on all scenes post-xfade
-- Test 6: regression — P-404 original gradient (navy-purple) still available + used (palette index 0 = current)
+**Day 1 (2026-04-27 est):**
+1. **Full E2E on prod** — upload 2-3 different PDFs (varying complexity). Record each flow: upload → cards → quiz → chat RAG → leaderboard → video render → download.
+2. **Backup MP4 recording** — record screen (OBS / Loom) of golden-path flow on 1 PDF end-to-end. 2-3 min video. If live demo breaks, play the recording.
+3. **Test PDFs selection** — pick 2-3 PDFs that showcase different card counts / chapter depths / multilingual content (Phase 4 P-402 EN-in-VN TTS showcase).
+4. **Stopwatch practice runs** — time yourself from "share URL" to "video ready" to know demo pacing.
 
-**Expected PR diff:** 3-4 files (render.mjs ~80 LOC added, task md, blueprint §13, AGENT_LOG). No new deps. No new env vars.
+**Day 2 (2026-04-28 est):**
+1. **Demo script** — 2-3 min narrative: "Problem (Gen Z học khó tập trung) → Solution (AI convert PDF → TikTok-style cards + quiz + chat) → Live demo (upload → show cards/quiz/chat/video) → Tech stack summary → Questions". Write beats bằng tiếng Việt if Vietnamese audience.
+2. **Slide deck minimal** — 5-7 slides for context before/after live demo. Architecture diagram, tech stack table, future roadmap.
+3. **Rehearsal dry-run** — 2-3 full walkthroughs with timer.
+4. **Q&A prep** — anticipate: scaling? cost? AI model choice? security? data privacy? MVP limits? Write cheat-sheet answers.
 
-**Executor model:** claude-opus-4-7 (complex ffmpeg filter_complex logic, Phase 4 protected region risk). NOT sonnet — xfade chain math is not mechanical.
+### Backup plans if demo breaks
 
-**Post-merge:** `cd vibeseek && vercel --prod --yes` to redeploy (deploy runbook §Step 2).
+| Failure | Backup |
+|---|---|
+| Vercel down | Play pre-recorded screen capture |
+| Gemini quota dry | Groq fallback chain kicks in (Phase 2 verified) |
+| GH Actions render slow | Pre-render 2 videos in advance, show those instead |
+| Upload fails | Pre-load a document in browser beforehand |
+| Internet spotty | Have phone hotspot as backup |
+| Laptop dies | Have laptop charger + power bank |
+
+### B3/B4/B5 candidates (deferred post-demo)
+
+Do NOT start during demo week. Revisit 2026-05-01+:
+- **B3** SSML voice switching for English terms (if user feedback from demo asks for better pronunciation)
+- **B4** chat analytics / moderation dashboard
+- **B5** Vercel git-auto-deploy (requires reopening D-7/D-8 from T-406)
 
 ### Bootstrap prompt for new session (copy-paste)
 
 ```
-Bạn là Software Architect cho dự án VibeSeek. Resume session mới cho task
-P-501 B2-Lite (pre-made background pool + xfade crossfade).
+Bạn là Software Architect cho dự án VibeSeek. Resume session mới post-P-501.
 
-MVP đang LIVE: https://vibeseek-five.vercel.app (Vercel Hobby, sin1).
-Phase 5 at 4/N done (T-405/T-407/T-408/T-406). Demo 1 tuần tới.
-
-Task P-501 đã LOCK (user chốt 2026-04-22):
-- Pool 8-10 gradient palette variants trong render.mjs
-- ffmpeg xfade crossfade 0.3s giữa scenes
-- Không new deps, không AI image gen
-- Đúng blueprint P-405 original intent (architect override Phase 4 sang ASS
-  \fad, giờ revisit làm proper crossfade với multiple bg)
+MVP + P-501 B2-Lite đã LIVE: https://vibeseek-five.vercel.app (Vercel Hobby,
+sin1). Phase 5 at 5/N done. Demo 2026-04-29 (1 tuần từ P-501 merge).
 
 TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ:
-1. Đọc SESSION_HANDOFF.md §Step 11 — P-501 scope outline + failure modes
-   + test plan drafted
-2. Đọc memory/feedback_vibeseek_phase4_lessons.md — libass + frame-extract
-   review technique (MUST USE for this task)
-3. Đọc memory/feedback_vibeseek_phase5_deploy_lessons.md — post-merge
-   redeploy runbook
-4. Đọc memory/project_vibeseek_state_2026_04_22_phase5.md — current state
-5. Đọc ARCHITECT_BLUEPRINT.md §13 top 5 changelog + §10 Phase 4 (P-404/P-405)
-6. git log --oneline -5 main — tip phải bắt đầu từ `a7abc4b` (docs handoff)
-   hoặc `8e3aefe` (architect close T-406)
+1. Đọc SESSION_HANDOFF.md §Step 11 — post-P-501 handoff, AC-14 pending,
+   demo rehearsal plan
+2. Đọc memory/feedback_dispatch_sub_agents_cost_aware.md — user directive
+   2026-04-22 về Sonnet-default dispatch (áp dụng mọi task code impl sau này)
+3. Đọc memory/project_vibeseek_state_2026_04_22_phase5_p501.md — post-P-501
+   snapshot
+4. Đọc memory/feedback_vibeseek_phase5_deploy_lessons.md — deploy runbook
+   (nếu cần ops)
+5. git log --oneline -5 main — tip phải bắt đầu từ `76c324f` (PR #40 merge P-501)
 
-Sau đó confirm sẵn sàng + đề xuất quy trình P-501 (failure modes spec +
-Files NOT to touch + frame-extract verify + protected-region grep). Không
-viết spec vội — user phải duyệt quy trình trước.
+User có thể chọn 1 trong:
+- AC-14 prod smoke (upload real PDF, verify visual diversity)
+- Demo rehearsal prep (Day 1 hoặc Day 2 plan)
+- B3/B4/B5 post-demo (KHÔNG nên trong demo week)
+- Đóng session cuối cùng trước demo
+
+Sau đó confirm sẵn sàng + đề xuất quy trình. Không viết code vội.
+Khi nào cần impl → DISPATCH sub-agent với model hợp lý (Sonnet default).
 ```
-
-### Post-P-501 close-out sẽ cần
-
-- Redeploy prod: `vercel --prod --yes`
-- Run smoke: render a real PDF + user verify visual diversity + no regression
-- Update blueprint §13 with P-501 entry + mark P-405 override repealed
-- Update SESSION_HANDOFF.md + state snapshot
-- **Demo rehearsal:** sau P-501 ship + verify, dành 1-2 ngày cuối tuần prep demo (script, test PDFs, backup recorded video)
 
 ---
 

@@ -1,6 +1,6 @@
 # P-501 · Per-scene palette pool + ffmpeg xfade crossfade (B2-Lite)
 
-**Status:** `review`
+**Status:** `done` (merged 2026-04-22 via PR #40, commit `4f7015f`, merge SHA `76c324f`)
 **Severity:** MEDIUM (Phase 5 demo-polish, 1-week timeline)
 **Blueprint ref:** §10 Phase 4 · P-405 (original intent revisit); §13 changelog slot (2026-04-XX P-501)
 **Branch:** `task/P-501-scene-background-xfade`
