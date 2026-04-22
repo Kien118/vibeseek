@@ -56,7 +56,7 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
         : 'border-paper-cream/10 bg-paper-cream/5 hover:border-paper-cream/30'
     }
     // revealed
-    if (idx === result?.correctIndex) return 'border-sage bg-sage/20'
+    if (idx === result?.correctIndex) return 'border-sage bg-sage/20 shadow-glow-sage'
     if (idx === selected && !result?.correct) return 'border-error-terra bg-error-terra/20'
     return 'border-paper-cream/10 bg-paper-cream/5 opacity-60'
   }
@@ -82,10 +82,23 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
 
       <div className="space-y-3 mb-6">
         {question.options.map((opt, idx) => (
-          <button
+          <motion.button
             key={idx}
             disabled={stage === 'revealed'}
             onClick={() => setSelected(idx)}
+            animate={
+              stage === 'revealed' && idx === result?.correctIndex
+                ? {
+                    scale: [1, 1.03, 1],
+                    transition: {
+                      duration: 0.5,
+                      delay: result?.correct ? 0 : 0.5,
+                    },
+                  }
+                : stage === 'revealed' && idx === selected && !result?.correct
+                  ? { x: [0, -4, 4, -4, 4, 0], transition: { duration: 0.4 } }
+                  : {}
+            }
             className={`
               w-full text-left px-5 py-3 rounded-2xl border transition
               text-paper-cream/90 font-body
@@ -95,12 +108,26 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
             <span className="font-mono text-xs text-paper-cream/40 mr-3">{String.fromCharCode(65 + idx)}.</span>
             {opt}
             {stage === 'revealed' && idx === result?.correctIndex && (
-              <CheckCircle2 className="inline-block w-4 h-4 ml-2 text-sage" />
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: result?.correct ? 0.2 : 0.7, type: 'spring', stiffness: 260, damping: 18 }}
+                className="inline-block"
+              >
+                <CheckCircle2 className="inline-block w-4 h-4 ml-2 text-sage" />
+              </motion.span>
             )}
             {stage === 'revealed' && idx === selected && !result?.correct && (
-              <XCircle className="inline-block w-4 h-4 ml-2 text-error-terra" />
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                className="inline-block"
+              >
+                <XCircle className="inline-block w-4 h-4 ml-2 text-error-terra" />
+              </motion.span>
             )}
-          </button>
+          </motion.button>
         ))}
       </div>
 

@@ -8,6 +8,7 @@ import GlowButton from '@/components/GlowButton'
 import VibeCard from '@/components/VibeCard'
 import VideoPlayer from '@/components/VideoPlayer'
 import DocumentHistory from '@/components/DocumentHistory'
+import TextReveal from '@/components/TextReveal'
 import type { VibeCard as VibeCardType } from '@/utils/supabase'
 import {
   loadDocHistory,
@@ -152,7 +153,7 @@ export default function DashboardPage() {
       <section className="dashboard-shell">
         <header className="dashboard-header">
           <p className="dashboard-kicker">VibeSeek Studio</p>
-          <h1>Upload PDF - Analyze - Convert to Video</h1>
+          <TextReveal as="h1" text="Upload PDF - Analyze - Convert to Video" charDelay={30} />
           <p>Pipeline: Read PDF, generate Vibe Cards, then turn key insights into a ready-to-produce video storyboard.</p>
         </header>
 
