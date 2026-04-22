@@ -53,6 +53,14 @@ export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }:
     return () => { cancelled = true }
   }, [jobId])
 
+  // Cursor system: body.loading while video render is pending/rendering
+  useEffect(() => {
+    const pending = !job || job.status === 'queued' || job.status === 'rendering'
+    if (pending) document.body.classList.add('loading')
+    else document.body.classList.remove('loading')
+    return () => document.body.classList.remove('loading')
+  }, [job])
+
   if (error) {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-error-terra/30 bg-error-terra/10 p-4 text-error-terra">
@@ -88,7 +96,7 @@ export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }:
   const filename = `${documentTitle.replace(/[^a-zA-Z0-9_-]+/g, '-').toLowerCase()}.mp4`
   return (
     <div className="space-y-3">
-      <video controls className="w-full rounded-2xl border border-paper-cream/10" src={job.videoUrl!} />
+      <video controls className="zoomable w-full rounded-2xl border border-paper-cream/10" src={job.videoUrl!} />
       <a
         href={job.videoUrl!}
         download={filename}

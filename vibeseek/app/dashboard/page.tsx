@@ -45,6 +45,14 @@ export default function DashboardPage() {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
   const [docHistory, setDocHistory] = useState<DocHistoryEntry[]>([])
 
+  // Cursor system: body.loading while processing PDF or generating video
+  useEffect(() => {
+    const busy = isProcessing || isGeneratingVideo
+    if (busy) document.body.classList.add('loading')
+    else document.body.classList.remove('loading')
+    return () => document.body.classList.remove('loading')
+  }, [isProcessing, isGeneratingVideo])
+
   useEffect(() => {
     setDocHistory(loadDocHistory())
   }, [])

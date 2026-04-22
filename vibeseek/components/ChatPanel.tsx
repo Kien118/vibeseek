@@ -278,8 +278,16 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
     return () => { abortRef.current?.abort() }
   }, [])
 
+  // Cursor system: toggle body.loading class while streaming (drives loading cursor)
+  useEffect(() => {
+    const busy = phase === 'streaming' || phase === 'ensuring'
+    if (busy) document.body.classList.add('loading')
+    else document.body.classList.remove('loading')
+    return () => document.body.classList.remove('loading')
+  }, [phase])
+
   return (
-    <div className="flex flex-col h-[70vh] bg-ink-surface rounded-xl shadow-sm border border-paper-cream/10">
+    <div className={`flex flex-col h-[70vh] bg-ink-surface rounded-xl shadow-sm border border-paper-cream/10 ${mode === 'feynman' ? 'feynman-mode' : ''}`}>
       {/* P-502: Mode toggle header */}
       <div className={`border-b px-4 py-2 flex items-center justify-between ${mode === 'feynman' ? 'border-sage/40 bg-sage/10' : 'border-paper-cream/10 bg-ink-surface'}`}>
         <div className="flex items-center gap-2 text-xs">
