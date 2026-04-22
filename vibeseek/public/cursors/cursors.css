@@ -1,0 +1,110 @@
+/* =========================================================
+   VIBESEEK CURSOR SYSTEM · Static SVG Cursors
+   Import vào app/globals.css hoặc layout.tsx
+   ========================================================= */
+
+/* 1. DEFAULT — toàn bộ body */
+body {
+  cursor: url("/cursors/default.svg") 12 12, auto;
+}
+
+/* 2. POINTER — button, link, clickable */
+button,
+a,
+[role="button"],
+.clickable,
+summary,
+label[for] {
+  cursor: url("/cursors/pointer.svg") 16 16, pointer;
+}
+
+/* 3. TEXT — input, textarea, contenteditable */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+input[type="number"],
+textarea,
+[contenteditable="true"],
+.text-select {
+  cursor: url("/cursors/pencil.svg") 16 28, text;
+}
+
+/* 4. GRAB — draggable */
+.draggable,
+.grab {
+  cursor: url("/cursors/hand-open.svg") 16 16, grab;
+}
+
+/* 5. GRABBING — đang drag */
+.draggable:active,
+.dragging,
+.grabbing {
+  cursor: url("/cursors/hand-fist.svg") 16 18, grabbing;
+}
+
+/* 6. HIGHLIGHT MODE — chế độ đánh dấu */
+.highlight-mode,
+.highlight-mode * {
+  cursor: url("/cursors/highlighter.svg") 18 30, crosshair;
+}
+
+/* 7. ERASER — xóa highlight, delete note */
+.eraser-mode,
+.btn-delete:hover,
+.btn-remove:hover {
+  cursor: url("/cursors/eraser.svg") 16 16, not-allowed;
+}
+
+/* 8. DISABLED */
+button:disabled,
+input:disabled,
+textarea:disabled,
+.locked,
+.disabled {
+  cursor: url("/cursors/disabled.svg") 14 14, not-allowed !important;
+}
+
+/* 9. LOADING — body khi API pending */
+body.loading,
+body.loading * {
+  cursor: url("/cursors/loading.svg") 16 16, wait !important;
+}
+
+/* 10. BÉ VIBE — chỉ trong Feynman chat page */
+.feynman-mode {
+  cursor: url("/cursors/bevibe.svg") 18 18, help;
+}
+
+/* 11. ZOOM — hover image, diagram */
+.zoomable,
+img.zoomable,
+.diagram {
+  cursor: url("/cursors/zoom.svg") 13 13, zoom-in;
+}
+
+/* =========================================================
+   MOBILE — tắt custom cursor (native không có cursor)
+   Không cần media query vì mobile ignore cursor CSS.
+   ========================================================= */
+
+/* =========================================================
+   ACCESSIBILITY — user disable animation thì dùng native cursor
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  body,
+  button,
+  a,
+  input,
+  textarea,
+  .draggable,
+  .highlight-mode,
+  .feynman-mode,
+  .zoomable {
+    cursor: auto !important;
+  }
+  button, a, [role="button"] { cursor: pointer !important; }
+  input, textarea { cursor: text !important; }
+}
