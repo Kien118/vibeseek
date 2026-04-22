@@ -10,24 +10,32 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['var(--font-syne)', 'sans-serif'],
-        body: ['var(--font-dm-sans)', 'sans-serif'],
-        mono: ['var(--font-space-mono)', 'monospace'],
+        display: ['var(--font-display)', 'sans-serif'],
+        body: ['var(--font-body)', 'sans-serif'],
+        handwritten: ['var(--font-handwritten)', 'cursive'],
+        serif: ['var(--font-serif)', 'serif'],
+        mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
-        vibe: {
-          purple: '#A855F7',
-          cyan: '#22D3EE',
-          pink: '#EC4899',
-          green: '#10B981',
-          dark: '#0A0A0F',
-          glass: 'rgba(255,255,255,0.05)',
+        ink: '#17140F',
+        surface: '#221D17',
+        elevated: '#2E2720',
+        sunflower: '#F5B83E',
+        terracotta: '#D96C4F',
+        sage: '#7A9B7E',
+        lapis: '#5B89B0',
+        plum: '#9B5675',
+        paper: {
+          DEFAULT: '#F5EFE4',
+          soft: '#E8DFC9',
         },
+        stone: '#9A928A',
+        // Legacy `vibe` kept REMOVED — executor replaces all `vibe-*` class usages per §1 map
       },
       backgroundImage: {
-        'glow-purple': 'radial-gradient(circle at 50% 50%, rgba(168,85,247,0.15) 0%, transparent 70%)',
-        'glow-cyan': 'radial-gradient(circle at 50% 50%, rgba(34,211,238,0.15) 0%, transparent 70%)',
-        'mesh-gradient': 'linear-gradient(135deg, #0A0A0F 0%, #0F0A1E 50%, #0A0F1E 100%)',
+        'glow-sunflower': 'radial-gradient(circle at 50% 50%, rgba(245,184,62,0.15) 0%, transparent 70%)',
+        'glow-terracotta': 'radial-gradient(circle at 50% 50%, rgba(217,108,79,0.15) 0%, transparent 70%)',
+        'mesh-gradient': 'linear-gradient(135deg, #17140F 0%, #1E1912 50%, #221D17 100%)',
       },
       backdropBlur: {
         xs: '2px',
@@ -41,8 +49,8 @@ const config: Config = {
       },
       keyframes: {
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(168,85,247,0.3)' },
-          '50%': { boxShadow: '0 0 60px rgba(168,85,247,0.6), 0 0 100px rgba(34,211,238,0.2)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(245,184,62,0.3)' },
+          '50%': { boxShadow: '0 0 60px rgba(245,184,62,0.6), 0 0 100px rgba(217,108,79,0.2)' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
@@ -58,10 +66,10 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'glass': '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-        'glow-sm': '0 0 20px rgba(168,85,247,0.4)',
-        'glow-md': '0 0 40px rgba(168,85,247,0.5), 0 0 80px rgba(34,211,238,0.2)',
-        'glow-cyan': '0 0 30px rgba(34,211,238,0.4)',
+        'glass': '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(245,239,228,0.1)',
+        'glow-sm': '0 0 20px rgba(245,184,62,0.4)',
+        'glow-md': '0 0 40px rgba(245,184,62,0.5), 0 0 80px rgba(217,108,79,0.2)',
+        'glow-sage': '0 0 30px rgba(122,155,126,0.4)',
       },
     },
   },

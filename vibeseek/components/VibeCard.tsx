@@ -6,10 +6,10 @@ import type { VibeCard as VibeCardType } from '@/utils/supabase'
 const cardTypeConfig = {
   concept: {
     label: 'CONCEPT',
-    color: 'from-purple-500/20 to-violet-600/20',
-    border: 'border-purple-500/30',
-    badge: 'bg-purple-500/20 text-purple-300 border-purple-400/30',
-    glow: 'hover:shadow-[0_0_40px_rgba(168,85,247,0.2)]',
+    color: 'from-[#D96C4F]/20 to-[#9B5675]/20',
+    border: 'border-[#D96C4F]/30',
+    badge: 'bg-[#D96C4F]/20 text-[#D96C4F] border-[#D96C4F]/30',
+    glow: 'hover:shadow-[0_0_40px_rgba(217,108,79,0.2)]',
   },
   quote: {
     label: 'QUOTE',
@@ -20,24 +20,24 @@ const cardTypeConfig = {
   },
   tip: {
     label: 'TIP',
-    color: 'from-green-500/20 to-emerald-600/20',
-    border: 'border-green-500/30',
-    badge: 'bg-green-500/20 text-green-300 border-green-400/30',
-    glow: 'hover:shadow-[0_0_40px_rgba(16,185,129,0.2)]',
+    color: 'from-[#7A9B7E]/20 to-emerald-600/20',
+    border: 'border-[#7A9B7E]/30',
+    badge: 'bg-[#7A9B7E]/20 text-[#7A9B7E] border-[#7A9B7E]/30',
+    glow: 'hover:shadow-[0_0_40px_rgba(122,155,126,0.2)]',
   },
   fact: {
     label: 'FACT',
-    color: 'from-cyan-500/20 to-teal-600/20',
-    border: 'border-cyan-500/30',
-    badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
-    glow: 'hover:shadow-[0_0_40px_rgba(34,211,238,0.2)]',
+    color: 'from-[#5B89B0]/20 to-teal-600/20',
+    border: 'border-[#5B89B0]/30',
+    badge: 'bg-[#5B89B0]/20 text-[#7CA0C5] border-[#5B89B0]/30',
+    glow: 'hover:shadow-[0_0_40px_rgba(91,137,176,0.2)]',
   },
   summary: {
     label: 'SUMMARY',
-    color: 'from-pink-500/20 to-rose-600/20',
-    border: 'border-pink-500/30',
-    badge: 'bg-pink-500/20 text-pink-300 border-pink-400/30',
-    glow: 'hover:shadow-[0_0_40px_rgba(236,72,153,0.2)]',
+    color: 'from-[#F5B83E]/20 to-[#E0A535]/20',
+    border: 'border-[#F5B83E]/30',
+    badge: 'bg-[#F5B83E]/20 text-[#F5B83E] border-[#F5B83E]/30',
+    glow: 'hover:shadow-[0_0_40px_rgba(245,184,62,0.2)]',
   },
 }
 
@@ -54,10 +54,10 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        delay: index * 0.08, 
-        duration: 0.4, 
-        ease: [0.25, 0.46, 0.45, 0.94] 
+      transition={{
+        delay: index * 0.08,
+        duration: 0.4,
+        ease: [0.25, 0.46, 0.45, 0.94]
       }}
       whileHover={{ y: -4, scale: 1.01 }}
       className={`
@@ -74,7 +74,7 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
     >
       {/* Background mesh */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 blur-xl" />
+        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#F5EFE4]/5 blur-xl" />
       </div>
 
       <div className="relative z-10">
@@ -83,35 +83,35 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
           <div className="flex items-center gap-2">
             <span className="text-2xl">{card.emoji}</span>
             <span className={`
-              text-xs font-mono font-bold tracking-widest px-2 py-0.5 
+              text-xs font-mono font-bold tracking-widest px-2 py-0.5
               rounded-md border ${config.badge}
             `}>
               {config.label}
             </span>
           </div>
-          <div className="flex items-center gap-1 text-xs text-white/40 font-mono">
+          <div className="flex items-center gap-1 text-xs text-[#F5EFE4]/40 font-mono">
             <span className="text-yellow-400">⚡</span>
             <span>+{card.vibe_points}</span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="font-display font-bold text-white text-base mb-2 leading-tight">
+        <h3 className="font-display font-bold text-[#F5EFE4] text-base mb-2 leading-tight">
           {card.title}
         </h3>
 
         {/* Content */}
-        <p className="text-white/70 text-sm leading-relaxed font-body">
+        <p className="text-[#F5EFE4]/70 text-sm leading-relaxed font-body">
           {card.content}
         </p>
 
         {/* Footer: tags + quiz button */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#F5EFE4]/10">
           <div className="flex flex-wrap gap-1">
             {card.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/50 font-body"
+                className="text-xs px-2 py-0.5 rounded-full bg-[#F5EFE4]/10 text-[#F5EFE4]/50 font-body"
               >
                 #{tag}
               </span>
@@ -121,10 +121,10 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
           {onQuiz && (
             <button
               onClick={onQuiz}
-              className="text-xs font-mono font-bold text-white/60 hover:text-white
+              className="text-xs font-mono font-bold text-[#F5EFE4]/60 hover:text-[#F5EFE4]
                          transition-colors px-3 py-1 rounded-lg
-                         border border-white/10 hover:border-white/30
-                         hover:bg-white/5"
+                         border border-[#F5EFE4]/10 hover:border-[#F5EFE4]/30
+                         hover:bg-[#F5EFE4]/5"
             >
               QUIZ ME →
             </button>

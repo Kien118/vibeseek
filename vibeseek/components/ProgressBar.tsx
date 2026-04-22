@@ -10,15 +10,15 @@ interface ProgressBarProps {
 }
 
 const variantStyles = {
-  purple: 'from-purple-500 to-violet-600',
-  cyan: 'from-cyan-400 to-teal-500',
-  rainbow: 'from-purple-500 via-pink-500 to-cyan-400',
+  purple: 'from-[#D96C4F] to-[#9B5675]',
+  cyan: 'from-[#5B89B0] to-teal-500',
+  rainbow: 'from-[#D96C4F] via-[#F5B83E] to-[#5B89B0]',
 }
 
 const glowStyles = {
-  purple: 'shadow-[0_0_10px_rgba(168,85,247,0.8)]',
-  cyan: 'shadow-[0_0_10px_rgba(34,211,238,0.8)]',
-  rainbow: 'shadow-[0_0_10px_rgba(236,72,153,0.8)]',
+  purple: 'shadow-[0_0_10px_rgba(217,108,79,0.8)]',
+  cyan: 'shadow-[0_0_10px_rgba(91,137,176,0.8)]',
+  rainbow: 'shadow-[0_0_10px_rgba(245,184,62,0.8)]',
 }
 
 export default function ProgressBar({
@@ -34,10 +34,10 @@ export default function ProgressBar({
       {(label || showPercentage) && (
         <div className="flex justify-between items-center">
           {label && (
-            <span className="text-sm font-mono text-white/60">{label}</span>
+            <span className="text-sm font-mono text-[#F5EFE4]/60">{label}</span>
           )}
           {showPercentage && (
-            <span className="text-sm font-mono font-bold text-white">
+            <span className="text-sm font-mono font-bold text-[#F5EFE4]">
               {Math.round(clampedProgress)}%
             </span>
           )}
@@ -45,7 +45,7 @@ export default function ProgressBar({
       )}
 
       {/* Track */}
-      <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+      <div className="h-2 w-full bg-[#F5EFE4]/10 rounded-full overflow-hidden border border-[#F5EFE4]/5">
         {/* Fill */}
         <motion.div
           initial={{ width: 0 }}
@@ -56,7 +56,7 @@ export default function ProgressBar({
           {/* Glow tip */}
           <span
             className={`
-              absolute right-0 top-1/2 -translate-y-1/2 
+              absolute right-0 top-1/2 -translate-y-1/2
               w-3 h-3 rounded-full
               bg-gradient-to-r ${variantStyles[variant]}
               ${glowStyles[variant]}

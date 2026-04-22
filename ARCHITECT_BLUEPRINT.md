@@ -184,6 +184,7 @@ Không thay đổi các mục dưới đây khi chưa cập nhật blueprint và
 |---|---|---|
 | Frontend framework | **Next.js 14 App Router + TypeScript** | Đã có sẵn; Vercel free; full-stack one-repo |
 | Styling | **Tailwind CSS 3.4** | Đã có; Gen Z aesthetic nhanh |
+| Fonts | **Bricolage Grotesque** (display) · **Be Vietnam Pro** (body) · **Patrick Hand** (handwritten) · **Fraunces** (serif) · **JetBrains Mono** (mono) | P-503 brand rebrand 2026-04-22 — warm academic palette, Vietnamese subset. Loaded via `next/font/google` with `display: 'swap'`. |
 | 3D | **three + @react-three/fiber + drei** | DOJO.glb là nhân vật chính landing page |
 | Animation | **framer-motion + gsap** | Đã có; dùng cho page transitions + scroll |
 | Icon | **lucide-react** | Đã có |
@@ -980,6 +981,15 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 ---
 
 ## §13. Changelog
+
+### 2026-04-22 — P-503 Brand Tokens — fonts + palette foundation (Phase 5 Day 1 Track A)
+- **What:** Full palette swap cyberpunk → warm academic. Fonts: Syne/Plus Jakarta/JetBrains → Bricolage Grotesque/Be Vietnam Pro/Patrick Hand/Fraunces/JetBrains Mono. All 5 font families load via `next/font/google` with `vietnamese` subset + `display: 'swap'`.
+- **Palette:** Sunflower `#F5B83E` (primary) · Terracotta `#D96C4F` (warm/human/AI) · Sage `#7A9B7E` (success/Feynman) · Lapis `#5B89B0` (info/quiz) · Plum `#9B5675` (rare badges) · Ink `#17140F` (base bg) · Paper `#F5EFE4` (main text) · Stone `#9A928A` (muted).
+- **Scope:** 19 code files (3 foundation + 16 component/page) + 3 doc files = 22 files. No new deps, no DB migration, no motion/animation. Mechanical token migration only.
+- **AC-4 grep sentinel:** 0 matches for pink/cyan/purple/lime/acid/legacy hex in `components/` + `app/`. tsc exit 0. package.json diff = 0 lines.
+- **Foundation batch:** Unblocks P-504 (typing indicator) + P-505 (ambient bg) parallel dispatch Day 1 Track B — both depend on new CSS vars + Tailwind tokens.
+- **Dispatch:** claude-sonnet-4-6 executor (mechanical pattern-match task, spec-heavy literal mapping table — right-sized per cost-aware dispatch rule).
+- **Flagged out-of-scope:** `LeaderboardTable.tsx`, `QuizCard.tsx`, `VibePointsBadge.tsx`, `VideoPlayer.tsx`, `app/quiz/[documentId]/page.tsx` have residual `text-white` refs — not in P-503 file list. Queued for P-503b or next brand pass.
 
 ### 2026-04-22 — P-502 Feynman Dojo Mode (Phase 5)
 - **What:** Dual-mode chat — Default (RAG Q&A, unchanged) + Feynman Dojo (student teaches concept → DOJO probes gaps → 3-round verdict flow). Toggle in ChatPanel, no new page.
