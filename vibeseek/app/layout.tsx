@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Bricolage_Grotesque, Be_Vietnam_Pro, Patrick_Hand, Fraunces, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import VibePointsBadge from '@/components/VibePointsBadge'
+import AmbientBackground from '@/components/AmbientBackground'
 import './globals.css'
 
 const displayFont = Bricolage_Grotesque({
@@ -63,6 +64,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className="dark">
       <body className={`${displayFont.variable} ${bodyFont.variable} ${handwrittenFont.variable} ${serifFont.variable} ${monoFont.variable}`}>
+        <AmbientBackground />
         {children}
         <VibePointsBadge />
         <Toaster
