@@ -151,24 +151,26 @@ export default function Model() {
      * P-513b 2026-04-23 (second tune): user feedback "full head visible at
      * top + model position goes DOWN on scroll + full body visible at bottom".
      *
-     * Top (p=0):    scale=5.0, y=-7.0 → full head + shoulders with camera
-     *               lookY=1.8. Model head_world ≈ 5*1.75 - 7 = 1.75 visible.
-     * Bottom (p=1): scale=1.8, y=-8.5 → model shrinks + drifts DOWN. Combined
-     *               with camera z=5.0 pull-back, lookY=-0.5, fov=65° wide —
-     *               full body visible in frame.
+     * P-513c 2026-04-23 (third tune): user still saw model position too low
+     * at top + model too small at bottom. Adjustments:
      *
-     * Y DIRECTION FLIPPED: -7.0 → -8.5 (decreases = model moves DOWN as
-     * scroll increases, per user "xuống theo" request).
+     * Top (p=0):    scale=5.0 (same), y=-6.0 (raised from -7.0) → head +
+     *               upper body shifted UP in viewport. With camera lookY=2.0
+     *               (raised) → full head prominent.
+     * Bottom (p=1): scale=2.88 (1.6× bigger than prior 1.8 per user), y=-7.5
+     *               (still moves DOWN from top -6.0, per "xuống theo").
+     *               Camera pulls further back (z=6.5, lookY=-1.5, fov=70°)
+     *               so larger model still fits full body.
      */
     const EASE = 0.07
 
-    const targetScale = MathUtils.lerp(5.0, 1.8, p)
+    const targetScale = MathUtils.lerp(5.0, 2.88, p)
     group.scale.setScalar(MathUtils.lerp(group.scale.x, targetScale, EASE))
 
     const targetX = MathUtils.lerp(0, 1.0, p)
     group.position.x = MathUtils.lerp(group.position.x, targetX, EASE)
 
-    const targetY = MathUtils.lerp(-7.0, -8.5, p)
+    const targetY = MathUtils.lerp(-6.0, -7.5, p)
     group.position.y = MathUtils.lerp(group.position.y, targetY, EASE)
 
     // Rotate the whole robot ~45° counter-clockwise so it faces left (toward text)
