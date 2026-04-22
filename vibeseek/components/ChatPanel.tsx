@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import TypingDots from '@/components/TypingDots'
 import { getOrCreateAnonId, peekAnonId } from '@/utils/anon-id' // architect audit 2026-04-18 — exact export names
 import {
   loadHistory, saveHistory, newMessageId, type ChatHistoryMessage,
@@ -331,7 +332,11 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
                 ? (m.mode === 'feynman' ? 'bg-sage text-ink' : 'bg-sunflower text-ink')
                 : 'bg-[#2E2720] text-[#F5EFE4]'
             }`}>
-              {m.content || (streamingId === m.id ? '...' : '')}
+              {m.content ? (
+                m.content
+              ) : streamingId === m.id ? (
+                <TypingDots />
+              ) : null}
             </div>
           </div>
         ))}
