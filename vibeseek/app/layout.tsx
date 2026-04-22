@@ -3,6 +3,9 @@ import { Bricolage_Grotesque, Be_Vietnam_Pro, Patrick_Hand, Fraunces, JetBrains_
 import { Toaster } from 'react-hot-toast'
 import VibePointsBadge from '@/components/VibePointsBadge'
 import AmbientBackground from '@/components/AmbientBackground'
+import SoundToggle from '@/components/SoundToggle'
+import ThemeToggle from '@/components/ThemeToggle'
+import PageTransition from '@/components/PageTransition'
 import './globals.css'
 
 const displayFont = Bricolage_Grotesque({
@@ -65,8 +68,10 @@ export default function RootLayout({
     <html lang="vi" className="dark">
       <body className={`${displayFont.variable} ${bodyFont.variable} ${handwrittenFont.variable} ${serifFont.variable} ${monoFont.variable}`}>
         <AmbientBackground />
-        {children}
+        <PageTransition>{children}</PageTransition>
         <VibePointsBadge />
+        <SoundToggle />
+        <ThemeToggle />
         <Toaster
           position="bottom-center"
           toastOptions={{

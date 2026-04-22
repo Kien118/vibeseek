@@ -707,3 +707,27 @@ body::before {
     transition: none;
   }
 }
+
+/* =========================================================
+ * P-511 item 12: Light mode v1 — data-attribute driven CSS var swap
+ * Scope: core tokens only. Toggle exists + ink/paper invert. Full
+ * per-component theme audit deferred to Phase 6 post-demo.
+ * ========================================================= */
+
+html[data-theme='light'] {
+  --color-ink: #F5EFE4;           /* paper cream becomes base bg */
+  --color-surface: #E8DFC9;       /* paper soft becomes surface */
+  --color-elevated: #DCD2BA;      /* slightly darker for hover */
+  --color-ink-border: #C7BFA9;    /* warm beige border */
+  --color-paper: #17140F;         /* ink becomes text */
+  --color-paper-soft: #2E2720;    /* elevated becomes secondary text */
+  --color-stone: #6B6459;         /* mid-tone stays warm */
+  --color-bg: var(--color-ink);
+}
+
+html[data-theme='light'] body {
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(245,184,62,0.08) 0%, transparent 52%),
+    radial-gradient(ellipse at 80% 80%, rgba(217,108,79,0.06) 0%, transparent 48%),
+    var(--color-ink);
+}
