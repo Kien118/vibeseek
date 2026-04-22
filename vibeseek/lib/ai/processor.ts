@@ -183,13 +183,20 @@ export interface VideoStoryboard {
   scenes: VideoScene[]
 }
 
-// Helper: check if error is a rate-limit / quota error
+// Helper: check if error is retriable (quota / rate-limit / upstream unavailable).
+// Extended 2026-04-23 to also catch 503 UNAVAILABLE ("high demand") — previously
+// only 429 quota was caught, so storyboard gen skipped Groq fallback when
+// gemini-2.5-flash threw 503. chat.ts has same pattern.
 function isQuotaError(err: unknown): boolean {
   const message = err instanceof Error ? err.message : String(err)
+  const lower = message.toLowerCase()
   return (
     message.includes('429') ||
-    message.toLowerCase().includes('quota') ||
-    message.includes('RESOURCE_EXHAUSTED')
+    message.includes('503') ||
+    lower.includes('quota') ||
+    lower.includes('resource_exhausted') ||
+    lower.includes('unavailable') ||
+    lower.includes('overloaded')
   )
 }
 
