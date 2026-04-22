@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** 2026-04-22 Day 2 motion batch complete (P-506..P-509). MVP LIVE on production. Commit tip: `b237155`. Phase 5 at 14/N (+ P-503/P-504/P-505/P-506a/P-506/P-507/P-508/P-509 done — 3 hotfixes total). Day 2 remaining: item 9 card tilt + item 11 sound + item 12 light mode + item 13 idle state + Update #2 Video spec. Demo 2026-04-29.
+> **Last refresh:** 2026-04-22 Day 3 COMPLETE — **all brand + video shipped** (P-510 + P-511). MVP LIVE on production. Commit tip: `e21a2cd`. Phase 5 at 16/N (+P-510 Video + P-511 final brand batch — 3 hotfixes total). **All 13 user brand items + Update #2 Video done.** Next: demo rehearsal Days 5-6 (2026-04-27/28), demo 2026-04-29.
 
 ---
 
