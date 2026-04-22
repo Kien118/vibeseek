@@ -3,9 +3,11 @@ export interface ChatHistoryMessage {
   role: 'user' | 'assistant'
   content: string
   createdAt: number
+  mode?: 'default' | 'feynman' // P-502 — absent = 'default' for backward compat
 }
 
 const KEY_PREFIX = 'vibeseek:chat:'
+const FEYNMAN_CONCEPT_KEY_PREFIX = 'vibeseek:feynman:concept:'
 
 export function loadHistory(documentId: string): ChatHistoryMessage[] {
   if (typeof window === 'undefined') return []
@@ -15,7 +17,9 @@ export function loadHistory(documentId: string): ChatHistoryMessage[] {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     return parsed.filter(m =>
-      m && typeof m.id === 'string' && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string',
+      m && typeof m.id === 'string'
+        && (m.role === 'user' || m.role === 'assistant')
+        && typeof m.content === 'string',
     )
   } catch {
     return []
@@ -47,4 +51,28 @@ export function newMessageId(): string {
     return crypto.randomUUID()
   }
   return `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+// P-502: persist Feynman session's concept card id per document across reloads.
+export function loadFeynmanConcept(documentId: string): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage.getItem(FEYNMAN_CONCEPT_KEY_PREFIX + documentId)
+  } catch {
+    return null
+  }
+}
+
+export function saveFeynmanConcept(documentId: string, conceptCardId: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(FEYNMAN_CONCEPT_KEY_PREFIX + documentId, conceptCardId)
+  } catch {}
+}
+
+export function clearFeynmanConcept(documentId: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(FEYNMAN_CONCEPT_KEY_PREFIX + documentId)
+  } catch {}
 }

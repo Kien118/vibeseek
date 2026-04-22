@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabaseAdmin
     .from('chat_messages')
-    .select('id, role, content, created_at')
+    .select('id, role, content, created_at, mode')  // P-502: include mode
     .eq('document_id', documentId)
     .eq('anon_id', anonId)
     .order('created_at', { ascending: true })
@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
     role: row.role as 'user' | 'assistant',
     content: row.content,
     createdAt: new Date(row.created_at).getTime(),
+    mode: (row.mode as 'default' | 'feynman') ?? 'default',  // P-502
   }))
 
   return new Response(JSON.stringify({ messages }), {

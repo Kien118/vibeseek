@@ -981,6 +981,15 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 
 ## §13. Changelog
 
+### 2026-04-22 — P-502 Feynman Dojo Mode (Phase 5)
+- **What:** Dual-mode chat — Default (RAG Q&A, unchanged) + Feynman Dojo (student teaches concept → DOJO probes gaps → 3-round verdict flow). Toggle in ChatPanel, no new page.
+- **Scope:** 5 code files + 1 DB migration + 4 doc files. ~220 LOC net. No new deps. No new env vars.
+- **DB:** `ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'default'` — non-breaking, existing rows auto-populated with `'default'`. Apply in Supabase Dashboard before merging PR.
+- **Backend:** `retrieveFeynmanContext()` new sibling (no embedding call — loads card + raw_text snippet by card title). `streamChatResponse()` gains `StreamOptions { mode, round }` param (backward compat default). `/api/chat` accepts `mode`, `conceptCardId`, `round`; validates `round ∈ {1,2,3}` for Feynman; skips embeddings pre-check for Feynman mode; persists `mode` col on both inserts. Cap bumped 50→100.
+- **UI:** ChatPanel toggle (Default ⟷ 🥋 Feynman), acid green (lime-500) Feynman theme, mode badge + round counter `🥋 FEYNMAN DOJO • Round X/3`, concept picker fallback, opening template injected client-side only, round counter increments after each response, session-complete CTA after round 3.
+- **Prompt:** `FEYNMAN_SYSTEM_PROMPT` added after `CHAT_SYSTEM_PROMPT` — senpai Nhật-TikTok voice, strict Round 1/2/3 flow rules, gap detection against CONTEXT only, max 200 words per response.
+- **Dispatch:** claude-sonnet-4-6 executor (spec-heavy pre-audited, pattern-heavy, ~220 LOC — right-sized per cost-aware dispatch rule).
+
 ### 2026-04-22 — AC-14 hotfix: render-jobs poll route stale cache (P-501 post-merge)
 - **Symptom:** After P-501 merge + redeploy, user uploaded PDF → dashboard kẹt "đang xếp hàng" 20 min → "Lỗi: Render quá lâu" error. AC-14 visual smoke blocked until resolved.
 - **Render.mjs P-501 code worked correctly.** GH Actions run `24765471989` executed render.mjs with 6-scene real storyboard (`6 scene(s), xfade=0.3s, palette-pool size=8`), 49.54s audio → 49.49s output (0.05s codec rounding, within tolerance), uploaded Supabase Storage, DB row transitioned to `status=ready` at 07:17:25Z. Verified via direct REST query with service-role key.
