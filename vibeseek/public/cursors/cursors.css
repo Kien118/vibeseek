@@ -108,3 +108,21 @@ img.zoomable,
   button, a, [role="button"] { cursor: pointer !important; }
   input, textarea { cursor: text !important; }
 }
+
+/* =========================================================
+ * CUSTOM CURSOR MODE — AnimatedCursor JS tier hides native
+ * Toggle class added/removed by AnimatedCursor component.
+ * Applies to ALL elements to override per-element cursor rules.
+ * ========================================================= */
+html.custom-cursor,
+html.custom-cursor *,
+html.custom-cursor body,
+html.custom-cursor button,
+html.custom-cursor a,
+html.custom-cursor input,
+html.custom-cursor textarea,
+html.custom-cursor .draggable,
+html.custom-cursor .zoomable,
+html.custom-cursor .feynman-mode {
+  cursor: none !important;
+}

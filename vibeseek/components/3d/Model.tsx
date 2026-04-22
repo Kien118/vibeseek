@@ -148,23 +148,27 @@ export default function Model() {
     const p = scroll.offset // 0 = top of page, 1 = bottom
 
     /**
-     * P-513 2026-04-23: inverted scale + position so model is BIG at top
-     * (shoulder-up visible with face at camera lookY=1.3) and SHRINKS on
-     * scroll. User feedback: "mô hình 3D ở đầu trang sẽ to hơn một chút
-     * để thấy được từ vai trở lên ở đầu trang, sau đó nhỏ dần khi scroll".
+     * P-513b 2026-04-23 (second tune): user feedback "full head visible at
+     * top + model position goes DOWN on scroll + full body visible at bottom".
      *
-     * Top (p=0):    scale=4.0, y=-5.5 → head at world y≈1.3 matches camera lookY
-     * Bottom (p=1): scale=2.0, y=-2.6 → full body visible, smaller, wider view
+     * Top (p=0):    scale=5.0, y=-7.0 → full head + shoulders with camera
+     *               lookY=1.8. Model head_world ≈ 5*1.75 - 7 = 1.75 visible.
+     * Bottom (p=1): scale=1.8, y=-8.5 → model shrinks + drifts DOWN. Combined
+     *               with camera z=5.0 pull-back, lookY=-0.5, fov=65° wide —
+     *               full body visible in frame.
+     *
+     * Y DIRECTION FLIPPED: -7.0 → -8.5 (decreases = model moves DOWN as
+     * scroll increases, per user "xuống theo" request).
      */
     const EASE = 0.07
 
-    const targetScale = MathUtils.lerp(4.0, 2.0, p)
+    const targetScale = MathUtils.lerp(5.0, 1.8, p)
     group.scale.setScalar(MathUtils.lerp(group.scale.x, targetScale, EASE))
 
     const targetX = MathUtils.lerp(0, 1.0, p)
     group.position.x = MathUtils.lerp(group.position.x, targetX, EASE)
 
-    const targetY = MathUtils.lerp(-5.5, -2.6, p)
+    const targetY = MathUtils.lerp(-7.0, -8.5, p)
     group.position.y = MathUtils.lerp(group.position.y, targetY, EASE)
 
     // Rotate the whole robot ~45° counter-clockwise so it faces left (toward text)

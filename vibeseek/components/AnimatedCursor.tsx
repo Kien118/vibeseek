@@ -58,8 +58,10 @@ export default function AnimatedCursor() {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
 
-    // Ẩn native cursor
-    document.body.style.cursor = "none";
+    // Ẩn native cursor — toggle class trên <html> để CSS rule hide cursor
+    // trên TẤT CẢ elements (body.style.cursor không đủ vì cursors.css có
+    // per-element rules trên button/a/input/.draggable override body).
+    document.documentElement.classList.add("custom-cursor");
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
@@ -120,7 +122,7 @@ export default function AnimatedCursor() {
     window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      document.body.style.cursor = "";
+      document.documentElement.classList.remove("custom-cursor");
       window.removeEventListener("mousemove", handleMouseMove);
       document.body.removeEventListener("mouseleave", handleMouseLeave);
       document.body.removeEventListener("mouseenter", handleMouseEnter);
