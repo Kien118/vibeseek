@@ -164,7 +164,10 @@ export default function Model() {
      */
     const EASE = 0.07
 
-    const targetScale = MathUtils.lerp(5.0, 2.88, p)
+    // P-513d 2026-04-23 (fourth tune): user wants smaller at top + bigger at bottom
+    // Top scale:    5.0 → 4.2 (16% smaller — less dominant at top)
+    // Bottom scale: 2.88 → 3.6 (25% bigger — more prominent full-body shot)
+    const targetScale = MathUtils.lerp(4.2, 3.6, p)
     group.scale.setScalar(MathUtils.lerp(group.scale.x, targetScale, EASE))
 
     const targetX = MathUtils.lerp(0, 1.0, p)
