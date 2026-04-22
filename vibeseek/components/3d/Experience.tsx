@@ -67,7 +67,7 @@ export default function Experience() {
             <p className="landing-kicker">VibeSeek</p>
             <h1>Learning with DOJO.</h1>
             <p>
-              Ngày xưa có một đứa trẻ tên DOJO sinh ra trong thư viện. Nó đọc ngấu nghiến mọi tài liệu nhưng luôn hỏi lại người khác: "Vậy thì... nghĩa là gì?" Hôm nay, DOJO trở thành robot học trò của bạn — người giúp biến kiến thức thành feed, và biến bạn thành người thầy giỏi nhất của chính mình.
+              Ngày xưa có một đứa trẻ tên DOJO sinh ra trong thư viện. Nó đọc ngấu nghiến mọi tài liệu nhưng luôn hỏi lại người khác: “Vậy thì... nghĩa là gì?” Hôm nay, DOJO trở thành robot học trò của bạn — người giúp biến kiến thức thành feed, và biến bạn thành người thầy giỏi nhất của chính mình.
             </p>
           </section>
 
