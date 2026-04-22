@@ -90,7 +90,7 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
             </span>
           </div>
           <div className="flex items-center gap-1 text-xs text-[#F5EFE4]/40 font-mono">
-            <span className="text-yellow-400">⚡</span>
+            <span className="text-[#F5B83E]">⚡</span>
             <span>+{card.vibe_points}</span>
           </div>
         </div>

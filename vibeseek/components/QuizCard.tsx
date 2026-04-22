@@ -52,13 +52,13 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
   function classForOption(idx: number) {
     if (stage === 'answering') {
       return selected === idx
-        ? 'border-indigo-400 bg-indigo-500/20'
-        : 'border-white/10 bg-white/5 hover:border-white/30'
+        ? 'border-[#F5B83E] bg-[#F5B83E]/20'
+        : 'border-[#F5EFE4]/10 bg-[#F5EFE4]/5 hover:border-[#F5EFE4]/30'
     }
     // revealed
-    if (idx === result?.correctIndex) return 'border-green-400 bg-green-500/20'
-    if (idx === selected && !result?.correct) return 'border-red-400 bg-red-500/20'
-    return 'border-white/10 bg-white/5 opacity-60'
+    if (idx === result?.correctIndex) return 'border-[#7A9B7E] bg-[#7A9B7E]/20'
+    if (idx === selected && !result?.correct) return 'border-[#C85A3C] bg-[#C85A3C]/20'
+    return 'border-[#F5EFE4]/10 bg-[#F5EFE4]/5 opacity-60'
   }
 
   return (
@@ -69,16 +69,16 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
       transition={{ duration: 0.35 }}
       className="glass rounded-3xl p-8 max-w-2xl mx-auto w-full"
     >
-      <div className="flex items-center justify-between mb-4 text-sm text-white/50 font-mono">
+      <div className="flex items-center justify-between mb-4 text-sm text-[#F5EFE4]/50 font-mono">
         <span>Câu {questionNumber} / {totalQuestions}</span>
         {stage === 'revealed' && result && (
-          <span className={result.correct ? 'text-green-400' : 'text-red-400'}>
+          <span className={result.correct ? 'text-[#7A9B7E]' : 'text-[#C85A3C]'}>
             {result.correct ? '+' : ''}{result.pointsEarned} vibe {result.alreadyAttempted ? '(đã làm)' : ''}
           </span>
         )}
       </div>
 
-      <h2 className="font-display text-2xl text-white mb-6">{question.question}</h2>
+      <h2 className="font-display text-2xl text-[#F5EFE4] mb-6">{question.question}</h2>
 
       <div className="space-y-3 mb-6">
         {question.options.map((opt, idx) => (
@@ -88,25 +88,25 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
             onClick={() => setSelected(idx)}
             className={`
               w-full text-left px-5 py-3 rounded-2xl border transition
-              text-white/90 font-body
+              text-[#F5EFE4]/90 font-body
               ${classForOption(idx)}
             `}
           >
-            <span className="font-mono text-xs text-white/40 mr-3">{String.fromCharCode(65 + idx)}.</span>
+            <span className="font-mono text-xs text-[#F5EFE4]/40 mr-3">{String.fromCharCode(65 + idx)}.</span>
             {opt}
             {stage === 'revealed' && idx === result?.correctIndex && (
-              <CheckCircle2 className="inline-block w-4 h-4 ml-2 text-green-400" />
+              <CheckCircle2 className="inline-block w-4 h-4 ml-2 text-[#7A9B7E]" />
             )}
             {stage === 'revealed' && idx === selected && !result?.correct && (
-              <XCircle className="inline-block w-4 h-4 ml-2 text-red-400" />
+              <XCircle className="inline-block w-4 h-4 ml-2 text-[#C85A3C]" />
             )}
           </button>
         ))}
       </div>
 
       {stage === 'revealed' && result?.explanation && (
-        <div className="p-4 rounded-2xl border border-white/10 bg-white/5 mb-6 text-sm text-white/70">
-          <b className="text-white">Giải thích:</b> {result.explanation}
+        <div className="p-4 rounded-2xl border border-[#F5EFE4]/10 bg-[#F5EFE4]/5 mb-6 text-sm text-[#F5EFE4]/70">
+          <b className="text-[#F5EFE4]">Giải thích:</b> {result.explanation}
         </div>
       )}
 
@@ -115,14 +115,14 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
           <button
             onClick={handleSubmit}
             disabled={selected === null || submitting}
-            className="px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold disabled:opacity-40"
+            className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] text-[#F5EFE4] font-semibold disabled:opacity-40"
           >
             {submitting ? 'Đang chấm...' : 'Chốt đáp án'}
           </button>
         ) : (
           <button
             onClick={onNext}
-            className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold"
+            className="px-6 py-2.5 rounded-full bg-[#F5EFE4]/10 hover:bg-[#F5EFE4]/20 text-[#F5EFE4] font-semibold"
           >
             {questionNumber === totalQuestions ? 'Xem kết quả' : 'Câu tiếp'}
           </button>

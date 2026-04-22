@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
           <button
             onClick={saveName}
             disabled={saving || myName.trim().length < 1}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-semibold disabled:opacity-40"
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] font-semibold disabled:opacity-40"
           >
             {saving ? '\u0110ang l\u01b0u...' : 'L\u01b0u t\u00ean'}
           </button>

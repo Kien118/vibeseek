@@ -44,7 +44,7 @@ export default function DocumentHistory({ entries, onRemove }: Props) {
             <div className="flex gap-2 flex-wrap">
               <Link
                 href={`/quiz/${doc.documentId}`}
-                className="px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-[#F5EFE4] text-xs font-semibold hover:opacity-90"
+                className="px-3 py-1.5 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] text-[#F5EFE4] text-xs font-semibold hover:opacity-90"
               >
                 🎯 Quiz
               </Link>

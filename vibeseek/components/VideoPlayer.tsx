@@ -55,7 +55,7 @@ export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }:
 
   if (error) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-400">
+      <div className="flex items-center gap-2 rounded-xl border border-[#C85A3C]/30 bg-[#C85A3C]/10 p-4 text-[#C85A3C]">
         <AlertCircle className="h-5 w-5" />
         <span>Lỗi: {error}</span>
       </div>
@@ -65,17 +65,17 @@ export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }:
   if (!job || job.status === 'queued' || job.status === 'rendering') {
     const label = job?.status === 'rendering' ? 'Đang render video...' : 'Đang xếp hàng...'
     return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-8">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-400" />
-        <p className="text-white/70">{label}</p>
-        <p className="text-xs text-white/40">Thường mất 1–2 phút. Đừng tắt tab.</p>
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-[#F5EFE4]/10 bg-[#F5EFE4]/5 p-8">
+        <Loader2 className="h-10 w-10 animate-spin text-[#F5B83E]" />
+        <p className="text-[#F5EFE4]/70">{label}</p>
+        <p className="text-xs text-[#F5EFE4]/40">Thường mất 1–2 phút. Đừng tắt tab.</p>
       </div>
     )
   }
 
   if (job.status === 'failed') {
     return (
-      <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-red-300">
+      <div className="rounded-2xl border border-[#C85A3C]/30 bg-[#C85A3C]/10 p-6 text-[#E8A08A]">
         <div className="flex items-center gap-2 font-semibold">
           <AlertCircle className="h-5 w-5" /> Render thất bại
         </div>
@@ -88,11 +88,11 @@ export default function VideoPlayer({ jobId, documentTitle = 'vibeseek-video' }:
   const filename = `${documentTitle.replace(/[^a-zA-Z0-9_-]+/g, '-').toLowerCase()}.mp4`
   return (
     <div className="space-y-3">
-      <video controls className="w-full rounded-2xl border border-white/10" src={job.videoUrl!} />
+      <video controls className="w-full rounded-2xl border border-[#F5EFE4]/10" src={job.videoUrl!} />
       <a
         href={job.videoUrl!}
         download={filename}
-        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-6 py-2.5 font-semibold text-white hover:opacity-90"
+        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] px-6 py-2.5 font-semibold text-[#F5EFE4] hover:opacity-90"
       >
         <Download className="h-4 w-4" /> Tải về thiết bị
       </a>

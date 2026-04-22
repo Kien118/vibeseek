@@ -215,7 +215,7 @@ export default function DashboardPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Link
                     href={`/quiz/${documentId}`}
-                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-[#F5EFE4] font-semibold text-sm hover:opacity-90 transition-opacity"
+                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] text-[#F5EFE4] font-semibold text-sm hover:opacity-90 transition-opacity"
                   >
                     🎯 Làm Quiz
                   </Link>
