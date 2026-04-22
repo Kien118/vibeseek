@@ -58,10 +58,19 @@ export default function AnimatedCursor() {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
 
-    // Ẩn native cursor — toggle class trên <html> để CSS rule hide cursor
-    // trên TẤT CẢ elements (body.style.cursor không đủ vì cursors.css có
-    // per-element rules trên button/a/input/.draggable override body).
+    // Ẩn native cursor — inject inline <style> tag at end of <head>. More
+    // reliable than body.style.cursor or class-based approach because:
+    // 1. `*, *::before, *::after { cursor: none !important }` matches EVERY
+    //    element including those with per-selector rules in cursors.css
+    // 2. Being a late-appended <style> in <head>, it wins cascade via source
+    //    order when specificity ties with !important
     document.documentElement.classList.add("custom-cursor");
+    const hideNativeStyle = document.createElement("style");
+    hideNativeStyle.id = "animated-cursor-hide-native";
+    hideNativeStyle.textContent = `
+      *, *::before, *::after { cursor: none !important; }
+    `;
+    document.head.appendChild(hideNativeStyle);
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
@@ -123,6 +132,8 @@ export default function AnimatedCursor() {
 
     return () => {
       document.documentElement.classList.remove("custom-cursor");
+      const el = document.getElementById("animated-cursor-hide-native");
+      if (el) el.remove();
       window.removeEventListener("mousemove", handleMouseMove);
       document.body.removeEventListener("mouseleave", handleMouseLeave);
       document.body.removeEventListener("mouseenter", handleMouseEnter);

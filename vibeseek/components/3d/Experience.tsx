@@ -24,17 +24,17 @@ export default function Experience() {
      * CLOSE (scroll=0): tight on upper body hero shot
      * FAR   (scroll=1): slight pull-back to give room as robot shrinks right
      */
-    // P-513b: top = close-up head visible, bottom = far pull-back full body.
-    // Wider FOV at bottom + looking DOWN so model (which moves down on scroll)
-    // stays fully in frame.
-    const closePosition = isMobile ? [0, 1.5, 2.4] : [0, 1.5, 2.2]
-    const farPosition   = isMobile ? [0, 0.5, 5.5] : [0, 0.5, 5.0]
+    // P-513c: raised lookY at top (2.0 vs 1.8) to elevate head in viewport.
+    // Pulled camera further back at bottom (z=6.5 vs 5.0) + lookY=-1.5 +
+    // fov=70° wider so 1.6× larger bottom model (scale 2.88) still fits.
+    const closePosition = isMobile ? [0, 1.8, 2.4] : [0, 1.8, 2.2]
+    const farPosition   = isMobile ? [0, 0.2, 7.0] : [0, 0.2, 6.5]
     const closeFov = isMobile ? 48 : 42
-    const farFov   = isMobile ? 70 : 65
+    const farFov   = isMobile ? 72 : 70
 
-    // lookAt: look UP at head at top, look DOWN at body at bottom
-    const closeLookY = 1.8
-    const farLookY   = -0.5
+    // lookAt: look UP at head at top (elevated), look DOWN at body at bottom
+    const closeLookY = 2.0
+    const farLookY   = -1.5
     const lookY = MathUtils.lerp(closeLookY, farLookY, progress)
 
     const targetX   = MathUtils.lerp(closePosition[0], farPosition[0], progress)
