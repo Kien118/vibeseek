@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** 2026-04-22 post-P-502 Feynman Dojo Mode. MVP LIVE on production. Commit tip: `2c16974`. Phase 5 at 6/N (T-405, T-407, T-408, T-406, P-501, **P-502** done — 2 hotfixes total). AC-17 Feynman user browser smoke pending.
+> **Last refresh:** 2026-04-22 post-P-502 Feynman Dojo Mode + AC-17 pass. MVP LIVE on production. Commit tip: `b8b6b50`. Phase 5 at 6/N (T-405, T-407, T-408, T-406, P-501, **P-502 + AC-17 verified** done — 3 hotfixes total). Next: Update #2 Video quality upgrade per 7-day roadmap.
 
 ---
 
@@ -76,7 +76,8 @@ Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
 | 5 Remaining | Video quality upgrade + Brand/UI refresh | 📝 next per 7-day roadmap |
 
 Tip commits worth knowing:
-- **`2c16974`** — PR #41 merge (P-502 Feynman Dojo Mode, current main tip)
+- **`b8b6b50`** — P-502 hotfix (chat page fetch cards for Feynman picker, current main tip)
+- `2c16974` — PR #41 merge (P-502 Feynman Dojo Mode)
 - `8ea5ca9` — P-502 impl commit (Sonnet executor)
 - `57fe62d` — AC-14 hotfix (render-jobs poll route uses supabaseAdmin)
 - `76c324f` — PR #40 merge (P-501 B2-Lite palette pool + xfade)
