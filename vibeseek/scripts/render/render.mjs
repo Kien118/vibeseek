@@ -24,6 +24,7 @@ import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
+import { renderInfographic } from './generate-infographic.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -363,21 +364,34 @@ async function main() {
       )
     }
 
-    // P-510: per-scene drawtext pre-composite (title card + scene kicker)
-    // BEFORE xfade chain. Labels [s0]..[s(N-1)] for pre-composited scenes,
-    // [vxf0]..[vxf(N-2)] for xfade outputs. Subtitle overlay on final [vout].
-    const sceneDrawtextParts = []
+    // P-512: generate per-scene infographic PNG (card with title + bullets +
+    // accent design) via @napi-rs/canvas. Write to workDir, then add each as
+    // ffmpeg `-loop 1 -t dur -i infographic-K.png` input (indices N..2N-1).
+    console.log(`Generating ${N} infographic PNGs...`)
+    const infographicStart = Date.now()
+    const infographicInputArgs = []
     for (let i = 0; i < N; i++) {
-      const scene = scenes[i]
-      const rawTitle = (scene.title || `Scene ${i + 1}`).slice(0, 50)
-      const title = escapeDrawtext(rawTitle)
-      const kicker = `${String(i + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`
-      const kickerDraw = `drawtext=fontfile=title-font.ttf:text='${kicker}':fontsize=28:fontcolor=0x5B89B0:x=(w-text_w)/2:y=80:borderw=2:bordercolor=0x17140F`
-      const titleDraw = `drawtext=fontfile=title-font.ttf:text='${title}':fontsize=64:fontcolor=0xF5EFE4:x=(w-text_w)/2:y=140:box=1:boxcolor=0x221D17@0.75:boxborderw=24`
-      sceneDrawtextParts.push(`[${i}:v]${kickerDraw},${titleDraw}[s${i}]`)
+      const buf = await renderInfographic(scenes[i], i, N)
+      const pngPath = join(workDir, `infographic-${i}.png`)
+      await writeFile(pngPath, buf)
+      const dur = i === 0 ? sceneDurations[i] : sceneDurations[i] + XFADE_DURATION
+      infographicInputArgs.push(
+        '-loop', '1',
+        '-t', dur.toFixed(3),
+        '-i', `infographic-${i}.png`,
+      )
+    }
+    console.log(`  infographics rendered in ${Date.now() - infographicStart}ms`)
+
+    // P-512: per-scene overlay composite — gradient[i:v] + infographic[N+i:v]
+    // → [sK] BEFORE xfade chain. Replaces P-510 drawtext approach since canvas
+    // PNG already contains title + kicker + bullets + accent design.
+    const sceneOverlayParts = []
+    for (let i = 0; i < N; i++) {
+      sceneOverlayParts.push(`[${i}:v][${N + i}:v]overlay=0:0[s${i}]`)
     }
 
-    // Build filter_complex: per-scene drawtext → xfade chain → subtitle on final [vout].
+    // Build filter_complex: per-scene overlay → xfade chain → subtitle on final [vout].
     const xfadeParts = []
     if (N === 1) {
       xfadeParts.push('[s0]subtitles=subtitles.ass[vout]')
@@ -393,15 +407,16 @@ async function main() {
       }
       xfadeParts.push(`${prevLabel}subtitles=subtitles.ass[vout]`)
     }
-    const filterComplex = [...sceneDrawtextParts, ...xfadeParts].join(';')
+    const filterComplex = [...sceneOverlayParts, ...xfadeParts].join(';')
 
     await run('ffmpeg', [
       '-y',
-      ...gradientInputArgs,
-      '-i', audioPath,
+      ...gradientInputArgs,          // inputs 0..N-1 (gradients)
+      ...infographicInputArgs,       // inputs N..2N-1 (infographic PNGs)
+      '-i', audioPath,               // input 2N (audio)
       '-filter_complex', filterComplex,
       '-map', '[vout]',
-      '-map', `${N}:a`,
+      '-map', `${2 * N}:a`,
       '-c:v', 'libx264',
       '-preset', 'fast',
       '-pix_fmt', 'yuv420p',
