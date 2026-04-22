@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
           <button
             onClick={saveName}
             disabled={saving || myName.trim().length < 1}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta font-semibold disabled:opacity-40"
+            className="btn-polish px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-ink-base font-semibold disabled:opacity-40"
           >
             {saving ? '\u0110ang l\u01b0u...' : 'L\u01b0u t\u00ean'}
           </button>
@@ -86,7 +86,7 @@ export default function LeaderboardPage() {
           </p>
           <Link
             href="/dashboard"
-            className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-terracotta to-sunflower text-paper-cream font-semibold text-sm hover:opacity-90"
+            className="btn-polish-terra inline-block px-5 py-2 rounded-full bg-gradient-to-r from-terracotta to-sunflower text-ink-base font-semibold text-sm"
           >
             Về Dashboard
           </Link>

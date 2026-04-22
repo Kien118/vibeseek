@@ -73,16 +73,18 @@ body {
   box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(245,239,228,0.05);
 }
 
-/* Noise overlay for depth */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.3'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.5;
-}
+/* Noise overlay removed 2026-04-22 per user request — was too grainy.
+ * Kept block as comment so it can be re-enabled by uncommenting below.
+ * body::before {
+ *   content: '';
+ *   position: fixed;
+ *   inset: 0;
+ *   background-image: url("...noise SVG...");
+ *   pointer-events: none;
+ *   z-index: 1;
+ *   opacity: 0.5;
+ * }
+ */
 
 .scroll-scene {
   position: relative;
@@ -665,7 +667,11 @@ body::before {
 @media (hover: hover) {
   .btn-polish:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(245, 184, 62, 0.30), 0 0 60px rgba(245, 184, 62, 0.12); /* sunflower glow */
+    box-shadow:
+      inset 0 0 24px rgba(255, 206, 94, 0.45),    /* inner glow — sunflower bright */
+      0 0 30px rgba(245, 184, 62, 0.50),          /* outer glow near — sunflower */
+      0 0 60px rgba(245, 184, 62, 0.22);          /* outer glow far */
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 
@@ -680,7 +686,11 @@ body::before {
 @media (hover: hover) {
   .btn-polish-terra:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(217, 108, 79, 0.28), 0 0 60px rgba(217, 108, 79, 0.12); /* terracotta glow */
+    box-shadow:
+      inset 0 0 24px rgba(232, 148, 120, 0.45),   /* inner glow — terracotta soft */
+      0 0 30px rgba(217, 108, 79, 0.48),          /* outer glow near */
+      0 0 60px rgba(217, 108, 79, 0.20);          /* outer glow far */
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 
@@ -695,7 +705,11 @@ body::before {
 @media (hover: hover) {
   .btn-polish-sage:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(122, 155, 126, 0.28), 0 0 60px rgba(122, 155, 126, 0.12); /* sage glow */
+    box-shadow:
+      inset 0 0 24px rgba(154, 189, 160, 0.45),   /* inner glow — sage bright */
+      0 0 30px rgba(122, 155, 126, 0.48),          /* outer glow near */
+      0 0 60px rgba(122, 155, 126, 0.20);          /* outer glow far */
+    filter: brightness(1.05) saturate(1.1);
   }
 }
 

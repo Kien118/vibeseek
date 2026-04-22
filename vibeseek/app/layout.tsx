@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from 'next'
 import { Bricolage_Grotesque, Be_Vietnam_Pro, Patrick_Hand, Fraunces, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import VibePointsBadge from '@/components/VibePointsBadge'
-import AmbientBackground from '@/components/AmbientBackground'
+// AmbientBackground removed 2026-04-22 per user request (blur too heavy).
+// Keep component file for future re-enable.
+// import AmbientBackground from '@/components/AmbientBackground'
 import SoundToggle from '@/components/SoundToggle'
 import ThemeToggle from '@/components/ThemeToggle'
 import PageTransition from '@/components/PageTransition'
@@ -67,7 +69,6 @@ export default function RootLayout({
   return (
     <html lang="vi" className="dark">
       <body className={`${displayFont.variable} ${bodyFont.variable} ${handwrittenFont.variable} ${serifFont.variable} ${monoFont.variable}`}>
-        <AmbientBackground />
         <PageTransition>{children}</PageTransition>
         <VibePointsBadge />
         <SoundToggle />

@@ -44,13 +44,13 @@ export default function DocumentHistory({ entries, onRemove }: Props) {
             <div className="flex gap-2 flex-wrap">
               <Link
                 href={`/quiz/${doc.documentId}`}
-                className="px-3 py-1.5 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-paper-cream text-xs font-semibold hover:opacity-90"
+                className="btn-polish px-3 py-1.5 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-ink-base text-xs font-semibold"
               >
                 🎯 Quiz
               </Link>
               <Link
                 href={`/chat/${doc.documentId}`}
-                className="px-3 py-1.5 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-paper-cream text-xs font-semibold hover:opacity-90"
+                className="btn-polish-terra px-3 py-1.5 rounded-full bg-gradient-to-r from-terracotta to-sunflower text-ink-base text-xs font-semibold"
               >
                 💬 Chat
               </Link>

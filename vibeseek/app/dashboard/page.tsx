@@ -216,13 +216,13 @@ export default function DashboardPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Link
                     href={`/quiz/${documentId}`}
-                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-paper-cream font-semibold text-sm hover:opacity-90 transition-opacity"
+                    className="btn-polish inline-block px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-ink-base font-semibold text-sm"
                   >
                     🎯 Làm Quiz
                   </Link>
                   <Link
                     href={`/chat/${documentId}`}
-                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-paper-cream font-semibold text-sm hover:opacity-90 transition-opacity"
+                    className="btn-polish inline-block px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-ink-base font-semibold text-sm"
                   >
                     💬 Chat với DOJO
                   </Link>

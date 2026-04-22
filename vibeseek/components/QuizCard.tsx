@@ -142,14 +142,14 @@ export default function QuizCard({ question, questionNumber, totalQuestions, onS
           <button
             onClick={handleSubmit}
             disabled={selected === null || submitting}
-            className="px-6 py-2.5 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-paper-cream font-semibold disabled:opacity-40"
+            className="btn-polish px-6 py-2.5 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-ink-base font-semibold disabled:opacity-40"
           >
             {submitting ? 'Đang chấm...' : 'Chốt đáp án'}
           </button>
         ) : (
           <button
             onClick={onNext}
-            className="px-6 py-2.5 rounded-full bg-paper-cream/10 hover:bg-paper-cream/20 text-paper-cream font-semibold"
+            className="btn-polish px-6 py-2.5 rounded-full bg-sunflower text-ink-base font-semibold"
           >
             {questionNumber === totalQuestions ? 'Xem kết quả' : 'Câu tiếp'}
           </button>
