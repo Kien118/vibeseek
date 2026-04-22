@@ -95,18 +95,18 @@ export default function QuizPage() {
 
   if (phase === 'loading') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center text-[#F5EFE4]/70 gap-3">
-        <Loader2 className="w-10 h-10 animate-spin text-[#F5B83E]" />
+      <main className="min-h-screen flex flex-col items-center justify-center text-paper-cream/70 gap-3">
+        <Loader2 className="w-10 h-10 animate-spin text-sunflower" />
         <p>Đang chuẩn bị quiz...</p>
-        <p className="text-xs text-[#F5EFE4]/40">Lần đầu có thể mất 10-15s (AI đang sinh câu hỏi).</p>
+        <p className="text-xs text-paper-cream/40">Lần đầu có thể mất 10-15s (AI đang sinh câu hỏi).</p>
       </main>
     )
   }
 
   if (phase === 'error') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center text-[#F5EFE4]/80 gap-3 px-6">
-        <p className="text-[#C85A3C]">Lỗi: {errorMsg}</p>
+      <main className="min-h-screen flex flex-col items-center justify-center text-paper-cream/80 gap-3 px-6">
+        <p className="text-error-terra">Lỗi: {errorMsg}</p>
         <button onClick={() => router.back()} className="underline">Quay lại</button>
       </main>
     )
@@ -114,14 +114,14 @@ export default function QuizPage() {
 
   if (phase === 'done') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center text-[#F5EFE4] gap-6 px-6">
+      <main className="min-h-screen flex flex-col items-center justify-center text-paper-cream gap-6 px-6">
         <h1 className="font-display text-4xl">Xong rồi! 🎉</h1>
-        <p className="text-[#F5EFE4]/70">Đúng {correctCount}/{questions.length} câu · +{pointsEarned} vibe points</p>
+        <p className="text-paper-cream/70">Đúng {correctCount}/{questions.length} câu · +{pointsEarned} vibe points</p>
         <div className="flex gap-3">
-          <Link href="/leaderboard" className="px-5 py-2 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] font-semibold">
+          <Link href="/leaderboard" className="px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta font-semibold">
             Xem leaderboard
           </Link>
-          <Link href="/dashboard" className="px-5 py-2 rounded-full bg-[#F5EFE4]/10 font-semibold">
+          <Link href="/dashboard" className="px-5 py-2 rounded-full bg-paper-cream/10 font-semibold">
             Về dashboard
           </Link>
         </div>

@@ -16,22 +16,22 @@ interface GlowButtonProps {
 
 const variantStyles = {
   purple: {
-    bg: 'from-[#D96C4F] to-[#9B5675]',
+    bg: 'from-terracotta to-plum',
     glow: 'shadow-[0_0_30px_rgba(217,108,79,0.5)]',
     hover: 'hover:shadow-[0_0_50px_rgba(217,108,79,0.7)]',
-    border: 'border-[#D96C4F]/30',
+    border: 'border-terracotta/30',
   },
   cyan: {
-    bg: 'from-[#5B89B0] to-teal-600',
+    bg: 'from-lapis to-teal-600',
     glow: 'shadow-[0_0_30px_rgba(91,137,176,0.5)]',
     hover: 'hover:shadow-[0_0_50px_rgba(91,137,176,0.7)]',
-    border: 'border-[#5B89B0]/30',
+    border: 'border-lapis/30',
   },
   pink: {
-    bg: 'from-[#F5B83E] to-[#E0A535]',
+    bg: 'from-sunflower to-sunflower-deep',
     glow: 'shadow-[0_0_30px_rgba(245,184,62,0.5)]',
     hover: 'hover:shadow-[0_0_50px_rgba(245,184,62,0.7)]',
-    border: 'border-[#F5B83E]/30',
+    border: 'border-sunflower/30',
   },
 }
 
@@ -63,7 +63,7 @@ export default function GlowButton({
       whileTap={{ scale: disabled ? 1 : 0.97 }}
       className={`
         relative inline-flex items-center justify-center gap-2
-        font-display font-semibold text-[#F5EFE4] rounded-xl
+        font-display font-semibold text-paper-cream rounded-xl
         bg-gradient-to-r ${v.bg}
         border ${v.border}
         ${v.glow} ${v.hover}
@@ -74,11 +74,11 @@ export default function GlowButton({
       `}
     >
       {/* Shimmer effect */}
-      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-[#F5EFE4]/10 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-paper-cream/10 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
 
       {loading ? (
         <>
-          <span className="w-4 h-4 border-2 border-[#F5EFE4]/30 border-t-[#F5EFE4] rounded-full animate-spin" />
+          <span className="w-4 h-4 border-2 border-paper-cream/30 border-t-paper-cream rounded-full animate-spin" />
           <span>Processing...</span>
         </>
       ) : children}

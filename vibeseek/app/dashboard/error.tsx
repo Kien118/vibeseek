@@ -18,20 +18,20 @@ export default function DashboardError({
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-md text-center space-y-4">
         <div className="text-6xl">📄</div>
-        <h1 className="text-2xl font-bold text-[#F5EFE4]">Lỗi tải Dashboard</h1>
-        <p className="text-[#F5EFE4]/70 text-sm">
+        <h1 className="text-2xl font-bold text-paper-cream">Lỗi tải Dashboard</h1>
+        <p className="text-paper-cream/70 text-sm">
           Không tải được danh sách tài liệu của bạn. Thử lại hoặc refresh trang.
         </p>
         <div className="flex gap-2 justify-center flex-wrap">
           <button
             onClick={() => reset()}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#D96C4F] to-[#F5B83E] text-[#F5EFE4] font-semibold text-sm hover:opacity-90"
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-terracotta to-sunflower text-paper-cream font-semibold text-sm hover:opacity-90"
           >
             Thử lại
           </button>
           <Link
             href="/"
-            className="px-5 py-2 rounded-full border border-[#F5EFE4]/20 text-[#F5EFE4]/80 text-sm hover:bg-[#F5EFE4]/5"
+            className="px-5 py-2 rounded-full border border-paper-cream/20 text-paper-cream/80 text-sm hover:bg-paper-cream/5"
           >
             Về trang chủ
           </Link>
