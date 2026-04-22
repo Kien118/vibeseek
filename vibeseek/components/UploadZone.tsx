@@ -47,7 +47,7 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
           border-2 border-dashed
           cursor-pointer
           transition-all group
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#F5B83E]/50 hover:bg-[#F5B83E]/5'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-sunflower/50 hover:bg-sunflower/5'}
         `}
       >
         {/* Glow effect when dragging */}
@@ -57,7 +57,7 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 rounded-2xl bg-[#F5B83E]/10 blur-xl"
+              className="absolute inset-0 rounded-2xl bg-sunflower/10 blur-xl"
             />
           )}
         </AnimatePresence>
@@ -72,11 +72,11 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
           </motion.div>
 
           <div>
-            <p className="font-display font-bold text-[#F5EFE4] text-lg">
+            <p className="font-display font-bold text-paper-cream text-lg">
               {isDragActive ? 'Thả PDF vào đây!' : 'Drag & Drop PDF của bạn'}
             </p>
-            <p className="text-[#F5EFE4]/40 text-sm mt-1 font-body">
-              hoặc <span className="text-[#5B89B0] underline underline-offset-2">click để chọn file</span>
+            <p className="text-paper-cream/40 text-sm mt-1 font-body">
+              hoặc <span className="text-lapis underline underline-offset-2">click để chọn file</span>
             </p>
           </div>
 
@@ -85,7 +85,7 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
               <span
                 key={badge}
                 className="text-xs font-mono px-2 py-1 rounded-md
-                           bg-[#F5EFE4]/5 border border-[#F5EFE4]/10 text-[#F5EFE4]/40"
+                           bg-paper-cream/5 border border-paper-cream/10 text-paper-cream/40"
               >
                 {badge}
               </span>

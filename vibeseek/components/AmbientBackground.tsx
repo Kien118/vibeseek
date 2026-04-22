@@ -20,7 +20,7 @@ export default function AmbientBackground() {
       <motion.div
         className="absolute w-[42vw] h-[42vw] rounded-full blur-3xl opacity-20"
         style={{
-          background: 'radial-gradient(circle, #F5B83E 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--color-sunflower) 0%, transparent 70%)',
           top: '-10%',
           left: '-10%',
         }}
@@ -39,7 +39,7 @@ export default function AmbientBackground() {
       <motion.div
         className="absolute w-[50vw] h-[50vw] rounded-full blur-3xl opacity-15"
         style={{
-          background: 'radial-gradient(circle, #D96C4F 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--color-terracotta) 0%, transparent 70%)',
           bottom: '-15%',
           right: '-15%',
         }}
@@ -58,7 +58,7 @@ export default function AmbientBackground() {
       <motion.div
         className="absolute w-[30vw] h-[30vw] rounded-full blur-3xl opacity-10"
         style={{
-          background: 'radial-gradient(circle, #7A9B7E 0%, transparent 70%)',
+          background: 'radial-gradient(circle, var(--color-sage) 0%, transparent 70%)',
           top: '40%',
           left: '50%',
         }}
@@ -77,7 +77,7 @@ export default function AmbientBackground() {
       <div
         className="absolute inset-0 opacity-[0.08]"
         style={{
-          backgroundImage: 'radial-gradient(circle, #F5EFE4 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, var(--color-paper) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
           maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
           WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',

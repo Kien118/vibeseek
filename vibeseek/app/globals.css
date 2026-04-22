@@ -10,22 +10,29 @@
   --font-serif: 'Fraunces', serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Semantic palette */
+  /* Ink system */
   --color-ink: #17140F;           /* base bg */
   --color-surface: #221D17;       /* card */
   --color-elevated: #2E2720;      /* modal / hover */
-  --color-sunflower: #F5B83E;     /* primary / XP */
-  --color-terracotta: #D96C4F;    /* warm / human / AI */
-  --color-sage: #7A9B7E;          /* success / correct */
-  --color-lapis: #5B89B0;         /* info / quiz / link */
-  --color-plum: #9B5675;          /* rare badges */
+  --color-ink-border: #3A3229;    /* NEW — border token */
+  /* Paper text */
   --color-paper: #F5EFE4;         /* main text */
   --color-paper-soft: #E8DFC9;    /* secondary text */
   --color-stone: #9A928A;         /* muted / meta */
+  /* Accents */
+  --color-sunflower: #F5B83E;     /* primary / XP */
+  --color-sunflower-bright: #FFCE5E;  /* NEW */
+  --color-sunflower-deep: #C48920;    /* NEW */
+  --color-terracotta: #D96C4F;    /* warm / human / AI */
+  --color-terracotta-soft: #E89478;   /* NEW */
+  --color-sage: #7A9B7E;          /* success / correct */
+  --color-sage-bright: #9ABDA0;   /* NEW */
+  --color-lapis: #5B89B0;         /* info / quiz / link */
+  --color-lapis-soft: #88A9C5;    /* NEW */
+  --color-plum: #9B5675;          /* rare badges */
   --color-error: #C85A3C;         /* error */
 
-  /* Legacy vars retained ONLY IF imported elsewhere (verify none do) */
-  --color-bg: var(--color-ink);   /* backward alias if any component reads --color-bg */
+  --color-bg: var(--color-ink);   /* backward alias from P-503 */
 }
 
 * {

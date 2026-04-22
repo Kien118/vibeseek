@@ -12,25 +12,45 @@ const config: Config = {
       fontFamily: {
         display: ['var(--font-display)', 'sans-serif'],
         body: ['var(--font-body)', 'sans-serif'],
-        handwritten: ['var(--font-handwritten)', 'cursive'],
+        hand: ['var(--font-handwritten)', 'cursive'],
         serif: ['var(--font-serif)', 'serif'],
         mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
-        ink: '#17140F',
-        surface: '#221D17',
-        elevated: '#2E2720',
-        sunflower: '#F5B83E',
-        terracotta: '#D96C4F',
-        sage: '#7A9B7E',
-        lapis: '#5B89B0',
-        plum: '#9B5675',
+        // Warm ink background system
+        ink: {
+          base:     '#17140F',
+          surface:  '#221D17',
+          elevated: '#2E2720',
+          border:   '#3A3229',
+        },
+        // Paper text system
         paper: {
-          DEFAULT: '#F5EFE4',
-          soft: '#E8DFC9',
+          cream: '#F5EFE4',
+          soft:  '#E8DFC9',
         },
         stone: '#9A928A',
-        // Legacy `vibe` kept REMOVED — executor replaces all `vibe-*` class usages per §1 map
+        // Accents
+        sunflower: {
+          DEFAULT: '#F5B83E',
+          bright:  '#FFCE5E',
+          deep:    '#C48920',
+        },
+        terracotta: {
+          DEFAULT: '#D96C4F',
+          soft:    '#E89478',
+        },
+        sage: {
+          DEFAULT: '#7A9B7E',
+          bright:  '#9ABDA0',
+        },
+        lapis: {
+          DEFAULT: '#5B89B0',
+          soft:    '#88A9C5',
+        },
+        plum: '#9B5675',
+        // Error (preserved from P-503)
+        'error-terra': '#C85A3C',
       },
       backgroundImage: {
         'glow-sunflower': 'radial-gradient(circle at 50% 50%, rgba(245,184,62,0.15) 0%, transparent 70%)',
@@ -67,9 +87,9 @@ const config: Config = {
       },
       boxShadow: {
         'glass': '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(245,239,228,0.1)',
-        'glow-sm': '0 0 20px rgba(245,184,62,0.4)',
-        'glow-md': '0 0 40px rgba(245,184,62,0.5), 0 0 80px rgba(217,108,79,0.2)',
-        'glow-sage': '0 0 30px rgba(122,155,126,0.4)',
+        'glow-sun':   '0 0 30px rgba(245,184,62,0.30), 0 0 60px rgba(245,184,62,0.12)',
+        'glow-terra': '0 0 30px rgba(217,108,79,0.28), 0 0 60px rgba(217,108,79,0.12)',
+        'glow-sage':  '0 0 30px rgba(122,155,126,0.28), 0 0 60px rgba(122,155,126,0.12)',
       },
     },
   },

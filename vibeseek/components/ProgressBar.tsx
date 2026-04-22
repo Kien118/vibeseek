@@ -10,9 +10,9 @@ interface ProgressBarProps {
 }
 
 const variantStyles = {
-  purple: 'from-[#D96C4F] to-[#9B5675]',
-  cyan: 'from-[#5B89B0] to-teal-500',
-  rainbow: 'from-[#D96C4F] via-[#F5B83E] to-[#5B89B0]',
+  purple: 'from-terracotta to-plum',
+  cyan: 'from-lapis to-teal-500',
+  rainbow: 'from-terracotta via-sunflower to-lapis',
 }
 
 const glowStyles = {
@@ -34,10 +34,10 @@ export default function ProgressBar({
       {(label || showPercentage) && (
         <div className="flex justify-between items-center">
           {label && (
-            <span className="text-sm font-mono text-[#F5EFE4]/60">{label}</span>
+            <span className="text-sm font-mono text-paper-cream/60">{label}</span>
           )}
           {showPercentage && (
-            <span className="text-sm font-mono font-bold text-[#F5EFE4]">
+            <span className="text-sm font-mono font-bold text-paper-cream">
               {Math.round(clampedProgress)}%
             </span>
           )}
@@ -45,7 +45,7 @@ export default function ProgressBar({
       )}
 
       {/* Track */}
-      <div className="h-2 w-full bg-[#F5EFE4]/10 rounded-full overflow-hidden border border-[#F5EFE4]/5">
+      <div className="h-2 w-full bg-paper-cream/10 rounded-full overflow-hidden border border-paper-cream/5">
         {/* Fill */}
         <motion.div
           initial={{ width: 0 }}

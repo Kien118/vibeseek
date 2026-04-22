@@ -261,24 +261,24 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
   }, [])
 
   return (
-    <div className="flex flex-col h-[70vh] bg-[#221D17] rounded-xl shadow-sm border border-[#F5EFE4]/10">
+    <div className="flex flex-col h-[70vh] bg-ink-surface rounded-xl shadow-sm border border-paper-cream/10">
       {/* P-502: Mode toggle header */}
-      <div className={`border-b px-4 py-2 flex items-center justify-between ${mode === 'feynman' ? 'border-[#7A9B7E]/40 bg-[#7A9B7E]/10' : 'border-[#F5EFE4]/10 bg-[#221D17]'}`}>
+      <div className={`border-b px-4 py-2 flex items-center justify-between ${mode === 'feynman' ? 'border-sage/40 bg-sage/10' : 'border-paper-cream/10 bg-ink-surface'}`}>
         <div className="flex items-center gap-2 text-xs">
           {mode === 'feynman' && (
-            <span className="font-mono text-[#7A9B7E]">🥋 FEYNMAN DOJO • Round {Math.min(round, 3)}/3</span>
+            <span className="font-mono text-sage">🥋 FEYNMAN DOJO • Round {Math.min(round, 3)}/3</span>
           )}
           {mode === 'default' && (
-            <span className="font-mono text-[#9A928A]">DEFAULT CHAT</span>
+            <span className="font-mono text-stone">DEFAULT CHAT</span>
           )}
         </div>
         <div className="flex items-center gap-1.5 text-xs">
           <button
-            className={`px-2 py-0.5 rounded ${mode === 'default' ? 'bg-sunflower text-ink' : 'text-stone hover:bg-elevated'}`}
+            className={`px-2 py-0.5 rounded ${mode === 'default' ? 'bg-sunflower text-ink-base' : 'text-stone hover:bg-ink-elevated'}`}
             onClick={() => handleToggleMode('default')}
           >Default</button>
           <button
-            className={`px-2 py-0.5 rounded ${mode === 'feynman' ? 'bg-sage text-ink' : 'text-stone hover:bg-elevated'}`}
+            className={`px-2 py-0.5 rounded ${mode === 'feynman' ? 'bg-sage text-ink-base' : 'text-stone hover:bg-ink-elevated'}`}
             onClick={() => handleToggleMode('feynman')}
           >🥋 Feynman</button>
         </div>
@@ -286,21 +286,21 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
 
       {/* P-502: Concept picker overlay */}
       {needConceptPicker && (
-        <div className="px-4 py-3 border-b border-[#7A9B7E]/40 bg-[#7A9B7E]/10">
-          <p className="text-sm mb-2 text-[#7A9B7E]">Bạn muốn ôn concept nào?</p>
+        <div className="px-4 py-3 border-b border-sage/40 bg-sage/10">
+          <p className="text-sm mb-2 text-sage">Bạn muốn ôn concept nào?</p>
           <div className="flex flex-wrap gap-2">
             {(cards ?? []).length === 0 && (
-              <p className="text-xs text-[#9A928A]">Chưa có card nào. Quay lại dashboard để upload.</p>
+              <p className="text-xs text-stone">Chưa có card nào. Quay lại dashboard để upload.</p>
             )}
             {(cards ?? []).slice(0, 8).map(c => (
               <button
                 key={c.id}
-                className="px-3 py-1 text-xs rounded-full border border-[#7A9B7E]/40 text-[#7A9B7E] hover:bg-[#7A9B7E]/20"
+                className="px-3 py-1 text-xs rounded-full border border-sage/40 text-sage hover:bg-sage/20"
                 onClick={() => startFeynmanSession(c.id)}
               >🥋 {c.title}</button>
             ))}
             <button
-              className="px-3 py-1 text-xs rounded-full text-[#9A928A]"
+              className="px-3 py-1 text-xs rounded-full text-stone"
               onClick={() => setNeedConceptPicker(false)}
             >Hủy</button>
           </div>
@@ -309,10 +309,10 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {phase === 'ensuring' && (
-          <p className="text-[#9A928A] text-sm">⏳ Đang chuẩn bị bộ nhớ cho DOJO...</p>
+          <p className="text-stone text-sm">⏳ Đang chuẩn bị bộ nhớ cho DOJO...</p>
         )}
         {phase === 'ensure-error' && (
-          <div className="text-[#C85A3C] text-sm">
+          <div className="text-error-terra text-sm">
             ⚠️ Không chuẩn bị được embeddings: {ensureError}.
             <button
               className="ml-2 underline"
@@ -327,32 +327,41 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
             key={m.id}
             className={m.role === 'user' ? 'text-right' : 'text-left'}
           >
-            <div className={`inline-block max-w-[80%] px-3 py-2 rounded-lg whitespace-pre-wrap ${
-              m.role === 'user'
-                ? (m.mode === 'feynman' ? 'bg-sage text-ink' : 'bg-sunflower text-ink')
-                : 'bg-[#2E2720] text-[#F5EFE4]'
-            }`}>
-              {m.content ? (
-                m.content
-              ) : streamingId === m.id ? (
-                <TypingDots />
-              ) : null}
-            </div>
+            {m.role === 'assistant' ? (
+              <div className="relative inline-block max-w-[82%] px-4 py-3 rounded-2xl rounded-bl-sm
+                bg-terracotta/[0.12] border border-terracotta/30
+                font-hand text-xl leading-tight text-paper-cream
+                whitespace-pre-wrap mt-5">
+                <span className="absolute -top-5 left-2.5 font-mono text-[10px] tracking-wider
+                  uppercase text-terracotta">DOJO 🤔</span>
+                {m.content ? (
+                  m.content
+                ) : streamingId === m.id ? (
+                  <TypingDots />
+                ) : null}
+              </div>
+            ) : (
+              <div className={`inline-block max-w-[80%] px-4 py-3 rounded-2xl rounded-br-sm whitespace-pre-wrap font-body font-medium text-sm leading-relaxed ${
+                m.mode === 'feynman' ? 'bg-sage text-ink-base' : 'bg-sunflower text-ink-base'
+              }`}>
+                {m.content || ''}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       {/* P-502: Session complete CTA */}
       {mode === 'feynman' && round > 3 && (
-        <div className="px-4 py-3 border-t border-[#7A9B7E]/40 bg-[#7A9B7E]/10 flex items-center justify-between text-xs">
-          <span className="text-[#7A9B7E]">🥋 Session hoàn tất!</span>
+        <div className="px-4 py-3 border-t border-sage/40 bg-sage/10 flex items-center justify-between text-xs">
+          <span className="text-sage">🥋 Session hoàn tất!</span>
           <div className="flex gap-2">
             <button
-              className="px-3 py-1 rounded border border-[#7A9B7E]/50 text-[#7A9B7E] hover:bg-[#7A9B7E]/20"
+              className="px-3 py-1 rounded border border-sage/50 text-sage hover:bg-sage/20"
               onClick={() => { clearFeynmanConcept(documentId); setNeedConceptPicker(true) }}
             >Concept khác</button>
             <button
-              className="px-3 py-1 rounded border border-[#F5EFE4]/20 text-[#9A928A] hover:bg-elevated"
+              className="px-3 py-1 rounded border border-paper-cream/20 text-stone hover:bg-ink-elevated"
               onClick={() => handleToggleMode('default')}
             >Chat thường</button>
           </div>
@@ -360,11 +369,11 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
       )}
 
       <form
-        className="border-t border-[#F5EFE4]/10 p-3 flex gap-2"
+        className="border-t border-paper-cream/10 p-3 flex gap-2"
         onSubmit={e => { e.preventDefault(); send() }}
       >
         <input
-          className="flex-1 px-3 py-2 border border-[#F5EFE4]/20 rounded-lg bg-[#2E2720] text-[#F5EFE4] placeholder:text-[#9A928A] disabled:opacity-50"
+          className="flex-1 px-3 py-2 border border-paper-cream/20 rounded-lg bg-ink-elevated text-paper-cream placeholder:text-stone disabled:opacity-50"
           placeholder={mode === 'feynman' ? 'Giải thích concept cho DOJO...' : 'Hỏi DOJO điều gì đó về tài liệu...'}
           value={input}
           onChange={e => setInput(e.target.value)}
