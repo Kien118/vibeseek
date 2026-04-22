@@ -1,0 +1,184 @@
+/* =========================================================
+   VibeSeek · ScrollBurst Styles
+   Import vào app/globals.css hoặc import trực tiếp vào component
+   ========================================================= */
+
+.scroll-burst-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+
+
+/* Aurora ambient — chỉ sáng khi đã burst */
+.scroll-burst-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 500px at 20% 90%, rgba(245, 184, 62, 0.05), transparent 60%),
+    radial-gradient(ellipse 500px 400px at 80% 20%, rgba(217, 108, 79, 0.04), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+.scroll-burst-bg.burst-active::after {
+  opacity: 1;
+}
+
+/* Float items · mặc định ẨN */
+.scroll-burst-bg .float-item {
+  position: absolute;
+  will-change: transform, opacity;
+  opacity: 0;
+  filter: drop-shadow(0 3px 8px rgba(23, 20, 15, 0.12));
+}
+
+/* =========================================================
+   VỊ TRÍ CUỐI (khi burst hoàn tất) — 12 items
+   ========================================================= */
+
+.scroll-burst-bg .item-pencil {
+  left: 2%;
+  bottom: -5%;
+  width: 200px;
+}
+
+.scroll-burst-bg .item-book {
+  left: 14%;
+  bottom: 12%;
+  width: 180px;
+}
+
+.scroll-burst-bg .item-eraser {
+  left: 28%;
+  bottom: 6%;
+  width: 100px;
+}
+
+.scroll-burst-bg .item-sticky-1 {
+  left: 18%;
+  top: 28%;
+  width: 140px;
+}
+
+.scroll-burst-bg .item-sticky-2 {
+  left: 38%;
+  bottom: 22%;
+  width: 120px;
+}
+
+.scroll-burst-bg .item-highlighter {
+  left: 45%;
+  bottom: 15%;
+  width: 90px;
+}
+
+.scroll-burst-bg .item-clip-1 {
+  left: 52%;
+  top: 18%;
+  width: 60px;
+}
+
+.scroll-burst-bg .item-clip-2 {
+  left: 8%;
+  top: 42%;
+  width: 55px;
+}
+
+.scroll-burst-bg .item-star-1 {
+  left: 30%;
+  top: 18%;
+  width: 35px;
+}
+
+.scroll-burst-bg .item-star-2 {
+  left: 48%;
+  top: 60%;
+  width: 28px;
+}
+
+.scroll-burst-bg .item-star-3 {
+  left: 12%;
+  bottom: 38%;
+  width: 40px;
+}
+
+.scroll-burst-bg .item-ruler {
+  left: -2%;
+  top: 52%;
+  width: 160px;
+}
+
+/* =========================================================
+   DEBUG METER (chỉ dùng dev)
+   ========================================================= */
+
+.burst-meter {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 60;
+  padding: 8px 14px;
+  background: rgba(34, 29, 23, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #3A3229;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #9A928A;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.burst-meter-dot {
+  width: 8px;
+  height: 8px;
+  background: #9A928A;
+  border-radius: 50%;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.burst-meter.active .burst-meter-dot {
+  background: #F5B83E;
+  box-shadow: 0 0 12px #F5B83E;
+}
+
+.burst-meter-progress {
+  color: #F5EFE4;
+  font-weight: 700;
+}
+
+.burst-meter.active .burst-meter-progress {
+  color: #F5B83E;
+}
+
+/* =========================================================
+   RESPONSIVE · mobile ẩn bớt items phụ
+   ========================================================= */
+@media (max-width: 768px) {
+  .scroll-burst-bg .item-clip-1,
+  .scroll-burst-bg .item-clip-2,
+  .scroll-burst-bg .item-star-1,
+  .scroll-burst-bg .item-ruler {
+    display: none;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY · prefers-reduced-motion
+   Items hiện ở vị trí cuối không animate
+   (được set inline bởi component luôn)
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-burst-bg .float-item {
+    opacity: 0.5 !important;
+    transform: none !important;
+  }
+}
