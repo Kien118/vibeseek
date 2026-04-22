@@ -27,6 +27,23 @@ import { randomUUID } from 'node:crypto'
 const run = promisify(execFile)
 
 // ---------------------------------------------------------------------------
+// P-501: Palette pool for per-scene gradient backgrounds + xfade crossfade.
+// Index 0 = P-404 original (backward visual compat on any 1-scene storyboard).
+// Scenes pick by round-robin on scene index: POOL[i % POOL.length].
+// ---------------------------------------------------------------------------
+const GRADIENT_POOL = [
+  { c0: '0x1a1a2e', c1: '0x2d1b4e', speed: 0.008 }, // 0 navy-purple (P-404 original)
+  { c0: '0x0f172a', c1: '0x0891b2', speed: 0.008 }, // 1 slate-cyan
+  { c0: '0x2d1b4e', c1: '0xc026d3', speed: 0.010 }, // 2 purple-fuchsia
+  { c0: '0x7f1d1d', c1: '0xea580c', speed: 0.012 }, // 3 crimson-orange
+  { c0: '0x064e3b', c1: '0x059669', speed: 0.008 }, // 4 forest-emerald
+  { c0: '0x312e81', c1: '0xa21caf', speed: 0.010 }, // 5 indigo-fuchsia
+  { c0: '0x1e293b', c1: '0x0284c7', speed: 0.008 }, // 6 slate-sky
+  { c0: '0x9f1239', c1: '0xd97706', speed: 0.011 }, // 7 rose-amber
+]
+const XFADE_DURATION = 0.3 // seconds — 0.3s crossfade between adjacent scenes
+
+// ---------------------------------------------------------------------------
 // 1. Validate env + args
 // ---------------------------------------------------------------------------
 
@@ -304,15 +321,51 @@ async function main() {
     // 8. Render video with ffmpeg
     // Use relative paths for the subtitles filter to avoid Windows drive-letter
     // colon being parsed as an ffmpeg filter option separator.
-    console.log('Rendering video with ffmpeg...')
+    // P-501: per-scene gradient inputs + xfade crossfade chain.
+    const N = sceneDurations.length
+    console.log(`Rendering video with ffmpeg — ${N} scene(s), xfade=${XFADE_DURATION}s, palette-pool size=${GRADIENT_POOL.length}...`)
     const outputPath = join(workDir, 'output.mp4')
+
+    // Build N gradient inputs (one per active scene). Input i≥1 gets +XFADE_DURATION
+    // tail duration to compensate xfade head-eat — keeps video total = audio total.
+    const gradientInputArgs = []
+    for (let i = 0; i < N; i++) {
+      const palette = GRADIENT_POOL[i % GRADIENT_POOL.length]
+      const dur = i === 0
+        ? sceneDurations[i]
+        : sceneDurations[i] + XFADE_DURATION
+      gradientInputArgs.push(
+        '-f', 'lavfi',
+        '-i', `gradients=s=1080x1920:d=${dur.toFixed(3)}:c0=${palette.c0}:c1=${palette.c1}:x0=0:y0=0:x1=1080:y1=1920:speed=${palette.speed}:rate=30`
+      )
+    }
+
+    // Build filter_complex: xfade chain + subtitle overlay on final output.
+    let filterComplex
+    if (N === 1) {
+      filterComplex = '[0:v]subtitles=subtitles.ass[vout]'
+    } else {
+      const parts = []
+      let cumulative = 0
+      let prevLabel = '[0:v]'
+      for (let k = 0; k < N - 1; k++) {
+        cumulative += sceneDurations[k]
+        const offset = (cumulative - XFADE_DURATION).toFixed(3)
+        const outLabel = `[vxf${k}]`
+        parts.push(`${prevLabel}[${k + 1}:v]xfade=transition=fade:duration=${XFADE_DURATION}:offset=${offset}${outLabel}`)
+        prevLabel = outLabel
+      }
+      parts.push(`${prevLabel}subtitles=subtitles.ass[vout]`)
+      filterComplex = parts.join(';')
+    }
 
     await run('ffmpeg', [
       '-y',
-      '-f', 'lavfi',
-      '-i', `gradients=s=1080x1920:d=${Math.ceil(totalDuration)}:c0=0x1a1a2e:c1=0x2d1b4e:x0=0:y0=0:x1=1080:y1=1920:speed=0.008:rate=30`,
+      ...gradientInputArgs,
       '-i', audioPath,
-      '-vf', `subtitles=subtitles.ass`,
+      '-filter_complex', filterComplex,
+      '-map', '[vout]',
+      '-map', `${N}:a`,
       '-c:v', 'libx264',
       '-preset', 'fast',
       '-pix_fmt', 'yuv420p',
