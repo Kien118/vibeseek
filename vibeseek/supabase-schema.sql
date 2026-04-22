@@ -263,3 +263,16 @@ DROP POLICY IF EXISTS "chat_messages service only" ON chat_messages;
 CREATE POLICY "chat_messages service only" ON chat_messages
   FOR ALL USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
+
+-- =============================================================
+-- Phase 5 (P-502) — Feynman Dojo Mode chat_messages.mode column
+-- Non-breaking migration: default 'default' for existing rows.
+-- Run on Supabase Dashboard SQL Editor BEFORE merging this PR.
+-- =============================================================
+
+ALTER TABLE chat_messages
+  ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'default';
+
+-- Existing chat_messages rows auto-populated with 'default' via DEFAULT clause.
+-- Future Feynman-mode rows will set mode = 'feynman' explicitly.
+-- RLS policy from T-407 covers new column (service-role only, no policy change).

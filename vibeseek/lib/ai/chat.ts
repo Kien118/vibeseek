@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai'
 import { supabaseAdmin } from '@/utils/supabase' // architect audit 2026-04-18 — verified path
 import { embedTexts } from './embeddings'
-import { CHAT_SYSTEM_PROMPT } from './prompts'
+import { CHAT_SYSTEM_PROMPT, FEYNMAN_SYSTEM_PROMPT } from './prompts'
 import { groqChat } from './providers/groq' // note: current groqChat returns string non-streaming — see §4 below
 
 export interface RetrievedCard {
@@ -132,6 +132,44 @@ function pickSnippet(rawText: string, query: string, maxChars: number): string {
   return rawText.slice(0, maxChars)
 }
 
+/**
+ * Retrieve Feynman mode context — no per-turn embedding.
+ * Load the picked concept card + raw_text snippet biased by concept title.
+ * Called ONCE per session; cached in client for subsequent turns.
+ */
+export async function retrieveFeynmanContext(
+  documentId: string,
+  conceptCardId: string,
+): Promise<RetrievedContext> {
+  const { data: doc, error: docErr } = await supabaseAdmin
+    .from('vibe_documents')
+    .select('id, title, raw_text')
+    .eq('id', documentId)
+    .maybeSingle()
+
+  if (docErr) throw new Error(`document query failed: ${docErr.message}`)
+  if (!doc) throw new Error('document_not_found')
+
+  const { data: card, error: cardErr } = await supabaseAdmin
+    .from('vibe_cards')
+    .select('id, title, content')
+    .eq('id', conceptCardId)
+    .eq('document_id', documentId)
+    .maybeSingle()
+
+  if (cardErr) throw new Error(`card query failed: ${cardErr.message}`)
+  if (!card) throw new Error('concept_card_not_found')
+
+  const rawText: string = doc.raw_text ?? ''
+  const textSnippet = pickSnippet(rawText, card.title, MAX_SNIPPET_CHARS)
+
+  return {
+    cards: [{ card_id: card.id, title: card.title, content: card.content, distance: 0 }],
+    textSnippet,
+    documentTitle: doc.title ?? 'Tài liệu',
+  }
+}
+
 function buildUserPrompt(context: RetrievedContext, history: ChatMessage[], message: string): string {
   const trimmedHistory = history.slice(-MAX_HISTORY_MESSAGES)
   const contextBlock = [
@@ -153,8 +191,39 @@ function buildUserPrompt(context: RetrievedContext, history: ChatMessage[], mess
   return `${contextBlock}${historyBlock}\n\n# Câu hỏi hiện tại của User:\n${message}\n\n# Trả lời của DOJO:`
 }
 
+function buildFeynmanUserPrompt(
+  context: RetrievedContext,
+  history: ChatMessage[],
+  message: string,
+  round: number,
+): string {
+  const concept = context.cards[0]
+  const contextBlock = [
+    `=== CONCEPT ĐANG ÔN: ${concept.title} ===`,
+    '',
+    '# Nội dung card gốc:',
+    concept.content,
+    '',
+    '# Trích đoạn tài liệu gốc (để verify):',
+    context.textSnippet,
+    `=== HẾT CONTEXT · ROUND ${round}/3 ===`,
+  ].join('\n')
+
+  const historyBlock = history.length
+    ? '\n# Lịch sử phiên Feynman (để biết user đã nói gì):\n' +
+      history.map(m => `${m.role === 'user' ? 'User' : 'DOJO'}: ${m.content}`).join('\n')
+    : ''
+
+  return `${contextBlock}${historyBlock}\n\n# Lời giải thích mới nhất của User (Round ${round}):\n${message}\n\n# Phản hồi của DOJO (tuân thủ LUẬT ROUND ${round}):`
+}
+
 export interface StreamChunk {
   delta: string
+}
+
+export interface StreamOptions {
+  mode?: 'default' | 'feynman'
+  round?: number // 1..3 for feynman, ignored for default
 }
 
 /**
@@ -168,8 +237,16 @@ export async function* streamChatResponse(
   context: RetrievedContext,
   history: ChatMessage[],
   message: string,
+  options: StreamOptions = {},
 ): AsyncGenerator<StreamChunk, { tokensUsed: number }, void> {
-  const userPrompt = buildUserPrompt(context, history, message)
+  const mode = options.mode ?? 'default'
+  const round = options.round ?? 1
+
+  const systemPrompt = mode === 'feynman' ? FEYNMAN_SYSTEM_PROMPT : CHAT_SYSTEM_PROMPT
+  const userPrompt = mode === 'feynman'
+    ? buildFeynmanUserPrompt(context, history, message, round)
+    : buildUserPrompt(context, history, message)
+
   const geminiModels = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash']
 
   let yieldedAny = false
@@ -183,7 +260,7 @@ export async function* streamChatResponse(
       try {
         const stream = await genAI.models.generateContentStream({
           model: modelName,
-          contents: `${CHAT_SYSTEM_PROMPT}\n\n${userPrompt}`,
+          contents: `${systemPrompt}\n\n${userPrompt}`,
           config: { temperature: 0.7, maxOutputTokens: 2048 },
         })
         for await (const chunk of stream) {
@@ -213,7 +290,7 @@ export async function* streamChatResponse(
     console.log('[chat] falling back to Groq')
     const full = await groqChat(
       [
-        { role: 'system', content: CHAT_SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
       { model: 'llama-3.3-70b-versatile', temperature: 0.7 },

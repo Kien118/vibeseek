@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/utils/supabase' // architect audit 2026-04-18 — verified
-import { retrieveContext, streamChatResponse, type ChatMessage } from '@/lib/ai/chat'
+import { retrieveContext, retrieveFeynmanContext, streamChatResponse, type ChatMessage } from '@/lib/ai/chat'
 import { consume } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
@@ -12,6 +12,9 @@ interface ChatReqBody {
   message?: string
   history?: ChatMessage[]
   anonId?: string
+  mode?: 'default' | 'feynman'       // P-502
+  conceptCardId?: string              // P-502: required if mode='feynman'
+  round?: number                      // P-502: 1..3 for feynman
 }
 
 function sseEvent(payload: unknown): Uint8Array {
@@ -27,7 +30,7 @@ function jsonError(status: number, code: string, detail?: string) {
 }
 
 // T-407: cap chat_messages rows per (document_id, anon_id) pair, FIFO delete oldest.
-const CHAT_HISTORY_CAP = 50
+const CHAT_HISTORY_CAP = 100 // P-502: bumped from 50 to accommodate Feynman sessions
 
 async function enforceCap(docId: string, anonId: string): Promise<void> {
   const { count, error: countErr } = await supabaseAdmin
@@ -81,6 +84,21 @@ export async function POST(req: NextRequest) {
     return jsonError(400, 'history_must_be_array')
   }
 
+  const mode = body.mode ?? 'default'
+  if (mode !== 'default' && mode !== 'feynman') {
+    return jsonError(400, 'invalid_mode')
+  }
+  const conceptCardId = body.conceptCardId
+  const round = body.round ?? 1
+  if (mode === 'feynman') {
+    if (!conceptCardId || typeof conceptCardId !== 'string') {
+      return jsonError(400, 'conceptCardId_required')
+    }
+    if (!Number.isInteger(round) || round < 1 || round > 3) {
+      return jsonError(400, 'invalid_round', 'round must be 1, 2, or 3')
+    }
+  }
+
   // Rate limit per anonId
   const rl = await consume(`chat:${anonId}`)
   if (!rl.ok) {
@@ -96,22 +114,27 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Ensure document exists + has embeddings before we open stream
-  const { count: embCount, error: embErr } = await supabaseAdmin
-    .from('card_embeddings')
-    .select('card_id', { count: 'exact', head: true })
-    .eq('document_id', documentId)
+  // Ensure document exists + has embeddings before we open stream (default mode only)
+  if (mode === 'default') {
+    const { count: embCount, error: embErr } = await supabaseAdmin
+      .from('card_embeddings')
+      .select('card_id', { count: 'exact', head: true })
+      .eq('document_id', documentId)
 
-  if (embErr) return jsonError(500, 'db_error', embErr.message)
-  if (!embCount || embCount === 0) return jsonError(404, 'no_embeddings', 'run /api/embeddings/ensure first')
+    if (embErr) return jsonError(500, 'db_error', embErr.message)
+    if (!embCount || embCount === 0) return jsonError(404, 'no_embeddings', 'run /api/embeddings/ensure first')
+  }
 
   // Retrieve context BEFORE opening stream so retrieve errors map to HTTP codes
   let ctx
   try {
-    ctx = await retrieveContext(documentId, message)
+    ctx = mode === 'feynman'
+      ? await retrieveFeynmanContext(documentId, conceptCardId!)
+      : await retrieveContext(documentId, message)
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     if (msg === 'document_not_found') return jsonError(404, 'document_not_found')
+    if (msg === 'concept_card_not_found') return jsonError(404, 'concept_card_not_found')
     if (msg === 'no_embeddings') return jsonError(404, 'no_embeddings')
     console.error('[chat] retrieve failed', err)
     return jsonError(503, 'retrieval_unavailable', msg)
@@ -128,12 +151,13 @@ export async function POST(req: NextRequest) {
           anon_id: anonId,
           role: 'user',
           content: message.trim(),
+          mode,  // P-502
         })
         if (userInsert.error) {
           console.warn('[chat] user msg persist failed', userInsert.error.message)
         }
 
-        const gen = streamChatResponse(ctx, history, message)
+        const gen = streamChatResponse(ctx, history, message, { mode, round })
         let tokensUsed = 0
         while (true) {
           const { value, done } = await gen.next()
@@ -159,6 +183,7 @@ export async function POST(req: NextRequest) {
             anon_id: anonId,
             role: 'assistant',
             content: assistantText,
+            mode,  // P-502
           })
           if (asstInsert.error) {
             console.warn('[chat] assistant msg persist failed', asstInsert.error.message)
