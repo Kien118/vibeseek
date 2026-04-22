@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.99",
     "@supabase/supabase-js": "^2.43.4"
   }
 }
