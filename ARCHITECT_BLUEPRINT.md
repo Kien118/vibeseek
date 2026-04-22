@@ -981,6 +981,16 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 
 ## §13. Changelog
 
+### 2026-04-22 — T-406 Vercel production deploy (Phase 5)
+- **Production URL LIVE:** https://vibeseek-five.vercel.app (Hobby free, `sin1` Singapore region).
+- Deploy via Vercel CLI direct-from-local (`vercel link --yes --project vibeseek` + `vercel --prod --yes`) after web UI bugs blocked Path A (F-3 OAuth scope mismatch) + Path A1 (Framework Preset field regression during Root Directory setup → Functions tab empty → all routes 404 despite "Compiled successfully" log).
+- Deployed under `twangnhat-05s-projects/vibeseek` team scope via CLI — user Vercel account, not Kien118's. URL publicly accessible regardless.
+- Code changes: `app/api/vibefy/route.ts` `maxDuration = 60` (prev default 10s → timeout risk); new `vibeseek/vercel.json` with `regions: ["sin1"]` co-located with Supabase + Upstash ap-southeast-1.
+- 14 env vars uploaded via stdin-pipe bash script from `.env.local`.
+- 1 hotfix: Windows Git Bash preserved `\r` in Upstash URL → client crash → `vercel env rm` + re-add with `tr -d '\r\n'` cleanup + redeploy (D-9 lesson).
+- Smoke green: AC-9/10/11 architect curl + AC-12/13/14 user browser E2E (PDF upload, quiz live-badge, chat SSE + F5 hydrate).
+- Vercel free-tier unblocker: T-408 Upstash cross-instance rate-limit was prereq (done 2026-04-20). T-406 closes Phase 5 deploy track.
+
 ### 2026-04-20 — T-408 Redis rate-limit (Phase 5)
 - Replaced in-memory `Map` in `lib/rate-limit.ts` with Upstash `@upstash/ratelimit` fixed-window.
 - `consume()` now async — 2 caller sites updated (`/api/chat`, `/api/chat/history`).

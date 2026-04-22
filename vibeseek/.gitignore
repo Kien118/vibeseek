@@ -14,3 +14,4 @@ scripts/smoke-*.ts
 # Editor / debug artifacts
 *.log
 .cursor/
+.vercel

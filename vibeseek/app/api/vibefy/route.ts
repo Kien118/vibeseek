@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractTextFromBuffer, vibefyText, chunkText } from '@/lib/ai/processor'
 
+export const maxDuration = 60
+
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE_MB || '10') * 1024 * 1024
 
 export async function POST(request: NextRequest) {
