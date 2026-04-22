@@ -28,15 +28,15 @@ export default function Experience() {
     // Pulled camera further back at bottom (z=6.5 vs 5.0) + lookY=-1.5 +
     // fov=70° wider so 1.6× larger bottom model (scale 2.88) still fits.
     const closePosition = isMobile ? [0, 1.8, 2.4] : [0, 1.8, 2.2]
-    const farPosition   = isMobile ? [0, 0.2, 8.0] : [0, 0.2, 7.5]
+    const farPosition   = isMobile ? [0, 0.2, 8.0] : [0, 0, 11.5]
     const closeFov = isMobile ? 48 : 42
-    const farFov   = isMobile ? 72 : 70
+    const farFov   = isMobile ? 72 : 50
 
     // P-513d: adjusted lookY for new scales (4.2 top / 3.6 bottom).
     // closeLookY 2.0 → 1.5 (head at scale 4.2 world ≈ 1.35, center view on head)
     // farLookY   -1.5 → -2.0 (model bigger, tilt down more to see full body)
     const closeLookY = 1.5
-    const farLookY   = -2.0
+    const farLookY   = -0.5
     const lookY = MathUtils.lerp(closeLookY, farLookY, progress)
 
     const targetX   = MathUtils.lerp(closePosition[0], farPosition[0], progress)
@@ -67,30 +67,29 @@ export default function Experience() {
             <p className="landing-kicker">VibeSeek</p>
             <h1>Learning with DOJO.</h1>
             <p>
-              Scroll down to move from face focus into a full-body reveal. The Robot reacts subtly to your cursor for
-              a cinematic landing experience.
+              Ngày xưa có một đứa trẻ tên DOJO sinh ra trong thư viện. Nó đọc ngấu nghiến mọi tài liệu nhưng luôn hỏi lại người khác: "Vậy thì... nghĩa là gì?" Hôm nay, DOJO trở thành robot học trò của bạn — người giúp biến kiến thức thành feed, và biến bạn thành người thầy giỏi nhất của chính mình.
             </p>
           </section>
 
           <section className="landing-panel landing-features">
             <div>
-              <h2>Head Tracking</h2>
-              <p>Mouse input maps from -1 to 1, then clamped and smoothed with `MathUtils.lerp`.</p>
+              <h2>Feynman Reverse</h2>
+              <p>Đảo vai giữa thầy và trò — bạn dạy lại cho Bé DOJO (AI 10 tuổi). Càng giải thích đơn giản, càng chứng minh bạn đã thực sự hiểu.</p>
             </div>
             <div>
-              <h2>Scroll Camera</h2>
-              <p>Top state is zoom-in near the face; scrolling transitions to zoom-out for full body framing.</p>
+              <h2>Vibefy Engine</h2>
+              <p>Thả PDF 300 trang vào — nhận lại feed 45 giây/card kiểu TikTok. AI tự băm nhỏ, giữ lại tinh túy, bỏ đi nhàm chán.</p>
             </div>
             <div>
-              <h2>Performance First</h2>
-              <p>Use lightweight HDR environment and keep model asset below 5MB when possible.</p>
+              <h2>Learn-to-Earnt</h2>
+              <p>Mỗi bài học là một VibePoint thực. Streak 7 ngày đổi voucher, master 1 chương mở Badge. Học không còn là nghĩa vụ. Tri thức có giá.</p>
             </div>
           </section>
 
           <section className="landing-panel landing-cta">
-            <p className="landing-kicker">Ready</p>
-            <h2>Build immersive product stories with 3D.</h2>
-            <button type="button" onClick={() => router.push('/dashboard')}>Start now</button>
+            <p className="landing-kicker">Sẵn sàng học cùng DOJO chưa?</p>
+            <h2>Upload PDF đầu tiên — feed học tập của bạn sẽ có trong 10 giây.</h2>
+            <button type="button" onClick={() => router.push('/dashboard')}>Start now ✦</button>
           </section>
         </div>
       </Scroll>

@@ -167,13 +167,13 @@ export default function Model() {
     // P-513d 2026-04-23 (fourth tune): user wants smaller at top + bigger at bottom
     // Top scale:    5.0 → 4.2 (16% smaller — less dominant at top)
     // Bottom scale: 2.88 → 3.6 (25% bigger — more prominent full-body shot)
-    const targetScale = MathUtils.lerp(4.2, 3.6, p)
+    const targetScale = MathUtils.lerp(3.8, 3.8, p)
     group.scale.setScalar(MathUtils.lerp(group.scale.x, targetScale, EASE))
 
-    const targetX = MathUtils.lerp(0, 1.0, p)
+    const targetX = MathUtils.lerp(0, 3.0, p)
     group.position.x = MathUtils.lerp(group.position.x, targetX, EASE)
 
-    const targetY = MathUtils.lerp(-6.0, -7.5, p)
+    const targetY = MathUtils.lerp(-4.5, -7.5, p)
     group.position.y = MathUtils.lerp(group.position.y, targetY, EASE)
 
     // Rotate the whole robot ~45° counter-clockwise so it faces left (toward text)
