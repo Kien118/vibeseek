@@ -122,10 +122,10 @@ export default function QuizPage() {
         <h1 className="font-display text-4xl">Xong rồi! 🎉</h1>
         <p className="text-paper-cream/70">Đúng {correctCount}/{questions.length} câu · +{pointsEarned} vibe points</p>
         <div className="flex gap-3">
-          <Link href="/leaderboard" className="px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta font-semibold">
+          <Link href="/leaderboard" className="btn-polish px-5 py-2 rounded-full bg-gradient-to-r from-sunflower to-terracotta text-ink-base font-semibold">
             Xem leaderboard
           </Link>
-          <Link href="/dashboard" className="px-5 py-2 rounded-full bg-paper-cream/10 font-semibold">
+          <Link href="/dashboard" className="btn-polish-sage px-5 py-2 rounded-full bg-sage text-ink-base font-semibold">
             Về dashboard
           </Link>
         </div>

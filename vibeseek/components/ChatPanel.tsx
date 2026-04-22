@@ -292,11 +292,11 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
         </div>
         <div className="flex items-center gap-1.5 text-xs">
           <button
-            className={`px-2 py-0.5 rounded ${mode === 'default' ? 'bg-sunflower text-ink-base' : 'text-stone hover:bg-ink-elevated'}`}
+            className={`btn-polish px-2 py-0.5 rounded ${mode === 'default' ? 'bg-sunflower text-ink-base' : 'text-stone hover:bg-ink-elevated'}`}
             onClick={() => handleToggleMode('default')}
           >Default</button>
           <button
-            className={`px-2 py-0.5 rounded ${mode === 'feynman' ? 'bg-sage text-ink-base' : 'text-stone hover:bg-ink-elevated'}`}
+            className={`btn-polish-sage px-2 py-0.5 rounded ${mode === 'feynman' ? 'bg-sage text-ink-base' : 'text-stone hover:bg-ink-elevated'}`}
             onClick={() => handleToggleMode('feynman')}
           >🥋 Feynman</button>
         </div>
@@ -313,7 +313,7 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
             {(cards ?? []).slice(0, 8).map(c => (
               <button
                 key={c.id}
-                className="px-3 py-1 text-xs rounded-full border border-sage/40 text-sage hover:bg-sage/20"
+                className="btn-polish-sage px-3 py-1 text-xs rounded-full bg-sage text-ink-base font-medium"
                 onClick={() => startFeynmanSession(c.id)}
               >🥋 {c.title}</button>
             ))}
@@ -375,11 +375,11 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
           <span className="text-sage">🥋 Session hoàn tất!</span>
           <div className="flex gap-2">
             <button
-              className="px-3 py-1 rounded border border-sage/50 text-sage hover:bg-sage/20"
+              className="btn-polish-sage px-3 py-1 rounded bg-sage text-ink-base font-medium"
               onClick={() => { clearFeynmanConcept(documentId); setNeedConceptPicker(true) }}
             >Concept khác</button>
             <button
-              className="px-3 py-1 rounded border border-paper-cream/20 text-stone hover:bg-ink-elevated"
+              className="btn-polish px-3 py-1 rounded bg-sunflower text-ink-base font-medium"
               onClick={() => handleToggleMode('default')}
             >Chat thường</button>
           </div>
@@ -408,7 +408,7 @@ export default function ChatPanel({ documentId, cards, initialMode, initialConce
         />
         <button
           type="submit"
-          className={`px-4 py-2 text-ink rounded-lg disabled:opacity-40 ${mode === 'feynman' ? 'bg-sage' : 'bg-sunflower'}`}
+          className={`px-4 py-2 text-ink-base font-semibold rounded-lg disabled:opacity-40 ${mode === 'feynman' ? 'bg-sage btn-polish-sage' : 'bg-sunflower btn-polish'}`}
           disabled={phase !== 'ready' || input.trim().length === 0 || (mode === 'feynman' && round > 3)}
         >
           {mode === 'feynman' && round > 3 ? 'Xong' : 'Gửi'}
