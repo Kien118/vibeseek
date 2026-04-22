@@ -8,6 +8,7 @@ import VibePointsBadge from '@/components/VibePointsBadge'
 import SoundToggle from '@/components/SoundToggle'
 import ThemeToggle from '@/components/ThemeToggle'
 import PageTransition from '@/components/PageTransition'
+import AnimatedCursor from '@/components/AnimatedCursor'
 import './globals.css'
 
 const displayFont = Bricolage_Grotesque({
@@ -69,6 +70,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className="dark">
       <body className={`${displayFont.variable} ${bodyFont.variable} ${handwrittenFont.variable} ${serifFont.variable} ${monoFont.variable}`}>
+        <AnimatedCursor />
         <PageTransition>{children}</PageTransition>
         <VibePointsBadge />
         <SoundToggle />

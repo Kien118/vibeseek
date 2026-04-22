@@ -16,6 +16,14 @@ export default function QuizPage() {
 
   const [phase, setPhase] = useState<Phase>('loading')
   const [questions, setQuestions] = useState<QuizCardQuestion[]>([])
+
+  // Cursor system: body.loading while quiz is loading
+  useEffect(() => {
+    if (phase === 'loading') document.body.classList.add('loading')
+    else document.body.classList.remove('loading')
+    return () => document.body.classList.remove('loading')
+  }, [phase])
+
   const [currentIdx, setCurrentIdx] = useState(0)
   const [pointsEarned, setPointsEarned] = useState(0)
   const [correctCount, setCorrectCount] = useState(0)

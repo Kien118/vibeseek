@@ -745,3 +745,116 @@ html[data-theme='light'] body {
     radial-gradient(ellipse at 80% 80%, rgba(217,108,79,0.06) 0%, transparent 48%),
     var(--color-ink);
 }
+
+/* =========================================================
+ * P-513: Landing header — fixed top bar with brand + nav
+ * User feedback 2026-04-23: "thêm header".
+ * ========================================================= */
+
+.landing-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  pointer-events: none;
+  padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+}
+
+.landing-header-inner {
+  pointer-events: auto;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: rgba(23, 20, 15, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 239, 228, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.landing-header-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--color-paper);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+.landing-header-logo-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--color-sunflower);
+  box-shadow: 0 0 14px rgba(245, 184, 62, 0.6);
+  display: inline-block;
+}
+
+.landing-header-name {
+  color: var(--color-paper);
+}
+
+.landing-header-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--color-stone);
+  font-weight: 500;
+  margin-left: 0.15rem;
+}
+
+.landing-header-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.landing-header-nav-link {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.86rem;
+  color: rgba(245, 239, 228, 0.72);
+  text-decoration: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.landing-header-nav-link:hover {
+  color: var(--color-paper);
+  background: rgba(245, 239, 228, 0.06);
+}
+
+.landing-header-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--color-ink);
+  background: var(--color-sunflower);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .landing-header-tag {
+    display: none;
+  }
+  .landing-header-nav-link:not(:last-child) {
+    display: none;
+  }
+  .landing-header-inner {
+    padding: 0.5rem 0.75rem;
+  }
+}

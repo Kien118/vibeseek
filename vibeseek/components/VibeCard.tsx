@@ -85,6 +85,7 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
       onMouseLeave={handleMouseLeave}
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d', transformPerspective: 1000 }}
       className={`
+        draggable
         relative rounded-2xl p-5
         bg-gradient-to-br ${config.color}
         border ${config.border}
@@ -93,7 +94,6 @@ export default function VibeCard({ card, index, onQuiz }: VibeCardProps) {
         ${config.glow}
         transition-shadow duration-300
         overflow-hidden
-        cursor-default
       `}
     >
       {/* Background mesh */}
