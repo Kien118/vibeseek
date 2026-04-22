@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** 2026-04-22 post-P-501 + AC-14 hotfix. MVP LIVE on production. Commit tip: `57fe62d`. Phase 5 at 5/N (T-405, T-407, T-408, T-406, P-501 done — **2 hotfixes total** = T-406 CR env + AC-14 poll cache). AC-14 visual VERIFIED pass.
+> **Last refresh:** 2026-04-22 post-P-502 Feynman Dojo Mode. MVP LIVE on production. Commit tip: `2c16974`. Phase 5 at 6/N (T-405, T-407, T-408, T-406, P-501, **P-502** done — 2 hotfixes total). AC-17 Feynman user browser smoke pending.
 
 ---
 
@@ -71,11 +71,14 @@ Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
 | 4 Polish — video | P-401..P-405 | ✅ done (1 hotfix P-401) |
 | 4 Polish — core | T-401..T-404 | ✅ done (0 hotfix) |
 | **5 Deploy + persist** | **T-405, T-407, T-408, T-406** | **✅ done (1 hotfix T-406)** |
-| **5 Video polish** | **P-501 (B2-Lite palette pool + xfade)** | **✅ done 2026-04-22 (0 hotfix)** |
-| 5 Remaining | B3/B4/B5 TBD | 📝 candidates, deferred post-demo |
+| **5 Video polish** | **P-501 (B2-Lite palette pool + xfade)** | **✅ done 2026-04-22 (+ 1 hotfix AC-14)** |
+| **5 Chat polish** | **P-502 (Feynman Dojo Mode dual-mode chat)** | **✅ done 2026-04-22 (0 hotfix, Sonnet dispatch)** |
+| 5 Remaining | Video quality upgrade + Brand/UI refresh | 📝 next per 7-day roadmap |
 
 Tip commits worth knowing:
-- **`57fe62d`** — AC-14 hotfix (render-jobs poll route uses supabaseAdmin, current main tip)
+- **`2c16974`** — PR #41 merge (P-502 Feynman Dojo Mode, current main tip)
+- `8ea5ca9` — P-502 impl commit (Sonnet executor)
+- `57fe62d` — AC-14 hotfix (render-jobs poll route uses supabaseAdmin)
 - `76c324f` — PR #40 merge (P-501 B2-Lite palette pool + xfade)
 - `4f7015f` — P-501 implementation commit
 - `8e3aefe` — architect close T-406
