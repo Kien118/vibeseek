@@ -36,8 +36,8 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
       <input {...getInputProps()} />
       <motion.div
         animate={{
-          borderColor: isDragActive ? 'rgba(168,85,247,0.8)' : 'rgba(255,255,255,0.15)',
-          backgroundColor: isDragActive ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.03)',
+          borderColor: isDragActive ? 'rgba(245,184,62,0.8)' : 'rgba(245,239,228,0.15)',
+          backgroundColor: isDragActive ? 'rgba(245,184,62,0.08)' : 'rgba(34,29,23,0.6)',
           scale: isDragActive ? 1.01 : 1,
         }}
         transition={{ duration: 0.2 }}
@@ -47,7 +47,7 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
           border-2 border-dashed
           cursor-pointer
           transition-all group
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-purple-500/50 hover:bg-purple-500/5'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#F5B83E]/50 hover:bg-[#F5B83E]/5'}
         `}
       >
         {/* Glow effect when dragging */}
@@ -57,7 +57,7 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 rounded-2xl bg-purple-500/10 blur-xl"
+              className="absolute inset-0 rounded-2xl bg-[#F5B83E]/10 blur-xl"
             />
           )}
         </AnimatePresence>
@@ -72,11 +72,11 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
           </motion.div>
 
           <div>
-            <p className="font-display font-bold text-white text-lg">
+            <p className="font-display font-bold text-[#F5EFE4] text-lg">
               {isDragActive ? 'Thả PDF vào đây!' : 'Drag & Drop PDF của bạn'}
             </p>
-            <p className="text-white/40 text-sm mt-1 font-body">
-              hoặc <span className="text-purple-400 underline underline-offset-2">click để chọn file</span>
+            <p className="text-[#F5EFE4]/40 text-sm mt-1 font-body">
+              hoặc <span className="text-[#5B89B0] underline underline-offset-2">click để chọn file</span>
             </p>
           </div>
 
@@ -85,7 +85,7 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
               <span
                 key={badge}
                 className="text-xs font-mono px-2 py-1 rounded-md
-                           bg-white/5 border border-white/10 text-white/40"
+                           bg-[#F5EFE4]/5 border border-[#F5EFE4]/10 text-[#F5EFE4]/40"
               >
                 {badge}
               </span>

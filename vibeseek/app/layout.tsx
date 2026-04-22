@@ -1,25 +1,42 @@
 import type { Metadata, Viewport } from 'next'
-import { JetBrains_Mono, Plus_Jakarta_Sans, Syne } from 'next/font/google'
+import { Bricolage_Grotesque, Be_Vietnam_Pro, Patrick_Hand, Fraunces, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import VibePointsBadge from '@/components/VibePointsBadge'
 import './globals.css'
 
-const headingFont = Syne({
-  subsets: ['latin'],
-  weight: ['800'],
-  variable: '--font-syne',
+const displayFont = Bricolage_Grotesque({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '600', '700', '800'],
+  variable: '--font-display',
+  display: 'swap',
 })
 
-const bodyFont = Plus_Jakarta_Sans({
-  subsets: ['latin'],
+const bodyFont = Be_Vietnam_Pro({
+  subsets: ['latin', 'vietnamese'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-plus-jakarta',
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const handwrittenFont = Patrick_Hand({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400'],
+  variable: '--font-handwritten',
+  display: 'swap',
+})
+
+const serifFont = Fraunces({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '600', '700'],
+  variable: '--font-serif',
+  display: 'swap',
 })
 
 const monoFont = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['500', '700'],
-  variable: '--font-jetbrains',
+  variable: '--font-mono',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -35,7 +52,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#a855f7',
+  themeColor: '#17140F', // ink base
 }
 
 export default function RootLayout({
@@ -45,25 +62,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className="dark">
-      <body className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable}`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable} ${handwrittenFont.variable} ${serifFont.variable} ${monoFont.variable}`}>
         {children}
         <VibePointsBadge />
         <Toaster
           position="bottom-center"
           toastOptions={{
             style: {
-              background: 'rgba(10,10,15,0.9)',
-              color: 'white',
-              border: '1px solid rgba(168,85,247,0.3)',
+              background: 'rgba(23,20,15,0.9)',          // ink base with alpha
+              color: '#F5EFE4',                           // paper cream
+              border: '1px solid rgba(245,184,62,0.3)',   // sunflower border
               backdropFilter: 'blur(20px)',
-              fontFamily: 'var(--font-dm-sans)',
+              fontFamily: 'var(--font-body)',
               fontSize: '14px',
             },
             success: {
-              iconTheme: { primary: '#A855F7', secondary: 'white' },
+              iconTheme: { primary: '#7A9B7E', secondary: '#F5EFE4' },   // sage
             },
             error: {
-              iconTheme: { primary: '#F43F5E', secondary: 'white' },
+              iconTheme: { primary: '#C85A3C', secondary: '#F5EFE4' },   // terracotta error
             },
           }}
         />

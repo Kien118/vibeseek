@@ -199,8 +199,8 @@ export default function DashboardPage() {
         {docHistory.length === 0 && cards.length === 0 && !isProcessing && !isGeneratingVideo && !currentJobId && (
           <section className="dashboard-empty-state glass text-center p-12 space-y-4">
             <div className="text-6xl">📚</div>
-            <h2 className="text-xl font-bold text-white">Chưa có tài liệu nào</h2>
-            <p className="text-white/60 text-sm max-w-md mx-auto">
+            <h2 className="text-xl font-bold text-[#F5EFE4]">Chưa có tài liệu nào</h2>
+            <p className="text-[#F5EFE4]/60 text-sm max-w-md mx-auto">
               Upload PDF đầu tiên để bắt đầu tạo Vibe Cards, Quiz, và chat với DOJO.
             </p>
           </section>
@@ -215,13 +215,13 @@ export default function DashboardPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Link
                     href={`/quiz/${documentId}`}
-                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] text-[#F5EFE4] font-semibold text-sm hover:opacity-90 transition-opacity"
                   >
                     🎯 Làm Quiz
                   </Link>
                   <Link
                     href={`/chat/${documentId}`}
-                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+                    className="inline-block px-5 py-2 rounded-full bg-gradient-to-r from-[#F5B83E] to-[#D96C4F] text-[#F5EFE4] font-semibold text-sm hover:opacity-90 transition-opacity"
                   >
                     💬 Chat với DOJO
                   </Link>
