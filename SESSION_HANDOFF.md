@@ -1,26 +1,35 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** Phase 5 mở rộng (2026-04-20). Commit tip: `8708b95`. T-405 ✅ merged. T-406 Vercel deploy ⏸ deferred do GitHub App permission blocker.
+> **Last refresh:** 2026-04-22 post-T-406. MVP LIVE on production. Commit tip: `8e3aefe`. Phase 5 at 4/N (T-405, T-407, T-408, T-406 done, 1 hotfix total).
 
 ---
 
-## Step 0 — Bootstrap prompt (paste this FIRST)
+## 🌐 Production URL (SHAREABLE)
+
+**https://vibeseek-five.vercel.app** — Vercel Hobby free, `sin1` Singapore region.
+
+Use this URL for demo submission / share with reviewers / user testing. No login required. No deployment protection. Public.
+
+---
+
+## Step 0 — Bootstrap prompt (paste this FIRST in new session)
 
 ```
 Bạn là Software Architect cho dự án VibeSeek — đồ án học tập biến PDF thành
 Vibe Cards + video 9:16 + quiz + leaderboard + chatbot RAG cho sinh viên
 Gen Z Việt Nam.
 
-Trạng thái dự án (hôm nay):
-- Phase 0 + 1 + 2 + 3 + 4-FULL (video P + core T) đã sealed + E2E verified
-  (8/8 smoke tests pass 2026-04-19).
-- Phase 5 đang tiếp: T-405 ✅ (dashboard persistence + leaderboard back-link,
-  merge 0ac1c0f). T-406 (Vercel deploy) ⏸ deferred do Vercel GitHub App
-  permission chưa grant được vibeseek cho collaborator account, cần Kien118
-  + user cùng debug 15 phút.
-- Tổng 30+ PRs merged, 12 hotfixes, 3 blueprint overrides (P-401 MaxLineCount,
-  P-405 xfade, P-404 testsrc2). MVP local demo-ready (`npm run dev`).
+Trạng thái dự án (2026-04-22):
+- MVP PRODUCTION LIVE: https://vibeseek-five.vercel.app (Vercel Hobby,
+  sin1 Singapore, deploy via CLI direct-from-local under
+  twangnhat-05s-projects/vibeseek scope).
+- Phase 0+1+2+3+4 sealed + E2E verified. Phase 5 at 4/N done
+  (T-405 dashboard persist, T-407 chat_messages DB, T-408 Upstash
+  rate-limit, T-406 Vercel deploy). Total 39 PRs merged, 13 hotfixes,
+  3 blueprint overrides.
+- Deploy is NOT git-linked → manual redeploy required:
+  `cd vibeseek && vercel --prod --yes`.
 
 Working dir: D:\WangNhat\Study\VibeCode
 Repo: https://github.com/Kien118/vibeseek (private)
@@ -28,25 +37,22 @@ Git user: twangnhat-05 · email: twangnhat@gmail.com
 
 TRƯỚC KHI LÀM BẤT CỨ ĐIỀU GÌ, đọc theo thứ tự:
 
-1. SESSION_HANDOFF.md (file này) — TL;DR + T-406 deferred state với 3 root
-   cause candidates + Phase 5 remaining options.
-2. ARCHITECT_BLUEPRINT.md §13 changelog 5 entries đầu — quick state recap.
-3. AGENT_LOG.md — 40 dòng cuối để bắt kịp T-405 close + T-406 defer log.
-4. memory/feedback_vibeseek_phase4_lessons.md — 18 lessons (libass PlayRes,
-   frame-extract, protected-region grep, parallel-dispatch AGENT_LOG conflicts,
-   minimize-asks). **BẮT BUỘC ÁP DỤNG.**
-5. memory/feedback_vibeseek_phase3_lessons.md — UI failure modes still valid.
-6. memory/feedback_vibeseek_phase2_lessons.md — Next.js 14 / Strict Mode gotchas.
-7. memory/feedback_minimize_user_asks.md — user directive về workflow.
-8. memory/project_vibeseek_state_2026_04_19_phase4.md — DB/API/UI snapshot
-   (still valid after T-405; T-405 thêm utils/doc-history.ts +
-   components/DocumentHistory.tsx không đổi DB).
+1. SESSION_HANDOFF.md (file này) — TL;DR + deploy runbook.
+2. ARCHITECT_BLUEPRINT.md §13 changelog top 3 entries — quick state recap.
+3. AGENT_LOG.md — last 30 lines để bắt kịp T-406 lifecycle.
+4. memory/feedback_vibeseek_phase5_deploy_lessons.md — D-7/D-8/D-9 + deploy
+   runbook (BẮT BUỘC đọc nếu task touch deploy / env vars / routes).
+5. memory/feedback_vibeseek_phase4_lessons.md — 18 lessons, still valid.
+6. memory/feedback_vibeseek_phase3_lessons.md — UI failure modes.
+7. memory/feedback_vibeseek_phase2_lessons.md — Next.js 14 / Strict Mode.
+8. memory/feedback_minimize_user_asks.md — user directive về workflow.
+9. memory/project_vibeseek_state_2026_04_22_phase5.md — current snapshot
+   (DB + API + UI + prod URL + env vars).
 
 Sau đó user sẽ chọn 1 trong các tracks:
-- Resume T-406 Vercel deploy (Kien đã sẵn sàng debug)
-- Phase 5 remaining items: SSML voice switching / per-scene visuals + xfade /
-  persistent chat_messages DB / Redis chat rate-limit
-- E2E smoke lại sau T-405 changes
+- Update code → redeploy (follow deploy runbook in §Deploy Runbook below)
+- Phase 5 remaining: B2 per-scene visuals / B3 SSML voice / B4 chat analytics
+- E2E retest prod
 - Đóng session nếu demo sắp tới
 
 Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
@@ -54,146 +60,221 @@ Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
 
 ---
 
-## Step 1 — What shipped through Phase 3
+## Step 1 — What shipped
 
 | Phase | Tasks | Status |
 |---|---|---|
-| 0 Hygiene | T-001…T-006 | ✅ done |
-| 1 Video renderer | T-101…T-108 | ✅ done + E2E verified |
-| 2 Quiz + Leaderboard | T-201…T-206 | ✅ done + E2E verified (8 hotfixes) |
-| 3 Chatbot RAG | T-301…T-305 | ✅ done (2 hotfixes) |
-| 4 Polish — video quality | P-401…P-405 | ✅ done (1 hotfix, all 5 merged 2026-04-19) |
-| 4 Polish — core | T-401…T-404 | ✅ done (0 hotfix, 2 rebase-rescues — parallel dispatch AGENT_LOG conflicts) |
-| 5 TBD | — | 📝 scope not yet decided |
+| 0 Hygiene | T-001..T-006 | ✅ done |
+| 1 Video renderer | T-101..T-108 | ✅ done + E2E verified |
+| 2 Quiz + Leaderboard | T-201..T-206 | ✅ done + E2E verified (8 hotfixes) |
+| 3 Chatbot RAG | T-301..T-305 | ✅ done (2 hotfixes) |
+| 4 Polish — video | P-401..P-405 | ✅ done (1 hotfix P-401) |
+| 4 Polish — core | T-401..T-404 | ✅ done (0 hotfix) |
+| **5 Deploy + persist** | **T-405, T-407, T-408, T-406** | **✅ done (1 hotfix T-406)** |
+| 5 Remaining | B2/B3/B4 TBD | 📝 candidates, not yet scoped |
 
-Commit tips worth knowing:
-- `cf75ca1` — architect close T-305 + Phase 3 complete marker
-- `08c803a` — T-305 merge (ChatPanel + `/chat/[documentId]` + dashboard link + localStorage)
-- `49f628d` — T-305 hotfix (input text color + saveHistory empty-guard)
-- `1c023f7` — T-304 merge (SSE `/api/chat` route)
-- `7e7ea3a` — T-303 merge (`chat.ts` RAG retrieve + stream)
-- `a9cc2d5` — T-302 merge (`embeddings.ts` + `/api/embeddings/ensure`)
-- `d630f8e` — T-301 merge (pgvector + card_embeddings + raw_text)
-
----
-
-## Step 2 — What worked in Phase 3 (keep doing)
-
-**One hotfix across five tasks** vs Phase 2's eight hotfixes. The 7-step pipeline proposed after Phase 2 delivered. Read `memory/feedback_vibeseek_phase3_lessons.md` end-to-end. The short list:
-
-1. Every spec gets a **Failure modes** table (8–15 items). Every listed mode must have explicit defensive code. Agent shipped them, zero post-merge hotfixes from in-spec failure modes in Phase 3.
-2. Every spec gets a **Local test plan** with curl/SQL-ready commands (3–7 tests). Caught T-305 localStorage race in 30 seconds.
-3. Every spec gets **Files NOT to touch**. Zero scope explosions in Phase 3.
-4. **Architect pre-flight audit against real code** before dispatch (2026-04-18 caught 6 drift issues — wrong imports, missing DB column, SDK API shape). Saved 6 would-be hotfixes.
-5. **Architect local-runs** the feature during review (not just tsc) — but DOES NOT `npm run build` while user's dev server is active (breaks `.next/server/` chunks).
-6. **Three-strikes circuit breaker** held: T-305 hit 2 bugs → direct-fix on branch with user approval. Phase 2 pattern of 8 patch-in-place was replaced.
+Tip commits worth knowing:
+- `8e3aefe` — architect close T-406 (current main tip)
+- `a6bc36e` — T-406 merge (Vercel deploy PR #39)
+- `d00fc68` — T-408 Upstash rate-limit
+- `bb16ee8` — T-407 chat_messages
+- `0ac1c0f` — T-405 dashboard persist
 
 ---
 
-## Step 3 — Two new UI failure modes discovered in Phase 3
+## Step 2 — Deploy Runbook (MEMORIZE THIS)
 
-Add these to the Phase 2 checklist when reviewing any new UI:
+### Regular redeploy after code change (99% of future deploys)
 
-### 9. Dark-theme app + light-theme widget = invisible text
-`app/globals.css` sets `body { color: white }`. Any element inside a `bg-white` card without an explicit `text-*` class inherits white and goes invisible. Reviewer must grep for `bg-white` on the diff and confirm sibling `text-*` classes on every text element (input, textarea, span, etc.).
+```bash
+cd D:/Wangnhat/Study/VibeCode/vibeseek
+npx tsc --noEmit        # must exit 0
+vercel --prod --yes     # takes 2-4 minutes
+```
 
-### 10. Mount-time useEffect race between load + persist
-When component has both `Effect A: load → setState` and `Effect B: save(state)`, Effect B fires in the same commit as Effect A but with the initial empty-state closure — wipes storage before the load's setState propagates. Fix: make the persist helper defensively refuse to write empty-equivalent values, and add a `clearHelper()` for intentional clears. Document the contract change.
+Verify after:
+```bash
+curl -sI https://vibeseek-five.vercel.app/api/leaderboard | grep -E "HTTP|X-Vercel-Id"
+# Expect: HTTP/1.1 200 OK + X-Vercel-Id: sin1::sin1::...
+```
 
----
+### Add / update env var
 
-## Step 4 — Proposed workflow for next session (post-Phase-4 E2E)
+```bash
+vercel env rm VAR_NAME production --yes
+value=$(grep '^VAR_NAME=' .env.local | cut -d'=' -f2- | tr -d '\r\n' | sed 's/^"//; s/"$//')
+printf "%s" "$value" | vercel env add VAR_NAME production
+vercel --prod --yes
+```
 
-Phase 4 fully sealed + E2E verified. 4 UX gaps surfaced during smoke (all pre-existing, not Phase 4 regressions). Two paths forward:
+⚠️ **MUST use `tr -d '\r\n'` + quote-strip** on Windows Git Bash. Otherwise D-9 bug fires (Upstash URL crash).
 
-### (Update 2026-04-20) T-405 merged `0ac1c0f` — 2/3 UX gaps closed. T-406 Vercel deploy attempted but deferred.
+### Debug logs
 
-**T-406 state:** pre-audit clean (no code blockers). Deploy blocked on Vercel GitHub App permission scope — user is collaborator on `Kien118/vibeseek` private repo; Vercel import page doesn't list repo even after Kien118 attempted GitHub App install. Root cause uncertain (3 candidates: (a) Kien118 missed tick `vibeseek` in "Only select repositories", (b) Vercel cache, (c) Vercel OAuth account scope mismatch). Resume when Kien118 + user can jointly debug 15 min — or pivot to fork-based path `twangnhat-05/vibeseek-fork` (trade-off: PR workflow disconnects from upstream).
+```bash
+# Recent 500 errors
+vercel logs --status-code 500 --since 10m --no-follow --no-branch --expand
 
-**Remaining Phase 5 candidates (unchanged):**
+# All recent logs
+vercel logs --since 10m --no-follow --no-branch --expand | head -50
+```
 
-### Option A (OLD, NOW COMPLETE) — Phase 5 T-405 "Dashboard persistence + cross-page nav"
+### Machine switch / first-time setup
 
-**Scope:**
-- Dashboard mount reads `anon_id` → fetch recent `vibe_documents` from Supabase → render list with per-doc links (Quiz / Chat / Video). Eliminates re-upload-on-reload.
-- VideoPlayer: on dashboard mount, fetch latest `render_jobs` for recent doc → if status=rendering resume polling; if status=ready render MP4 directly. Extend POLL_MAX_ATTEMPTS 240→360 (12→18 min) OR swap to Supabase Realtime channel subscribe.
-- Populated leaderboard gains "← Về Dashboard" link in header (consistency with other pages).
+If you're on a new machine (or CLI is not yet linked):
 
-**Why now:** biggest demo-blocker. Smoke test showed user must upload PDF twice in same session. Any presenter would hit this live.
+```bash
+npm i -g vercel                                    # if not installed
+cd D:/Wangnhat/Study/VibeCode/vibeseek             # or wherever repo is cloned
+vercel login                                       # browser OAuth
+vercel whoami                                      # should be twangnhat-05
+vercel link --yes --project vibeseek               # creates .vercel/project.json
+vercel env ls production                           # verify 14 vars present
+```
 
-### Option B — Phase 5 other directions
-- SSML voice switching (if P-402 phonetic feels unnatural to target audience after more user tests)
-- Per-scene distinct visuals + ffmpeg xfade concat (true blueprint P-405 original intent — architect overrode to ASS \\fad for MVP)
-- Redis/Upstash chat rate-limit (cross-instance when deploy Vercel)
-- Persistent chat_messages DB (cross-device sync, Q-09 deferred)
-- Deploy Vercel production (domain + SSL + env rotation)
-
-### Architect recommendation
-**Option A first** — UX gap has 10× impact on demo experience vs any Phase 5B item. Then evaluate Phase 5B based on demo feedback.
-
-### Old Phase 4 core polish queued path (now done, kept for history reference)
-
-#### Option A (OLD, NOW COMPLETE) — Phase 4 core polish (T-401..T-404)
-- T-401 Error boundaries + empty states (React App Router error.tsx patterns)
-- T-402 3D scene loading skeletons (DOJO mascot page startup)
-- T-403 PWA manifest (optional, `manifest.json` + icons)
-- T-404 Dọn `debug-*.log` (hygiene, .gitignore update)
-
-These are React/Next.js UI concerns. Phase 2/3 UI failure modes (dark-body color inherit, mount-time load/persist race, fixed-badge overlap) + Phase 3 pipeline directly apply. Architect frame-extract technique from Phase 4 does NOT apply (UI review needs dev-server run).
-
-### Option B — Phase 5 scope discussion
-Possible directions:
-- **Per-scene distinct visuals** — true per-scene background images (Gemini visual_prompt → Imagen/DALL-E/Leonardo? Cost concern) + ffmpeg `xfade` concat = the original blueprint P-405 prescription, if P-405 `\fad` alone feels insufficient in Phase 4 user test.
-- **SSML voice switching** — if P-402 `speakable_narration` phonetic feels unnatural after user runs AC-9, consider `<voice name="en-US-*">` inline for English substrings. Research edge-tts SSML support first.
-- **Redis/Upstash rate-limit** — swap in-memory `chat:${anonId}` bucket in `lib/rate-limit.ts` for a cross-instance store. Only needed if moving off single-server / deploying to Vercel.
-- **Persistent chat_messages** — reinstate DB table deferred in Q-09 Phase 3. Adds cross-device sync at cost of PII storage complexity.
-
-Architect recommendation: **Option A** first. Small scope, unblocks mobile install (PWA), wraps Phase 4 cleanly. Then re-evaluate Option B based on P-402/P-404/P-405 subjective user feedback.
-
-### Pipeline adjustments carried forward
-- **Spec has `Failure modes` (8-15 items), `Files NOT to touch`, `Local test plan` sections** — mature, keep.
-- **Architect pre-flight audit** against real codebase before dispatch — mature.
-- **Architect local-runs before approve** — for UI, dev server; for video, frame-extract + anullsrc bypass (Phase 4 lesson). Don't `npm run build` during dev server active (Phase 3 lesson).
-- **Three-strikes circuit breaker** — held across Phase 2 (8 hotfix chaos), Phase 3 (2 hotfix), Phase 4 (1 hotfix). Keep.
-- **Protected-region grep** — new in Phase 4. For any render.mjs / processor.ts / prompts.ts touch, grep diff for sentinels from prior phases to verify no regression.
-- **Architect overrides of blueprint prescriptions are expected** (Phase 4: 3/5 overrides). Document in spec Context section + Decisions log.
+Full details + common scenarios + edge cases: `memory/feedback_vibeseek_phase5_deploy_lessons.md`.
 
 ---
 
-## Step 5 — Environment notes (still true as of 2026-04-19)
+## Step 3 — Environment inventory (prod)
 
-- Windows 11, bash shell (forward slashes OK). PowerShell doesn't support `&&` — use `;` or separate commands. `curl` is aliased to `Invoke-WebRequest`; use `curl.exe` for native.
-- `.env.local` in `vibeseek/` has 11 core env vars + 2 Phase 3 debug flags (`DEBUG_FORCE_GEMINI_FAIL`, `DEBUG_FORCE_CHAT_GEMINI_FAIL`).
-- ngrok only for Phase 1 render-callback (not needed Phase 3/4 so far).
-- GitHub Actions secrets: 7 per blueprint §8.2.
-- Dev server: `cd vibeseek && npm run dev`. After any main pull or weird error, wipe `.next`: `Remove-Item -Recurse -Force .next` (PS) / `rm -rf .next` (Git Bash).
-- **DO NOT run `npm run build` while user's dev server is active** — corrupts `.next/server/` chunks. tsc alone is enough for review type-check.
-- User role on repo: `write` (not admin) — architect deletes branches manually via `git push origin --delete`.
+**14 env vars on Vercel production** (scope `Production`, NOT `Preview`, NOT `Development`):
+
+Secret:
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `GEMINI_API_KEY`
+- `GROQ_API_KEY`
+- `RENDER_CALLBACK_SECRET`
+- `GITHUB_DISPATCH_TOKEN`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+Public / config:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_APP_URL` (placeholder `https://vibeseek.vercel.app` — not code-referenced)
+- `MAX_FILE_SIZE_MB=10`
+- `SUPABASE_STORAGE_BUCKET=vibeseek-videos`
+- `UPSTASH_REDIS_REST_URL`
+- `GITHUB_REPO_OWNER=Kien118`
+- `GITHUB_REPO_NAME=vibeseek`
+
+**DEV-ONLY (NOT on Vercel):** `DEBUG_FORCE_GEMINI_FAIL`, `DEBUG_FORCE_CHAT_GEMINI_FAIL`
+
+**GitHub Actions secrets** (for render-video.yml worker) are SEPARATE from Vercel env — set on GitHub repo settings, not Vercel.
 
 ---
 
-## Step 6 — Memory files architect should load
+## Step 4 — Function runtime config (Hobby 60s ceiling)
+
+Each heavy route has `export const maxDuration = 60` where needed:
+- `/api/chat` — 60s (SSE streaming)
+- `/api/embeddings/ensure` — 60s (batch embed)
+- `/api/vibefy` — 60s (PDF + Gemini chain, T-406 added)
+- `/api/vibefy-video` — 30s
+- `/api/quiz/generate` — 30s
+
+Do NOT set `maxDuration` higher than 60 on Hobby — will be ignored.
+
+**Function region pinned via `vibeseek/vercel.json` → `sin1`.** Do not remove.
+
+---
+
+## Step 5 — Proposed workflow for future sessions
+
+### Scenario A — Small code update (1-2 file change, bug fix)
+1. Read SESSION_HANDOFF.md (you're doing this) + phase5 deploy lessons.
+2. Make code change + `npx tsc --noEmit`.
+3. Commit on task branch + open PR.
+4. After user merge → `cd vibeseek && vercel --prod --yes` from local (MANUAL, not auto-deploy).
+5. Verify via curl + update AGENT_LOG + state snapshot.
+
+### Scenario B — Larger feature (Phase 5 B2/B3/B4 candidates)
+Follow Phase 3/4 pipeline from previous lessons:
+1. Propose workflow to user (CLAUDE.md 4.1).
+2. Draft spec with Failure modes + Files NOT to touch + Local test plan + protected-region grep sentinels.
+3. Pre-audit against real code (Phase 3 lesson).
+4. Dispatch executor OR architect direct-implement for ops tasks.
+5. Review with tsc + protected grep + runtime smoke.
+6. Open PR + architect review + user merge.
+7. **Redeploy manually:** `vercel --prod --yes`.
+8. Smoke on prod URL + close-out.
+
+### Scenario C — Emergency hotfix
+1. Edit file directly (with user's approval for direct-commit to main).
+2. `npx tsc --noEmit` + local dev test.
+3. Commit + push main.
+4. `vercel --prod --yes`.
+5. Verify via curl.
+6. Log in AGENT_LOG.
+
+---
+
+## Step 6 — Protected regions (grep sentinels)
+
+After Phase 4 accumulated many touches to core files, grep the diff of any new PR for these sentinel strings — must return 0 matches:
+
+- `scripts/render/render.mjs` — `PlayResX | splitNarrationLines | formatAssTime | speakable_narration | gradients= | \\fad`
+- `lib/ai/processor.ts` — `OVERFLOW_RATIO | WORDS_PER_SECOND`
+- `lib/ai/prompts.ts` — `NGÂN SÁCH TỪ | PHIÊN ÂM CHO TTS`
+- `lib/rate-limit.ts` — `Ratelimit | @upstash/ratelimit` (T-408 invariant)
+- `app/api/chat/route.ts` — `enforceCap | assistantText` (T-407 invariant)
+- `vibeseek/vercel.json` — `"regions"` (T-406 sin1 pin)
+
+---
+
+## Step 7 — Non-code Vercel operations quick links
+
+- **Vercel Dashboard:** https://vercel.com/twangnhat-05s-projects/vibeseek
+- **Deployment list:** https://vercel.com/twangnhat-05s-projects/vibeseek/deployments
+- **Env vars UI:** https://vercel.com/twangnhat-05s-projects/vibeseek/settings/environment-variables
+- **Function logs UI:** https://vercel.com/twangnhat-05s-projects/vibeseek/logs
+- **GitHub repo:** https://github.com/Kien118/vibeseek
+- **Supabase project:** https://app.supabase.com (user has credentials)
+- **Upstash Redis console:** https://console.upstash.com
+- **Google AI Studio (Gemini key):** https://aistudio.google.com/apikey
+
+---
+
+## Step 8 — First actions in new session
+
+1. Read this file (you did).
+2. Read `memory/feedback_vibeseek_phase5_deploy_lessons.md` (new in Phase 5).
+3. Read `memory/project_vibeseek_state_2026_04_22_phase5.md` (current snapshot).
+4. Read `ARCHITECT_BLUEPRINT.md` §13 top 3 changelog entries.
+5. `git log --oneline -5 main` — tip should start with `8e3aefe` (architect close T-406).
+6. `vercel whoami` from `vibeseek/` folder → confirm still linked. If not → `vercel link --yes --project vibeseek`.
+7. Ask user: "Update code nào / task Phase 5 nào / check prod status?"
+8. On user choice, follow Scenario A/B/C workflow above.
+
+Do NOT skip step 6. Vercel CLI auth tokens can expire or machine-switch changes.
+
+---
+
+## Step 9 — Memory files to load
 
 All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 
 - `user_wangnhat.md` — user profile
 - `feedback_vibeseek_architect_role.md` — triggers + hard rules
 - `feedback_write_exact_commands.md` — always write literal commands inline
-- `feedback_vibeseek_phase2_lessons.md` — Phase 2 hotfix checklist
-- `feedback_vibeseek_phase3_lessons.md` — **NEW** Phase 3 pipeline validation + 2 new UI failure modes
-- `project_vibeseek_state_2026_04_19.md` — **NEW** post-Phase-3 snapshot
-- `project_vibeseek_state_2026_04_17.md` — superseded, kept for history
+- `feedback_minimize_user_asks.md` — user directive về workflow
+- `feedback_vibeseek_phase2_lessons.md` — Next.js 14 / Strict Mode / Supabase / Gemini pitfalls
+- `feedback_vibeseek_phase3_lessons.md` — 7-step pipeline + UI failure modes
+- `feedback_vibeseek_phase4_lessons.md` — libass + parallel dispatch (18 lessons)
+- `feedback_vibeseek_phase5_deploy_lessons.md` — **NEW** D-7/D-8/D-9 + deploy runbook
+- `project_vibeseek_state_2026_04_22_phase5.md` — **NEW** post-T-406 snapshot
+- `project_vibeseek_state_2026_04_19_phase4.md` — superseded, kept for history
 - `reference_vibeseek_paths.md` — SSOT file paths + gh CLI
 
 ---
 
-## Step 7 — First actions in new session
+## Step 10 — Environment notes (still true 2026-04-22)
 
-1. Read this file (you did).
-2. Read the memory files above (auto-loaded).
-3. Read `ARCHITECT_BLUEPRINT.md` §1, §2, §3, §10, §13.
-4. `git log --oneline -10 main` to confirm tip is close to `8682a3e` (P-404 merge) or the architect-close commit right after.
-5. Ask user: "Phase 4 core polish (T-401..T-404) hay Phase 5 scope discussion?"
-6. On user choice, draft spec(s) per validated Phase 3+4 pipeline (Failure modes, Files NOT to touch, Local test plan, protected-region grep sentinels, appropriate review technique per task domain).
-
-Do **NOT** skip step 5. Pattern that worked twice (Phase 2 → Phase 3 transition, and this one if user follows) is propose-then-spec, never spec-first.
+- Windows 11, bash shell (forward slashes OK, `/dev/null` not `NUL`). PowerShell doesn't support `&&` — use `;` in PS.
+- `.env.local` in `vibeseek/` has 14 core env vars + 2 debug flags. CRLF line endings — must handle with `tr -d '\r\n'` on upload.
+- Local dev: `cd vibeseek && npm run dev` → http://localhost:3000.
+- After main pull or weird Next.js error, wipe `.next`: `rm -rf .next` (Git Bash).
+- **DO NOT** `npm run build` while user's dev server is active (corrupts `.next/server/` chunks).
+- User role on repo: `write` (not admin on Kien118/vibeseek). But user's own Vercel account `twangnhat-05` owns the deploy — no Kien dependency for redeploy.
+- Vercel CLI state lives in `vibeseek/.vercel/project.json` (gitignored).
+- Vercel Hobby free: 60s function timeout, 100 GB bandwidth/mo, 45 min build time/mo.

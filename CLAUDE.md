@@ -82,10 +82,43 @@ User có thể gọi bằng: *"đóng session"*, *"handoff"*, *"lưu state"* —
 |---|---|
 | Phase 0 — Setup & Foundation | ✅ Done |
 | Phase 1 — Core MVP | ✅ Done |
-| Phase 2 — E2E + Hardening (8 hotfixes) | ✅ Done |
-| Phase 3 — Chatbot RAG | 🚧 In progress |
-| Phase 4+ | Xem `ARCHITECT_BLUEPRINT.md §10` |
+| Phase 2 — Quiz + Leaderboard (8 hotfixes) | ✅ Done |
+| Phase 3 — Chatbot RAG (2 hotfixes) | ✅ Done |
+| Phase 4 — Polish video + core (1 hotfix) | ✅ Done |
+| Phase 5 — Persist + Deploy (1 hotfix) | ✅ 4/N — T-405/T-407/T-408/T-406 done; B2/B3/B4 candidates open |
+| Phase 5+ | Xem `ARCHITECT_BLUEPRINT.md §10` |
+
+**MVP PRODUCTION LIVE:** https://vibeseek-five.vercel.app (Vercel Hobby free, sin1 Singapore).
+
+**Redeploy manual:** `cd vibeseek && vercel --prod --yes` (NOT git-linked). Runbook: `SESSION_HANDOFF.md` §Step 2 + `memory/feedback_vibeseek_phase5_deploy_lessons.md`.
 
 ---
 
-*Last updated: 2026-04-19*
+## 7. DEPLOY PROTOCOL (post-T-406, 2026-04-22)
+
+Bất cứ code change nào merged vào main → KHÔNG tự động deploy. Phải manual:
+
+```bash
+cd D:/Wangnhat/Study/VibeCode/vibeseek
+npx tsc --noEmit        # must exit 0
+vercel --prod --yes     # 2-4 min build
+```
+
+Verify:
+```bash
+curl -sI https://vibeseek-five.vercel.app/api/leaderboard | grep -E "HTTP|X-Vercel-Id"
+# Expect: HTTP/1.1 200 OK + X-Vercel-Id: sin1::sin1::...
+```
+
+Env var thay đổi: **luôn** dùng pattern CRLF-safe (Windows Git Bash preserves `\r`):
+
+```bash
+value=$(grep '^VAR=' .env.local | cut -d'=' -f2- | tr -d '\r\n' | sed 's/^"//; s/"$//')
+printf "%s" "$value" | vercel env add VAR production
+```
+
+Full runbook + edge cases: `memory/feedback_vibeseek_phase5_deploy_lessons.md`.
+
+---
+
+*Last updated: 2026-04-22*
