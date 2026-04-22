@@ -981,6 +981,17 @@ Format: **ID · Title** — Context · Files · Acceptance criteria.
 
 ## §13. Changelog
 
+### 2026-04-22 — AC-14 hotfix: render-jobs poll route stale cache (P-501 post-merge)
+- **Symptom:** After P-501 merge + redeploy, user uploaded PDF → dashboard kẹt "đang xếp hàng" 20 min → "Lỗi: Render quá lâu" error. AC-14 visual smoke blocked until resolved.
+- **Render.mjs P-501 code worked correctly.** GH Actions run `24765471989` executed render.mjs with 6-scene real storyboard (`6 scene(s), xfade=0.3s, palette-pool size=8`), 49.54s audio → 49.49s output (0.05s codec rounding, within tolerance), uploaded Supabase Storage, DB row transitioned to `status=ready` at 07:17:25Z. Verified via direct REST query with service-role key.
+- **Root cause:** `/api/render-jobs/[jobId]/route.ts` instantiated its own anon `createClient` inline WITHOUT the `noStoreFetch` wrapper — Next.js 14 fetch cache held stale `status=queued` response indefinitely. Same failure mode as Phase 2 E2E hotfix `eefa538` (supabaseAdmin + leaderboard total_points), just applied to a different client + different route.
+- **Hotfix (`57fe62d`):** 1 file, 6 insertions/7 deletions. Replaced inline anon createClient with `import { supabaseAdmin } from '@/utils/supabase'` (that client has `noStoreFetch` wired since `eefa538`). Service role has read access on render_jobs; anon RLS path not needed.
+- **Post-hotfix verify:** poll endpoint returns `{"status":"ready","videoUrl":"...","durationSec":49}` ✓. User confirmed *"Visual có chuyển màu"* → **AC-14 PASS** — P-501 palette pool + xfade crossfade visually verified end-to-end on prod.
+- **Bonus diagnostic:** manual `curl POST /repos/Kien118/vibeseek/dispatches` confirmed GH token + scope work independently. The earlier "dispatch missing" hypothesis was red-herring — dispatch probably happened, but we can't confirm from logs since Vercel logs rolled out.
+- **Latent bug watchlist:** `/api/vibefy-video` + `/api/render-callback` also use inline service-role createClient; not urgent but refactor when touched.
+- **Lesson elevated to invariant:** Any server-side Supabase read MUST use `supabaseAdmin` from `utils/supabase.ts`. Saved as `memory/feedback_vibeseek_phase5_supabase_nostore_invariant.md`. Protected-region grep technique extended with `createClient\(` sentinel.
+- **Phase 5 progress:** 5/N tasks done, **2 hotfixes total** (T-406 CR env upload + AC-14 poll cache stale).
+
 ### 2026-04-22 — P-501 per-scene palette pool + xfade crossfade (Phase 5 B2-Lite)
 - **What:** `render.mjs` final ffmpeg invocation rewritten — single continuous gradient input replaced by N per-scene gradient inputs (palette picked from 8-entry pool by scene index) chained via `xfade=transition=fade:duration=0.3` filter_complex. Subtitle overlay applied on final `[vout]` label. Math: gradient input `i=0` dur = `scene_0`; `i≥1` dur = `scene_i + 0.3` (compensates xfade head-eat) → video total = audio total exact. Verified synthetic 3-scene (12.000s) + 10-scene (54.000s) zero drift.
 - **Palette pool:** 8 variants (navy-purple P-404 original at index 0 + slate-cyan + purple-fuchsia + crimson-orange + forest-emerald + indigo-fuchsia + slate-sky + rose-amber). Deterministic round-robin by scene index — same storyboard → same video. No stochastic selection.

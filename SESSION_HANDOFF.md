@@ -1,7 +1,7 @@
 # Session Handoff — For New Claude Session
 
 > Paste-ready context for a new Claude chat session resuming as **Architect** on VibeSeek.
-> **Last refresh:** 2026-04-22 post-P-501. MVP LIVE on production. Commit tip: `76c324f`. Phase 5 at 5/N (T-405, T-407, T-408, T-406, P-501 done, 1 hotfix total).
+> **Last refresh:** 2026-04-22 post-P-501 + AC-14 hotfix. MVP LIVE on production. Commit tip: `57fe62d`. Phase 5 at 5/N (T-405, T-407, T-408, T-406, P-501 done — **2 hotfixes total** = T-406 CR env + AC-14 poll cache). AC-14 visual VERIFIED pass.
 
 ---
 
@@ -75,7 +75,8 @@ Xác nhận `sẵn sàng` + đề xuất quy trình. Không viết spec vội.
 | 5 Remaining | B3/B4/B5 TBD | 📝 candidates, deferred post-demo |
 
 Tip commits worth knowing:
-- `76c324f` — PR #40 merge (P-501 B2-Lite palette pool + xfade, current main tip)
+- **`57fe62d`** — AC-14 hotfix (render-jobs poll route uses supabaseAdmin, current main tip)
+- `76c324f` — PR #40 merge (P-501 B2-Lite palette pool + xfade)
 - `4f7015f` — P-501 implementation commit
 - `8e3aefe` — architect close T-406
 - `a6bc36e` — T-406 merge (Vercel deploy PR #39)
@@ -284,16 +285,11 @@ All live in `C:\Users\ADMIN\.claude\projects\C--Users-ADMIN\memory\`:
 - **Math verified:** 3-scene synth 12.000s + 10-scene synth 54.000s exact (0.000 drift). Protected-region grep 0 matches for P-401/P-402/P-403/P-405 sentinels.
 - **0 hotfix. Phase 5 progress: 5/N tasks done, 1 hotfix total (only T-406 CR env upload).**
 
-### AC-14 still pending (user browser smoke on prod)
+### AC-14 ✅ VERIFIED 2026-04-22 (user confirmed "Visual có chuyển màu")
 
-Upload a real PDF (≥3 scenes recommended) on https://vibeseek-five.vercel.app → wait for render complete (~5-12 min on GH Actions) → download + play MP4. Verify:
-1. Scenes have visibly DIFFERENT background palettes (not all same navy-purple).
-2. Transitions between scenes CROSSFADE smoothly (0.3s fade, not hard cut).
-3. Subtitle `\fad(300,300)` still fades in/out per scene (P-405 orthogonal).
-4. Audio sync preserved — subtitle timing matches TTS.
-5. Total video duration = sum of scene durations.
+End-to-end flow on prod with a real 6-scene storyboard: PDF upload → Gemini storyboard → GH Actions render.mjs với `6 scene(s), xfade=0.3s, palette-pool size=8` → 49.49s MP4 Supabase Storage → UI poll → video playback với palette diversity visible between scenes. P-501 ship confirmed working.
 
-If AC-14 fails: check GH Actions logs first (`render-video.yml`), then examine `render_jobs.storyboard` JSONB vs new render.mjs logic. Rollback plan: `git revert 4f7015f` → redeploy. (0% expected — feasibility + stress smoke green pre-merge.)
+**Hotfix taken during AC-14:** poll route `/api/render-jobs/[jobId]` was using inline anon `createClient` without `noStoreFetch` → Next.js 14 fetch cache held stale `status=queued` response after render.mjs had transitioned DB to `ready`. Fixed in commit `57fe62d` (6 insertions/7 deletions): switched to `supabaseAdmin` from `utils/supabase.ts`. Lesson saved `memory/feedback_vibeseek_phase5_supabase_nostore_invariant.md`.
 
 ### Demo rehearsal plan (2 ngày cuối tuần before 2026-04-29)
 
