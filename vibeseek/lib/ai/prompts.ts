@@ -68,6 +68,13 @@ QUY TẮC:
 - Visual prompt rõ bối cảnh, ánh sáng, phong cách.
 - Duration thực tế (4-15 giây/scene).
 
+THỜI LƯỢNG MỤC TIÊU (QUAN TRỌNG — không vi phạm):
+- Tổng video TARGET 50-70 giây. "total_duration_sec" phải nằm trong khoảng [50, 70].
+- Mỗi scene, "narration" PHẢI LẤP ĐẦY "duration_sec" — tối thiểu duration_sec × 1.5 TỪ tiếng Việt.
+- Ví dụ: scene 6 giây → ít nhất 9 từ (tốt nhất 10-12). Scene 10 giây → ít nhất 15 từ (tốt nhất 18-20).
+- Scene có narration quá ngắn so với duration_sec sẽ bị trừ điểm (video sẽ có khoảng lặng vô nghĩa).
+- Nếu ý không đủ dài để lấp duration_sec, GIẢM duration_sec (min 4) thay vì để narration ngắn.
+
 NGÂN SÁCH TỪ (QUAN TRỌNG — không vi phạm):
 - edge-tts giọng vi-VN-HoaiMyNeural đọc khoảng 2 từ/giây.
 - Mỗi scene, "narration" phải ≤ duration_sec × 2 TỪ tiếng Việt.

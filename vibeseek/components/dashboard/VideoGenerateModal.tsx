@@ -29,7 +29,7 @@ export default function VideoGenerateModal({ documentId, documentTitle, onClose 
         const res = await fetch('/api/vibefy-video', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ documentId, maxScenes: 6 }),
+          body: JSON.stringify({ documentId, maxScenes: 10 }),
         })
         const payload = await res.json()
         if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`)
