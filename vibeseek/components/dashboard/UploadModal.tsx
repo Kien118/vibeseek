@@ -8,11 +8,12 @@ import { addDocToHistory, type DocHistoryEntry } from '@/utils/doc-history'
 interface Props {
   onClose: () => void
   onSuccess: () => void
+  onGenerateVideo?: (documentId: string) => void
 }
 
 type ModalState = 'idle' | 'processing' | 'success'
 
-export default function UploadModal({ onClose, onSuccess }: Props) {
+export default function UploadModal({ onClose, onSuccess, onGenerateVideo }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
   const [progress, setProgress] = useState(0)
@@ -151,7 +152,7 @@ export default function UploadModal({ onClose, onSuccess }: Props) {
               &ldquo;{title}&rdquo; · +{totalVibePoints} XP
             </p>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {documentId && documentId !== 'local' && (
                 <button
                   onClick={() => { window.location.href = `/quiz/${documentId}` }}
@@ -159,6 +160,14 @@ export default function UploadModal({ onClose, onSuccess }: Props) {
                   style={{ background: 'linear-gradient(135deg, #F5B83E 0%, #FFCE5E 100%)' }}
                 >
                   Làm Quiz ngay →
+                </button>
+              )}
+              {documentId && documentId !== 'local' && onGenerateVideo && (
+                <button
+                  onClick={() => { onGenerateVideo(documentId) }}
+                  className="flex-1 px-4 py-3 rounded-xl font-display font-bold text-paper-cream text-sm border border-lapis/40 bg-lapis/12 hover:bg-lapis/20 transition"
+                >
+                  🎬 Tạo video
                 </button>
               )}
               <button

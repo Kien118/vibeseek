@@ -37,7 +37,7 @@ export default function VibePointsBadge() {
     return () => window.removeEventListener('vibe-points-updated', refresh)
   }, [pathname])
 
-  if (pathname === '/') return null
+  if (pathname === '/' || pathname.startsWith('/dashboard')) return null
   if (points === null) return null  // hide until loaded — prevents flash
 
   return (
