@@ -421,6 +421,7 @@ async function main() {
       '-preset', 'fast',
       '-pix_fmt', 'yuv420p',
       '-c:a', 'aac',
+      '-movflags', '+faststart',
       '-shortest',
       outputPath,
     ], { cwd: workDir, timeout: 600_000 }) // 10 min timeout
