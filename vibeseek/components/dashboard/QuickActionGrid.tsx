@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation'
 interface Props {
   latestDocId: string | null
   onUpload: () => void
+  onGenerateVideo: (documentId: string) => void
 }
 
-export default function QuickActionGrid({ latestDocId, onUpload }: Props) {
+export default function QuickActionGrid({ latestDocId, onUpload, onGenerateVideo }: Props) {
   const router = useRouter()
   // Treat 'local' as null (F-8)
   const docId = latestDocId === 'local' ? null : latestDocId
@@ -23,6 +24,11 @@ export default function QuickActionGrid({ latestDocId, onUpload }: Props) {
     else alert('Upload PDF trước để chat với DOJO.')
   }
 
+  const handleVideo = () => {
+    if (docId) onGenerateVideo(docId)
+    else alert('Upload PDF trước để tạo video.')
+  }
+
   // Hotkey listener (F-11)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -33,7 +39,7 @@ export default function QuickActionGrid({ latestDocId, onUpload }: Props) {
       if (key === 'q') { e.preventDefault(); handleQuiz() }
       else if (key === 'c') { e.preventDefault(); handleChat() }
       else if (key === 'u') { e.preventDefault(); onUpload() }
-      // V key = no-op (video route not available, R4)
+      else if (key === 'v') { e.preventDefault(); handleVideo() }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -77,9 +83,9 @@ export default function QuickActionGrid({ latestDocId, onUpload }: Props) {
       desc: 'Xuất video 9:16',
       icon: '🎬',
       tone: 'lapis' as const,
-      onClick: () => {},
-      disabled: true,
-      title: 'Sắp ra mắt',
+      onClick: handleVideo,
+      disabled: !docId,
+      title: docId ? undefined : 'Cần tài liệu trước',
     },
   ]
 

@@ -13,6 +13,7 @@ import UploadPromptCard from './UploadPromptCard'
 import UploadModal from './UploadModal'
 import SidebarStack from './SidebarStack'
 import DashboardTweaksPanel from './DashboardTweaks'
+import VideoGenerateModal from './VideoGenerateModal'
 
 interface DashboardPayload {
   profile: {
@@ -62,6 +63,7 @@ export default function DashboardClient() {
   const [payload, setPayload] = useState<DashboardPayload | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [videoDocId, setVideoDocId] = useState<string | null>(null)
   const [tweaks, setTweaks] = useState<DashboardTweaks>(() => loadTweaks())
 
   const refresh = useCallback(async (currentAnonId: string) => {
@@ -131,6 +133,7 @@ export default function DashboardClient() {
           <QuickActionGrid
             latestDocId={payload?.latestDoc?.documentId ?? null}
             onUpload={() => setUploadOpen(true)}
+            onGenerateVideo={(id) => setVideoDocId(id)}
           />
           <UploadPromptCard onUpload={() => setUploadOpen(true)} />
         </div>
@@ -149,6 +152,18 @@ export default function DashboardClient() {
             setUploadOpen(false)
             if (anonId) refresh(anonId)
           }}
+          onGenerateVideo={(id) => {
+            setUploadOpen(false)
+            setVideoDocId(id)
+          }}
+        />
+      )}
+
+      {videoDocId && (
+        <VideoGenerateModal
+          documentId={videoDocId}
+          documentTitle={payload?.latestDoc?.documentId === videoDocId ? payload?.latestDoc?.title : undefined}
+          onClose={() => setVideoDocId(null)}
         />
       )}
 
