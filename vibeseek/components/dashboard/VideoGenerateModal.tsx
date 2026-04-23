@@ -18,11 +18,12 @@ export default function VideoGenerateModal({ documentId, documentTitle, onClose 
   const startedRef = useRef(false)
 
   useEffect(() => {
-    // React StrictMode double-mount guard: only dispatch once per mount cycle.
+    // StrictMode guard via ref only. Do NOT add a `cancelled` cleanup — the
+    // dev-only teardown would flip it and block mount-1's setState after
+    // fetch resolves, leaving the modal stuck at 'starting'.
     if (startedRef.current) return
     startedRef.current = true
 
-    let cancelled = false
     async function start() {
       try {
         const res = await fetch('/api/vibefy-video', {
@@ -31,19 +32,16 @@ export default function VideoGenerateModal({ documentId, documentTitle, onClose 
           body: JSON.stringify({ documentId, maxScenes: 6 }),
         })
         const payload = await res.json()
-        if (cancelled) return
         if (!res.ok) throw new Error(payload.error || `HTTP ${res.status}`)
         if (!payload.jobId) throw new Error('jobId missing trong response')
         setJobId(payload.jobId)
         setState('rendering')
       } catch (e) {
-        if (cancelled) return
         setError(e instanceof Error ? e.message : 'Lỗi không xác định')
         setState('error')
       }
     }
     start()
-    return () => { cancelled = true }
   }, [documentId])
 
   useEffect(() => {
