@@ -3,7 +3,8 @@
 /**
  * VibeSeek Render Script
  *
- * Reads a render_jobs row from Supabase, generates narration via edge-tts,
+ * Reads a render_jobs row from Supabase, generates narration via ElevenLabs
+ * when configured (fallback: edge-tts),
  * composites video with ffmpeg (background + subtitles + audio), uploads
  * the MP4 to Supabase Storage, and POSTs the callback.
  *
@@ -14,6 +15,8 @@
  *   APP_CALLBACK_URL, RENDER_CALLBACK_SECRET
  * Optional:
  *   SUPABASE_STORAGE_BUCKET (default: vibeseek-videos)
+ *   ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID,
+ *   ELEVENLABS_MODEL_ID (default: eleven_turbo_v2_5)
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -57,6 +60,10 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const APP_CALLBACK_URL = process.env.APP_CALLBACK_URL
 const RENDER_CALLBACK_SECRET = process.env.RENDER_CALLBACK_SECRET
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'vibeseek-videos'
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID
+const ELEVENLABS_MODEL_ID = process.env.ELEVENLABS_MODEL_ID || 'eleven_turbo_v2_5'
+const ELEVENLABS_OUTPUT_FORMAT = process.env.ELEVENLABS_OUTPUT_FORMAT || 'mp3_44100_128'
 
 const requiredEnv = {
   SUPABASE_URL,
@@ -119,15 +126,67 @@ async function postCallback(payload) {
   }
 }
 
+function shouldUseElevenLabs() {
+  return Boolean(ELEVENLABS_API_KEY && ELEVENLABS_VOICE_ID)
+}
+
+async function elevenLabsTts(text, output) {
+  const url = new URL(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`)
+  url.searchParams.set('output_format', ELEVENLABS_OUTPUT_FORMAT)
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'xi-api-key': ELEVENLABS_API_KEY,
+    },
+    body: JSON.stringify({
+      text,
+      model_id: ELEVENLABS_MODEL_ID,
+      language_code: 'vi',
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75,
+        style: 0.15,
+        use_speaker_boost: true,
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`ElevenLabs TTS failed: ${res.status} ${body.slice(0, 240)}`)
+  }
+
+  const buffer = Buffer.from(await res.arrayBuffer())
+  await writeFile(output, buffer)
+}
+
 /**
- * Run edge-tts to generate a wav file for a piece of text.
+ * Run edge-tts to generate audio for a piece of text.
  */
-async function tts(text, output) {
+async function edgeTts(text, output) {
   await run('edge-tts', [
     '--voice', 'vi-VN-HoaiMyNeural',
     '--text', text,
     '--write-media', output,
   ])
+}
+
+async function tts(text, output) {
+  if (!shouldUseElevenLabs()) {
+    await edgeTts(text, output)
+    return 'edge-tts'
+  }
+
+  try {
+    await elevenLabsTts(text, output)
+    return `elevenlabs:${ELEVENLABS_MODEL_ID}`
+  } catch (err) {
+    console.warn(`ElevenLabs unavailable, falling back to edge-tts: ${err.message}`)
+    await edgeTts(text, output)
+    return 'edge-tts'
+  }
 }
 
 /**
@@ -234,7 +293,7 @@ async function main() {
 
     // 5. Generate TTS audio for each scene
     console.log(`Generating TTS for ${scenes.length} scenes...`)
-    const wavFiles = []
+    const audioFiles = []
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i]
       const narration = scene.narration || scene.text || ''
@@ -245,20 +304,21 @@ async function main() {
       const speakable = (typeof scene.speakable_narration === 'string' && scene.speakable_narration.trim())
         ? scene.speakable_narration
         : narration
-      const wavPath = join(workDir, `scene-${i}.wav`)
+      const audioPath = join(workDir, `scene-${i}.mp3`)
       console.log(`  TTS scene ${i}: "${speakable.substring(0, 50)}..."${speakable !== narration ? ' (phonetic)' : ''}`)
-      await tts(speakable, wavPath)
-      wavFiles.push(wavPath)
+      const provider = await tts(speakable, audioPath)
+      console.log(`    provider: ${provider}`)
+      audioFiles.push(audioPath)
     }
 
-    if (wavFiles.length === 0) {
+    if (audioFiles.length === 0) {
       throw new Error('No audio generated — all scenes have empty narration')
     }
 
-    // 6. Concat all wavs into a single mp3
+    // 6. Concat all scene audio files into a single mp3
     console.log('Concatenating audio files...')
     const concatListPath = join(workDir, 'concat.txt')
-    const concatContent = wavFiles.map((f) => `file '${f.replace(/\\/g, '/')}'`).join('\n')
+    const concatContent = audioFiles.map((f) => `file '${f.replace(/\\/g, '/')}'`).join('\n')
     await writeFile(concatListPath, concatContent, 'utf-8')
 
     const audioPath = join(workDir, 'audio.mp3')
@@ -285,8 +345,8 @@ async function main() {
 
     // Get individual scene durations for accurate timing
     const sceneDurations = []
-    for (const wavFile of wavFiles) {
-      const dur = await probeDuration(wavFile)
+    for (const audioFile of audioFiles) {
+      const dur = await probeDuration(audioFile)
       sceneDurations.push(dur)
     }
 

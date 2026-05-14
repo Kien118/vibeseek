@@ -49,4 +49,7 @@ jobs:
           SUPABASE_STORAGE_BUCKET: ${{ secrets.SUPABASE_STORAGE_BUCKET }}
           RENDER_CALLBACK_SECRET: ${{ secrets.RENDER_CALLBACK_SECRET }}
           APP_CALLBACK_URL: ${{ secrets.APP_CALLBACK_URL }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+          ELEVENLABS_MODEL_ID: ${{ vars.ELEVENLABS_MODEL_ID || 'eleven_turbo_v2_5' }}
         run: node render.mjs "$JOB_ID"
