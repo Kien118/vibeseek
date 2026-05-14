@@ -1,65 +1,140 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { generateVideoStoryboard } from '@/lib/ai/processor'
 import { triggerRenderVideo } from '@/lib/github/dispatch'
+import { supabaseAdmin } from '@/utils/supabase'
 
 export const maxDuration = 30
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+type StartRequest = {
+  documentId?: unknown
+  maxScenes?: unknown
+}
+
+function errorMessage(err: unknown) {
+  return err instanceof Error ? err.message : String(err)
+}
+
+function jsonError(error: string, detail: string, status: number, extra?: Record<string, unknown>) {
+  return NextResponse.json({ error, detail, ...extra }, { status })
+}
 
 export async function POST(request: NextRequest) {
+  let body: StartRequest
+
   try {
-    const { documentId, maxScenes = 6 } = await request.json()
-    if (!documentId) return NextResponse.json({ error: 'documentId required' }, { status: 400 })
+    body = (await request.json()) as StartRequest
+  } catch (err) {
+    return jsonError('Invalid request body', errorMessage(err), 400)
+  }
 
-    // 1. Load document + cards
-    const { data: doc } = await supabase
-      .from('vibe_documents').select('*, vibe_cards(*)').eq('id', documentId).single()
-    if (!doc) return NextResponse.json({ error: 'document not found' }, { status: 404 })
+  const documentId = typeof body.documentId === 'string' ? body.documentId.trim() : ''
+  const maxScenes = typeof body.maxScenes === 'number' && Number.isFinite(body.maxScenes)
+    ? body.maxScenes
+    : 6
 
-    // 2. Quota guard (§7.9) — block if GH Actions minutes near limit
-    const { data: jobs } = await supabase
-      .from('render_jobs').select('duration_sec')
+  if (!documentId) {
+    return jsonError('documentId required', 'Request body must include a documentId string.', 400)
+  }
+
+  console.info('[vibefy-video] start', { documentId, maxScenes })
+
+  try {
+    const { data: doc, error: docError } = await supabaseAdmin
+      .from('vibe_documents')
+      .select('*, vibe_cards(*)')
+      .eq('id', documentId)
+      .maybeSingle()
+
+    if (docError) {
+      console.error('[vibefy-video] document load failed', { documentId, error: docError.message })
+      return jsonError('Document load failed', docError.message, 500)
+    }
+
+    if (!doc) {
+      return jsonError('Document not found', `No vibe_documents row found for ${documentId}.`, 404)
+    }
+
+    const cards = Array.isArray(doc.vibe_cards) ? doc.vibe_cards : []
+    if (cards.length === 0) {
+      return jsonError('Document has no cards', `Document ${documentId} has no vibe_cards to turn into a storyboard.`, 422)
+    }
+
+    const { data: jobs, error: quotaError } = await supabaseAdmin
+      .from('render_jobs')
+      .select('duration_sec')
       .gte('created_at', new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString())
       .in('status', ['rendering', 'ready'])
+
+    if (quotaError) {
+      console.error('[vibefy-video] quota check failed', { documentId, error: quotaError.message })
+      return jsonError('Quota check failed', quotaError.message, 500)
+    }
+
     const totalMin = (jobs || []).reduce(
-      (s: number, j: { duration_sec: number | null }) => s + ((j.duration_sec ?? 120) / 60),
+      (sum: number, job: { duration_sec: number | null }) => sum + ((job.duration_sec ?? 120) / 60),
       0
     )
+
     if (totalMin >= 1800) {
-      return NextResponse.json({
-        error: 'Kho render đã đầy tháng này. Thử lại vào ngày 1 tháng sau.'
-      }, { status: 429 })
+      return jsonError(
+        'Render quota exhausted',
+        'Kho render đã đầy tháng này. Thử lại vào ngày 1 tháng sau.',
+        429
+      )
     }
 
-    // 3. Generate storyboard (Gemini → Groq fallback chain)
-    const storyboard = await generateVideoStoryboard(doc.vibe_cards, doc.title, maxScenes)
+    let storyboard: Awaited<ReturnType<typeof generateVideoStoryboard>>
+    try {
+      storyboard = await generateVideoStoryboard(cards, doc.title, maxScenes)
+    } catch (err) {
+      const detail = errorMessage(err)
+      console.error('[vibefy-video] storyboard failed', { documentId, error: detail })
+      return jsonError('Storyboard generation failed', detail, 502)
+    }
 
-    // 4. Insert render_jobs
-    const { data: job, error } = await supabase
+    const { data: job, error: insertError } = await supabaseAdmin
       .from('render_jobs')
       .insert({ document_id: documentId, storyboard, status: 'queued' })
-      .select('id').single()
-    if (error) throw error
+      .select('id')
+      .single()
 
-    // 5. Trigger GitHub Actions workflow
-    try {
-      await triggerRenderVideo(job.id)
-    } catch (dispatchErr) {
-      const errMsg = dispatchErr instanceof Error ? dispatchErr.message : String(dispatchErr)
-      await supabase.from('render_jobs').update({
-        status: 'failed',
-        error_message: `Dispatch failed: ${errMsg}`,
-      }).eq('id', job.id)
-      throw dispatchErr
+    if (insertError || !job?.id) {
+      const detail = insertError?.message ?? 'Supabase did not return a render job id.'
+      console.error('[vibefy-video] render job insert failed', { documentId, error: detail })
+      return jsonError('Render job insert failed', detail, 500)
     }
 
-    return NextResponse.json({ success: true, jobId: job.id, status: 'queued' }, { status: 202 })
+    const jobId = job.id as string
+    console.info('[vibefy-video] render job queued', { documentId, jobId })
+
+    try {
+      await triggerRenderVideo(jobId)
+      console.info('[vibefy-video] dispatch ok', { documentId, jobId, workflow: 'render-video' })
+    } catch (dispatchErr) {
+      const detail = errorMessage(dispatchErr)
+      const { error: updateError } = await supabaseAdmin
+        .from('render_jobs')
+        .update({
+          status: 'failed',
+          error_message: `Dispatch failed: ${detail}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', jobId)
+
+      console.error('[vibefy-video] dispatch failed', {
+        documentId,
+        jobId,
+        error: detail,
+        updateError: updateError?.message ?? null,
+      })
+
+      return jsonError('GitHub dispatch failed', detail, 502, { jobId })
+    }
+
+    return NextResponse.json({ success: true, jobId, status: 'queued' }, { status: 202 })
   } catch (err) {
-    console.error('[vibefy-video]', err)
-    return NextResponse.json({ error: 'Video generation failed', detail: String(err) }, { status: 500 })
+    const detail = errorMessage(err)
+    console.error('[vibefy-video] unexpected failure', { documentId, error: detail })
+    return jsonError('Video generation failed', detail, 500)
   }
 }
