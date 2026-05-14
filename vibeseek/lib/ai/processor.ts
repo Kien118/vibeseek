@@ -200,6 +200,22 @@ function isQuotaError(err: unknown): boolean {
   )
 }
 
+function isJsonParseError(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err)
+  const lower = message.toLowerCase()
+  return (
+    err instanceof SyntaxError ||
+    lower.includes('json') ||
+    lower.includes('unterminated string') ||
+    lower.includes('unexpected token') ||
+    lower.includes('unexpected end')
+  )
+}
+
+function isStoryboardRetryableError(err: unknown): boolean {
+  return isQuotaError(err) || isJsonParseError(err)
+}
+
 // Helper: count words (whitespace-separated, Vietnamese-safe — diacritics are part of words).
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length
@@ -215,11 +231,18 @@ function parseStoryboardResponse(
   rawText: string,
   documentTitle: string
 ): VideoStoryboard {
-  const cleaned = rawText
+  let cleaned = rawText
     .replace(/^```json\s*/i, '')
     .replace(/^```\s*/i, '')
     .replace(/\s*```$/i, '')
     .trim()
+
+  const firstBrace = cleaned.indexOf('{')
+  const lastBrace = cleaned.lastIndexOf('}')
+  if (firstBrace > 0 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1)
+  }
+
   const parsed = JSON.parse(cleaned) as Partial<VideoStoryboard>
 
   const normalizedScenes = Array.isArray(parsed.scenes)
@@ -282,8 +305,9 @@ export async function generateVideoStoryboard(
         model: modelName,
         contents: fullPrompt,
         config: {
-          temperature: 0.6,
+          temperature: 0.4,
           maxOutputTokens: 4096,
+          responseMimeType: 'application/json',
         },
       })
 
@@ -294,8 +318,10 @@ export async function generateVideoStoryboard(
       console.log(`[Storyboard] ✅ Success with ${modelName}`)
       return storyboard
     } catch (err) {
-      if (!isQuotaError(err)) throw err
-      console.warn(`[Storyboard] ❌ ${modelName} quota exceeded, trying next...`)
+      if (!isStoryboardRetryableError(err)) throw err
+      const reason = isJsonParseError(err) ? 'invalid JSON' : 'quota exceeded'
+      const detail = err instanceof Error ? err.message : String(err)
+      console.warn(`[Storyboard] ${modelName} ${reason}, trying next... ${detail.slice(0, 160)}`)
     }
   }
 
